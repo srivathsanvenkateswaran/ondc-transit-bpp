@@ -1142,6 +1142,185 @@ Non-negotiable, and the reviewer will look for it:
 
 ---
 
+---
+
+## 9. Fidelity, stated honestly
+
+The submission will be judged partly on transparent disclosure, so this table is
+an asset. It is also the table to put on screen in the demo.
+
+**Faithful to the real protocol:**
+
+| Aspect | What is real | Evidence |
+|---|---|---|
+| Domain and version | `ONDC:TRV11` version `2.0.1`, the published specification for metro and intracity bus ticketing | §3.4 |
+| Payload shapes | `context`, `catalog`, `Provider`, `Item`, `Fulfillment`, `Quote`, `Order`, `Payment`, `authorization` - all copied from ONDC's own examples, none invented | §3.5, §3.6 |
+| Transaction lifecycle | `search → on_search → select → on_select → init → on_init → confirm → on_confirm → status → on_status` | §3.1 |
+| Async callback model | Every call is answered with `ACK`, and the real answer arrives as a separate inbound POST | §3.2 |
+| ACK / NACK envelope and error codes | As documented by ONDC's own mock server | §3.2 |
+| Gateway broadcast | A real gateway process performs a real registry lookup and fans one `search` out to two independent BPPs | §5.1 |
+| Registry | A real registry process holds subscriber IDs, URIs, domains and public keys, and is queried at runtime | §5.1 |
+| Ed25519 signing and verification | Performed by the ONIX adapter as pipeline steps `validateSign → addRoute → validateSchema → signAck`, against keys held in the registry. Signatures are genuinely computed and genuinely verified. | §3.7 |
+| Schema validation | Real JSON Schema validation on both sides; a malformed payload is `NACK`ed exactly as the network would | §3.2 |
+| TTLs | `PT30S` in payloads; `PT15S` for `search` and `PT10S` for other actions in the BAP protocol server's config, and enforced | §3.3 |
+| Two independent providers | Two subscriber IDs, two protocol-server pairs, two registry entries. Not one BPP pretending to be two. | §5.2 |
+| Fares and routes | Real BMTC and Namma Metro routes, stops, Kannada names, line colours and published fare rules | §7.3 |
+
+**Stubbed, simulated, or absent:**
+
+| Aspect | What is not real | Consequence |
+|---|---|---|
+| Network participant identities | Subscriber IDs are `*.transit.localhost`, an RFC 6761 reserved name that cannot resolve publicly. Not ONDC-issued. | Nothing here can transact with, or be mistaken for, the real network. |
+| Registry trust chain | The local registry self-signs its participants. There is no ONDC-issued subscriber certificate, no whitelisting, no NP onboarding. | Signature verification proves the message was not tampered with in transit; it proves nothing about who the sender is in the real world. |
+| BMTC as a network participant | BMTC does not sell tickets over ONDC. The BMTC BPP here is a demonstration of what it would look like if it did. | This is the point of the project, not a flaw, but it must never be stated as "BMTC on ONDC". |
+| BMRCL as a network participant | BMRCL *is* live on ONDC, but this stack does not talk to it. The BMRCL BPP here is a local stand-in. | "Namma Metro is on ONDC" is true. "This is talking to Namma Metro" is not. |
+| Payment | No gateway, no UPI, no collection, no settlement. `status: PAID` is written because the field is required. | No money moves. Ever. |
+| Settlement terms | `BUYER_FINDER_FEES`, `SETTLEMENT_WINDOW`, `SETTLEMENT_BASIS`, `COURT_JURISDICTION` are carried with plausible values so the payloads validate. They bind nobody. | Structurally present, commercially meaningless. |
+| The ticket | A specimen. Not accepted at any gate, by any operator, ever. | §8.3 |
+| The QR token | Generated locally, encoding a specimen disclaimer. Not an operator ticket format. | §8.1 |
+| Real-time data | `SCHEDULED_INFO`/`GTFS` tags point at nothing live. No vehicle positions, no live occupancy. | Journey times are computed estimates. |
+| Cancellation, refunds, updates | Not implemented. `cancellation_terms` is present in payloads and honoured by nothing. | §2.2 |
+| Catalogue scale | Two providers, a handful of offers. The real network paginates thousands. | §2.2 |
+| Seat/quantity inventory | No inventory model. Every `select` succeeds. | No out-of-stock path. |
+| ONIX images on Apple Silicon | `linux/amd64` under emulation | Slow starts. An operational fact, not a protocol one. |
+
+**The one-sentence version, for a slide:** *the protocol, the signing, the
+registry, the gateway fan-out and the payloads are real; the network
+participants, the payment and the ticket are not, and the ticket says so on its
+face.*
+
+---
+
+## 10. File and directory layout
+
+### 10.1 This repository
+
+```
+.
+├── README.md                       # what this is, why a mock, how to run it
+├── LICENSE                         # MIT
+├── SPEC.md                         # this document
+├── docker-compose.yml              # the whole network, including our backend
+├── docker-compose.override.yml.example
+├── .env.example                    # every variable, documented, with defaults
+├── Makefile                        # up / down / logs / demo / test / seed
+├── package.json
+├── tsconfig.json
+├── vitest.config.ts
+│
+├── network/                        # everything that configures beckn-onix
+│   ├── README.md                   # what we changed from upstream and why
+│   ├── registry/
+│   │   └── subscribers.seed.json   # BAP + 2 BPPs + gateway, with public keys
+│   ├── keys/
+│   │   └── .gitkeep                # generated Ed25519 keypairs, git-ignored
+│   ├── bap-client.yaml             # synchronous mode, mongo URL
+│   ├── bap-network.yaml
+│   ├── bmtc-bpp-client.yaml        # webhook -> transit-bpp:7001/bmtc
+│   ├── bmtc-bpp-network.yaml
+│   ├── bmrcl-bpp-client.yaml       # webhook -> transit-bpp:7001/bmrcl
+│   ├── bmrcl-bpp-network.yaml
+│   └── gateway/
+│       └── networks.json           # the local network definition
+│
+├── schemas/
+│   ├── ondc_trv11/2.0.1/           # generated from the TRV11 build.yaml
+│   │   ├── search.json  on_search.json
+│   │   ├── select.json  on_select.json
+│   │   ├── init.json    on_init.json
+│   │   ├── confirm.json on_confirm.json
+│   │   └── status.json  on_status.json
+│   └── journey-source-response.json
+│
+├── src/
+│   ├── index.ts                    # HTTP server, one route per action
+│   ├── config.ts                   # env parsing, fail-fast on missing vars
+│   ├── protocol/
+│   │   ├── context.ts              # build and echo a TRV11 context
+│   │   ├── ack.ts                  # ACK / NACK envelopes
+│   │   ├── validate.ts             # JSON Schema validation, both directions
+│   │   ├── dispatch.ts             # POST an on_* back to the bpp-client
+│   │   └── errors.ts               # ONDC error codes
+│   ├── trv11/                      # TransitOffer -> TRV11, the only mapping layer
+│   │   ├── catalog.ts              # -> on_search
+│   │   ├── quote.ts                # -> on_select
+│   │   ├── draft.ts                # -> on_init
+│   │   ├── ticket.ts               # -> on_confirm, incl. authorization/QR
+│   │   ├── status.ts               # -> on_status
+│   │   └── ids.ts                  # P1/I1/F1 id allocation, deterministic
+│   ├── sources/
+│   │   ├── types.ts                # JourneySource, TransitOffer, ...
+│   │   ├── fixture.ts              # FixtureJourneySource (default)
+│   │   ├── http.ts                 # HttpJourneySource
+│   │   └── index.ts                # selection by JOURNEY_SOURCE
+│   ├── orders/
+│   │   └── store.ts                # in-memory order store, keyed by order_id
+│   ├── qr.ts                       # specimen QR generation
+│   └── log.ts                      # structured logs keyed by transaction_id
+│
+├── fixtures/
+│   ├── bmtc/
+│   │   ├── stops.json
+│   │   └── offers.json
+│   └── bmrcl/
+│       ├── stations.json
+│       └── offers.json
+│
+├── tests/
+│   ├── protocol/{context,ack,validate}.test.ts
+│   ├── trv11/{catalog,quote,draft,ticket,status}.test.ts
+│   ├── sources/{fixture,http}.test.ts
+│   ├── contract/trv11-examples.test.ts   # against ONDC's own example files
+│   └── e2e/happy-path.test.ts            # requires the stack up
+│
+├── docs/
+│   ├── journey-source-http.md      # the contract any planner can satisfy
+│   ├── fidelity.md                 # section 9, standalone and linkable
+│   └── demo.md                     # the 90-second script
+│
+└── scripts/
+    ├── generate-keys.sh
+    ├── seed-registry.sh
+    ├── fetch-trv11-schemas.sh      # pull + convert TRV11 build.yaml -> JSON Schema
+    └── demo.sh                     # fires the whole flow, prints each hop
+```
+
+**`beckn-onix` is not vendored.** `scripts/` clones it to a git-ignored
+directory at a pinned tag, or the Compose file references the published
+`fidedocker/*` images directly. Copying someone else's MIT-licensed installer
+into this tree creates a maintenance obligation for no benefit. What lives here
+is *our configuration of it*, in `network/`, with `network/README.md` recording
+exactly what differs from upstream defaults.
+
+### 10.2 The consuming application
+
+**Work in the consuming transit app, not here.** Given a Next.js App Router
+project with existing routes under `app/api/` and libraries under `src/`, and a
+test tree mirroring `src/`:
+
+```
+src/ondc/
+  types.ts  context.ts  client.ts  order.ts  journey.ts  config.ts
+src/tickets/
+  fromOndc.ts                       # ticketFromOndcOrder (new, alongside issue.ts)
+app/api/ondc/
+  quote/route.ts
+  book/route.ts
+  status/[transactionId]/route.ts
+  health/route.ts
+tests/ondc/
+  context.test.ts  client.test.ts  order.test.ts  journey.test.ts
+tests/tickets/
+  fromOndc.test.ts
+```
+
+Nothing in the existing planner, fares, ingest or lookup code changes. The one
+addition on that side beyond `src/ondc/` is the optional
+`POST /api/ondc/offers` route of §7.3, which serves the `HttpJourneySource`
+contract.
+
+---
+
 [^bmrcl]: BMRCL enables QR ticketing via ONDC on nine apps, July 2025. https://www.theweek.in/wire-updates/national/2025/07/08/srg8-ka-metro-tickets.html
 [^uber]: "Now buy Metro Tickets on Uber powered by ONDC". https://www.uber.com/en-IN/newsroom/now-buy-metro-tickets-on-uber-powered-by-ondc-b2b-logistics-next
 [^navi]: "Bengaluru's Namma Metro QR tickets now on Navi UPI", Deccan Herald. https://www.deccanherald.com/india/karnataka/bengaluru/bengalurus-namma-metro-qr-tickets-now-on-navi-upi-3807355
