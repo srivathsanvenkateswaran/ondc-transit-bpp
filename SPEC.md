@@ -435,6 +435,315 @@ and does not prove.
 
 ---
 
+## 4. Build or integrate: the decision
+
+Four candidates were examined. The comparison is on setup cost, mobility
+support, protocol fidelity, and how much survives if the stack were ever
+pointed at the real network.
+
+### 4.1 `ONDC-Official/ondc-mock-server` - **not recommended**
+
+ONDC's own mock and sandbox. Node/TypeScript, TurboRepo monorepo, Express
+backend plus a Vite React frontend, runs under Docker Compose. Its documented
+purpose is close to ours: "If you are a buyer app (BAP), you can provide
+`/action` APIs payload and you will receive the subsequent sync and async
+responses."[^mockserver-readme]
+
+Three findings rule it out.
+
+1. **It does not cover mobility.** Its own README states: "Currently, the mock
+   server and sandbox support B2B and services domains."[^mockserver-readme] Its
+   `.gitmodules` confirms it: every domain submodule points at
+   `ONDC-RET-Specifications`, `ONDC-SRV-Specifications`,
+   `ONDC-LOG-Specifications`, `ONDC-MEC-Specifications` or
+   `ONDC-AGR-Specifications`. **There is no submodule for
+   `mobility-specification` and therefore no TRV domain at all.**[^mockserver-gitmodules]
+   The README documents how to add one, and the mechanism is sound, but that is
+   work we would be doing, on someone else's monorepo, with no upstream path.
+2. **It is not a network.** It validates a payload against a schema and returns
+   a canned `on_action`. There is no registry, no gateway, no signing, no
+   fan-out, no second provider. The one moment that makes Beckn *look* like
+   Beckn - a gateway broadcasting one search to two independent operators - is
+   the exact thing it cannot show.
+3. **It has no licence file.** The repository contains no `LICENSE`.[^mockserver-nolicense]
+   Absent an explicit grant, the default is all rights reserved. Building a
+   public open-source project on top of it, or vendoring parts of it, is not
+   something to do on an assumption. See section 14.
+
+It remains useful as a **reference for the ACK/NACK envelope and error codes**,
+which is how it is cited in section 3.2.
+
+### 4.2 `beckn-onix` - **recommended**
+
+FIDE's reference protocol adapter and network installer. `github.com/beckn/beckn-onix`
+and `github.com/Beckn-One/beckn-onix` are the same repository content; use
+`beckn/beckn-onix` as canonical. Go 1.24, plugin-based since the August 2025
+rewrite; the pre-plugin adapter is preserved on the `main-pre-plugins`
+branch.[^onix-readme]
+
+What the installer gives you, and this is the finding that changes the project:
+
+`install/beckn-onix.sh` presents a menu whose **option 4** is
+"Set up a network on local machine with local registry and gateway (without
+Beckn One)".[^onix-installer] That option runs, in order:[^onix-installer-opt4]
+
+```
+install_registry
+install_gateway
+install_bap_protocol_server
+install_bpp_protocol_server_with_sandbox
+install_adapter "BOTH"
+```
+
+**All four network components on one machine, from one command.** The Compose
+files are in the repository and are readable before you run anything:
+
+| Component | Image | Ports | File |
+|---|---|---|---|
+| Registry | `fidedocker/registry` | 3000, 3030 | `install/docker-compose-registry.yml` |
+| Gateway | `fidedocker/gateway` | 4000, 4030 | `install/docker-compose-gateway.yml` |
+| BAP client / network | `fidedocker/protocol-server` | 5001, 5002 | `install/docker-compose-bap.yml` |
+| BPP client / network | `fidedocker/protocol-server` | 6001, 6002 | `install/docker-compose-bpp-with-sandbox.yml` |
+| Stub provider backend | `fidedocker/sandbox-api` | 4010 | same file |
+| ONIX adapter + Redis + Vault | `fidedocker/onix-adapter` | 8081 | `install/docker-compose-adapter.yml` |
+
+And the decisive detail: **the ONIX BPP adapter's shipped example routing config
+already names `ONDC:TRV11`** and routes its actions to a provider backend
+URL:[^onix-bpp-routing]
+
+```yaml
+routingRules:
+  - domain: "ONDC:TRV11"
+    version: "2.0.0"
+    routingType: "url"
+    target:
+      url: "https://services-backend/trv/v1"
+    endpoints:
+      - select
+      - init
+      - confirm
+```
+
+The seam we need is the seam the product was designed around. We are not
+extending ONIX; we are filling in the box its own configuration draws.
+
+The same is true of the older protocol-server path, which option 4 actually
+installs: the BPP installer **prompts for a "Webhook URL"** and writes it into
+`client.webhook.url` in the BPP client config.[^onix-installer-bpp][^onix-bpp-client-config]
+Whatever service sits at that URL *is* the BPP's business logic. That is our one
+new service.
+
+Licence: **MIT**, "Copyright (c) 2024 Beckn Protocol".[^onix-licence] (Note the
+README badge says Apache 2.0; the `LICENSE` file says MIT. The file governs. See
+section 14.)
+
+**Caveat, stated plainly.** The ONIX images are `platform: linux/amd64`. On
+Apple Silicon they run under emulation. Expect them to be slow to start and
+budget for that in the demo. See section 12's risk list.
+
+### 4.3 `beckn/starter-kit` - **not recommended for this project**
+
+Referenced from ONIX's own setup guide as "the fastest path": it "provisions a
+complete working network in a single command: two ONIX adapters (Consumer Node +
+Provider Node), sandbox applications, and the NFH fabric services that tie them
+together."[^onix-setup] It is genuinely excellent and it is the wrong generation
+of the protocol for this project.
+
+The starter kit targets **Beckn 2.0 / NFH fabric**: its action set is
+`discover → select → init → confirm`, its registry is the DeDi registry, and
+discovery is served by a crawler-fed discovery service reading catalogues a BPP
+publishes to its own storage.[^starterkit-readme] ONDC production - and TRV11 -
+is the earlier generation: `search → on_search` through a gateway, a subscriber
+registry, `ONDC:TRV11` version 2.0.1.
+
+Choosing the starter kit would mean demonstrating a protocol that Namma Metro is
+*not* transacting on. That defeats the argument in section 1. It also has no
+`LICENSE` file.[^starterkit-nolicense]
+
+Revisit this if the project's horizon extends past this deadline; for a
+demonstration whose whole point is "this is the network BMRCL is already on", it
+is the wrong choice.
+
+### 4.4 `beckn/beckn-sandbox` - **use as prior art, not as a dependency**
+
+A NestJS service that acts as a BPP's business logic behind the BPP protocol
+server, serving fixture JSON per domain. Its README: "Set the
+`client.webhook.url` field in BPP Client `config/default.yml` to the address of
+this sandbox installation."[^beckn-sandbox-readme] MIT licensed, "Copyright (c)
+2022 Beckn".[^beckn-sandbox-licence]
+
+It ships a `src/mobility/` module and a `src/umtc/` (urban mass transit) module
+with a full fixture set - `response.search.json`, `response.select.json`,
+`response.confirm.json` and so on. The UMTC search fixture is a public transport
+catalogue for Delhi Transport Corporation, in Bengaluru's city code
+`std:080`.[^beckn-sandbox-umtc]
+
+But its context block reads:
+
+```json
+"domain": "mobility:publictransport:0.8.0",
+"core_version": "0.9.4"
+```
+
+That is Beckn core 0.9.4 with the old `bpp/providers` catalogue shape - several
+generations behind TRV11 2.0.1, whose catalogue is `catalog.providers`. **Its
+fixtures are not usable as-is.** What *is* usable is its architecture: a small
+service, one module per domain, fixture JSON per action, sitting behind the BPP
+protocol server's webhook. Our provider backend should look like it and be
+written fresh against TRV11.
+
+### 4.5 Also found, worth knowing about
+
+- **`beckn/BAP-sync-adapter`** (Go, Fiber, last updated January 2026). "A
+  synchronous wrapper over Beckn protocol APIs. Use this adapter when your BAP
+  application must receive synchronous API responses from Beckn ONIX." It
+  forwards `POST /api/{action}`, waits for the callback on
+  `/webhook/on_{action}`, matches on `transaction_id` and `message_id`, returns
+  the callback to the original caller, and times out at 30
+  seconds.[^bap-sync-adapter] This is a genuine option for the consuming app
+  (section 6.3) and a fallback if the protocol server's own synchronous mode
+  disappoints. No `LICENSE` file at time of writing.
+- **`beckn/mobility`** - the Beckn (not ONDC) mobility domain adaptation. ONDC's
+  TRV11 is downstream of it. Read ONDC's, build against ONDC's.
+
+### 4.6 The recommendation
+
+> **`beckn-onix`, option 4, as the network. One new service on top: a TRV11
+> provider backend. Nothing bespoke at the protocol layer.**
+
+| Criterion | Verdict |
+|---|---|
+| Setup cost | One shell script, one Compose bring-up. Hours, not days. |
+| Mobility support | ONIX is domain-agnostic and its own examples already route `ONDC:TRV11`. |
+| Protocol fidelity | Real registry, real gateway fan-out, real Ed25519 signing, real schema validation. The highest of the four by a distance. |
+| Survives a real-network pivot | **Almost all of it.** The provider backend is the operator's business logic and is unchanged. Pointing at the real network means changing registry URLs, subscribing real keys, and completing ONDC's participant onboarding - configuration and paperwork, not a rewrite. That is the strongest argument of all: the thing we write is the thing a real BPP would write. |
+
+---
+
+## 5. Topology
+
+### 5.1 What runs
+
+Seven containers plus one we write. Several containers, not one, and
+deliberately so: the point of the demonstration is that these are **separate
+network participants that only know each other through the registry**. Collapsing
+them into one process would erase the thing worth showing.
+
+```
+                                   ┌───────────────────┐
+                                   │     registry      │  :3000 / :3030
+                                   │  fidedocker/      │  subscriber IDs,
+                                   │    registry       │  public keys, domains
+                                   └─────────▲─────────┘
+                                             │ lookup
+   ┌──────────────┐   search      ┌──────────┴────────┐   search (fan-out)
+   │ consuming    │──────────────▶│     gateway       │──────────────┐
+   │ app (BAP)    │   :5001       │ fidedocker/gateway│              │
+   │              │◀──────────────│      :4000        │              │
+   └──────┬───────┘   on_search   └───────────────────┘              │
+          │                                                          │
+          │ select / init / confirm / status  (direct, no gateway)   │
+          │                                                          ▼
+   ┌──────▼────────────┐                            ┌────────────────────────────┐
+   │  bap-client :5001 │                            │  bpp-network :6002         │
+   │  bap-network :5002│                            │  bpp-client  :6001         │
+   │  protocol-server  │◀───────on_* callbacks──────│  protocol-server           │
+   └───────────────────┘                            └──────────┬─────────────────┘
+                                                               │ webhook
+                                                               ▼
+                                            ┌──────────────────────────────────┐
+                                            │  transit-bpp  :7001   ← WE WRITE │
+                                            │  TRV11 provider backend          │
+                                            │  /bmtc/*      /bmrcl/*           │
+                                            └──────────────────────────────────┘
+```
+
+### 5.2 One BPP process, two providers, or two processes?
+
+**Recommendation: two BPP protocol-server pairs, one provider-backend process
+serving both.**
+
+- Two BPP protocol-server pairs means **two distinct subscriber IDs in the
+  registry**, which means the gateway genuinely fans one `search` out to two
+  independent participants. That is the demonstration. One BPP returning a
+  catalogue with two providers inside it would be an aggregator, not a network,
+  and it would quietly misrepresent the thing being argued for.
+- One provider-backend process serving both, on two URL prefixes, because they
+  are the same code with different fixtures and different fare rules. Two
+  processes would be honest topology and wasted RAM. The BPPs are separate
+  *network participants*; that separation lives in the registry and the protocol
+  servers, which is where it is observable.
+
+If the machine cannot carry two BPP protocol-server pairs (four containers) under
+amd64 emulation, cut to one BPP and say so in the demo. See section 12's cut
+list. **Do not** fake the fan-out.
+
+### 5.3 Identities
+
+| Participant | Subscriber ID | Subscriber URI | Role |
+|---|---|---|---|
+| BAP | `bap.transit.localhost` | `http://host.docker.internal:5002` | Buyer app |
+| BMTC BPP | `bmtc.bpp.transit.localhost` | `http://host.docker.internal:6002` | Bus operator |
+| BMRCL BPP | `bmrcl.bpp.transit.localhost` | `http://host.docker.internal:6102` | Metro operator |
+| Gateway | `gateway.transit.localhost` | `http://gateway:4000` | Broadcast |
+| Registry | - | `http://registry:3030/subscribers` | Directory |
+
+`.localhost` is reserved by RFC 6761 and cannot resolve on the public internet.
+This is deliberate: no identity in this stack can collide with, or be mistaken
+for, a real ONDC participant. **Do not** use a real operator's domain, and do not
+use `bmtc.gov.in` or `bmrcl.co.in` in any form.
+
+Ed25519 keypairs are generated by the installer
+(`install/generate-ed25519-keys.go`) and registered with the local registry. They
+are local test keys and must never be reused anywhere else.
+
+### 5.4 The finding that removes the consuming app's callback surface
+
+The ONIX BAP protocol server's client configuration offers three delivery modes,
+in documented priority order:[^onix-bap-config]
+
+```yaml
+# Priority order will be
+# 1. Synchronous
+# 2. webhook
+# 3. pubSub
+client:
+  synchronous:
+    mongoURL: "mongodb://.../ps?authSource=admin"
+  #webhook:
+  #  url: "https://.../clientURL"
+  #messageQueue:
+  #  amqpURL: "amqp://guest:guest@localhost:5672"
+```
+
+**In `synchronous` mode the BAP protocol server holds the caller's HTTP request
+open, collects the asynchronous callbacks that arrive from the BPPs, and returns
+them in the response body.** The consuming app POSTs `search` to
+`bap-client:5001/search` and gets the `on_search` results back on that same
+call.
+
+This is the single largest simplification in the whole design. Without it, the
+consuming app needs six inbound callback endpoints, a correlation store keyed by
+`transaction_id` + `message_id`, a timeout policy, and a way for its own UI to
+learn that a callback arrived - and it needs all of that to be publicly
+reachable from the BPP containers. With it, the app makes five ordinary
+request/response calls.
+
+**It costs one thing: the synchronous mode needs MongoDB**, per the config
+sample's `client.synchronous.mongoURL`. Add a `mongo` service to the Compose
+stack. That is a far better trade than building an async correlation layer.
+
+`UNRESOLVED:` whether synchronous mode aggregates **multiple** `on_search`
+callbacks from **two** BPPs into one response, or returns only the first to
+arrive within the `search` TTL (`PT15S` in the shipped config). This is the one
+open question that can materially change the consuming app's code, and it is
+settled in fifteen minutes by bringing the stack up and firing one `search` at
+two registered BPPs. **Do this on day one.** If it returns only one, fall back to
+webhook mode with `beckn/BAP-sync-adapter` (section 4.5), or issue one `search`
+per BPP with `bpp_id` pinned. Budget for it in section 12.
+
+---
+
 [^bmrcl]: BMRCL enables QR ticketing via ONDC on nine apps, July 2025. https://www.theweek.in/wire-updates/national/2025/07/08/srg8-ka-metro-tickets.html
 [^uber]: "Now buy Metro Tickets on Uber powered by ONDC". https://www.uber.com/en-IN/newsroom/now-buy-metro-tickets-on-uber-powered-by-ondc-b2b-logistics-next
 [^navi]: "Bengaluru's Namma Metro QR tickets now on Navi UPI", Deccan Herald. https://www.deccanherald.com/india/karnataka/bengaluru/bengalurus-namma-metro-qr-tickets-now-on-navi-upi-3807355
@@ -458,3 +767,18 @@ and does not prove.
 [^trv11-status]: https://github.com/ONDC-Official/mobility-specification/blob/release-TRV11-2.0.1/api/components/examples/metro/status/Get_latest_status_of_a_transit_ticket_booking_49.yaml
 [^ondc-signing]: ONDC signing and verification guide. https://github.com/ONDC-Official/developer-docs/blob/main/registry/signing-verification.md
 [^onix-bpp-adapter]: ONIX BPP adapter configuration, `steps:` list. https://github.com/beckn/beckn-onix/blob/main/config/onix-bpp/adapter.yaml
+[^mockserver-gitmodules]: `.gitmodules` in ondc-mock-server: every domain submodule is retail, services, logistics, MEC or agri. https://github.com/ONDC-Official/ondc-mock-server/blob/main/.gitmodules
+[^mockserver-nolicense]: Repository root, no `LICENSE` file present. https://github.com/ONDC-Official/ondc-mock-server
+[^onix-installer]: `install/beckn-onix.sh`, top-level menu. https://github.com/beckn/beckn-onix/blob/main/install/beckn-onix.sh
+[^onix-installer-opt4]: Same file, the `choice -eq 4` branch.
+[^onix-bpp-routing]: ONIX BPP receiver routing rules, naming `ONDC:TRV11`. https://github.com/beckn/beckn-onix/blob/main/config/onix-bpp/bppTxnReciever-routing.yaml
+[^onix-installer-bpp]: Same installer, the `"BPP"` branch, which prompts `Enter Webhook URL:`.
+[^onix-bpp-client-config]: BPP protocol-server client config sample, `client.webhook.url`. https://github.com/beckn/beckn-onix/blob/main/install/protocol-server-data/bpp-client.yaml-sample
+[^onix-licence]: https://github.com/beckn/beckn-onix/blob/main/LICENSE
+[^onix-setup]: Beckn ONIX setup guide, "The Fastest Path: NFH Fabric Starter Kit". https://github.com/beckn/beckn-onix/blob/main/SETUP.md
+[^starterkit-readme]: https://github.com/beckn/starter-kit/blob/main/README.md
+[^starterkit-nolicense]: Repository root, no `LICENSE` file present. https://github.com/beckn/starter-kit
+[^beckn-sandbox-readme]: https://github.com/beckn/beckn-sandbox/blob/main/README.md
+[^beckn-sandbox-licence]: https://github.com/beckn/beckn-sandbox/blob/main/LICENSE
+[^beckn-sandbox-umtc]: https://github.com/beckn/beckn-sandbox/blob/main/src/umtc/response/response.search.json
+[^bap-sync-adapter]: https://github.com/beckn/BAP-sync-adapter/blob/main/README.md
