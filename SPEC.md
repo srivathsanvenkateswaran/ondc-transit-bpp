@@ -38,11 +38,11 @@ existing one do we run, and what small thing do we write on top". The answer:
 biggest saving is not the network containers - it is discovering that the ONIX
 BAP protocol server supports a **synchronous client mode** (section 5.4), which
 deletes the entire async-callback surface the consuming app would otherwise have
-had to build, test and debug. See section 12 for the staged estimate and the cut
+had to build, test and debug. See section 13 for the staged estimate and the cut
 list.
 
 **On whether this repository should exist at all:** yes, but smaller than the
-name suggests, and the name should change. See section 13.
+name suggests, and the name should change. See section 14.
 
 ---
 
@@ -468,7 +468,7 @@ Three findings rule it out.
 3. **It has no licence file.** The repository contains no `LICENSE`.[^mockserver-nolicense]
    Absent an explicit grant, the default is all rights reserved. Building a
    public open-source project on top of it, or vendoring parts of it, is not
-   something to do on an assumption. See section 14.
+   something to do on an assumption. See section 14.3.
 
 It remains useful as a **reference for the ACK/NACK envelope and error codes**,
 which is how it is cited in section 3.2.
@@ -539,7 +539,7 @@ section 14.)
 
 **Caveat, stated plainly.** The ONIX images are `platform: linux/amd64`. On
 Apple Silicon they run under emulation. Expect them to be slow to start and
-budget for that in the demo. See section 12's risk list.
+budget for that in the demo. See section 13's risk list.
 
 ### 4.3 `beckn/starter-kit` - **not recommended for this project**
 
@@ -675,7 +675,7 @@ serving both.**
   servers, which is where it is observable.
 
 If the machine cannot carry two BPP protocol-server pairs (four containers) under
-amd64 emulation, cut to one BPP and say so in the demo. See section 12's cut
+amd64 emulation, cut to one BPP and say so in the demo. See section 13's cut
 list. **Do not** fake the fan-out.
 
 ### 5.3 Identities
@@ -740,7 +740,7 @@ open question that can materially change the consuming app's code, and it is
 settled in fifteen minutes by bringing the stack up and firing one `search` at
 two registered BPPs. **Do this on day one.** If it returns only one, fall back to
 webhook mode with `beckn/BAP-sync-adapter` (section 4.5), or issue one `search`
-per BPP with `bpp_id` pinned. Budget for it in section 12.
+per BPP with `bpp_id` pinned. Budget for it in section 13.
 
 ---
 
@@ -796,7 +796,7 @@ URLs, one process.
 
 **Every response body is validated against the TRV11 schema before it is sent.**
 Not optional. A provider backend that emits payloads the network would `NACK` is
-worse than no provider backend, because it looks like it works. See section 10.
+worse than no provider backend, because it looks like it works. See section 11.3.
 
 ### 6.2 Piece B: the BAP client (the consuming application)
 
@@ -1318,6 +1318,346 @@ Nothing in the existing planner, fares, ingest or lookup code changes. The one
 addition on that side beyond `src/ondc/` is the optional
 `POST /api/ondc/offers` route of §7.3, which serves the `HttpJourneySource`
 contract.
+
+---
+
+---
+
+## 11. Acceptance criteria, and the tests
+
+### 11.1 What a passing run looks like
+
+Bring the stack up and run `make demo`. It must produce, in order, with one line
+per hop and a single `transaction_id` threaded through all of them:
+
+```
+[T:9f2c…] → search           bap-client:5001            ACK
+[T:9f2c…]   gateway          lookup → 2 subscribers     bmtc.bpp.transit.localhost,
+                                                        bmrcl.bpp.transit.localhost
+[T:9f2c…]   gateway → bmtc   search                     ACK
+[T:9f2c…]   gateway → bmrcl  search                     ACK
+[T:9f2c…] ← on_search        bmtc     1 provider, 1 item, ₹27.00
+[T:9f2c…] ← on_search        bmrcl    1 provider, 1 item, ₹20.00
+[T:9f2c…] → select   bmtc                               ACK
+[T:9f2c…] ← on_select        quote ₹27.00  BASE_FARE
+[T:9f2c…] → init     bmtc                               ACK
+[T:9f2c…] ← on_init          draft order, settlement terms present
+[T:9f2c…] → confirm  bmtc                               ACK
+[T:9f2c…] ← on_confirm       order 4a7b1e02  status ACTIVE
+                             fulfillment F2 type TICKET, authorization QR,
+                             status UNCLAIMED, valid_to 2026-08-27T23:59:59Z
+[T:9f2c…] → status   bmtc                               ACK
+[T:9f2c…] ← on_status        order 4a7b1e02  status ACTIVE
+[T:c31d…]   … the same nine hops again for bmrcl …
+
+PASS  2 orders, 2 tickets, ₹47.00 total, 0 NACKs
+```
+
+**Nine observable calls per operator, eighteen for the journey, and the gateway
+appears exactly twice - once per BPP - and only during `search`.** If the
+gateway appears during `select`, the routing is wrong. If it never appears, the
+BAP is talking to a BPP directly and the demonstration is void.
+
+### 11.2 The criteria
+
+Numbered so they can be ticked off.
+
+**Network**
+
+1. `docker compose up` brings the stack to healthy with no manual step beyond
+   `make seed` on first run.
+2. The registry returns all four subscribers on `GET /subscribers`.
+3. `GET /healthz` on the provider backend returns 200.
+
+**Protocol**
+
+4. A `search` from the BAP produces **two** distinct `on_search` callbacks, one
+   per BPP, correlated by a single `transaction_id`.
+5. Both `on_search` bodies validate against the TRV11 `on_search` schema.
+6. Every `on_*` body validates against its TRV11 schema. Zero exceptions.
+7. A deliberately malformed `search` (drop `context.domain`) returns `NACK` with
+   `error.type: JSON-SCHEMA-ERROR`, and no `on_search` follows.
+8. A `select` carrying an unknown `item.id` returns an error, not a quote.
+9. `transaction_id` is byte-identical across all nine hops of one order.
+10. `message_id` differs between `select` and `init` within one order, and
+    matches between a request and its own callback.
+11. `on_confirm` carries `order.id`, `order.status: ACTIVE`, a `TICKET`-type
+    fulfillment with `stops[0].authorization.type: QR`, a non-empty `token`, a
+    parseable `valid_to`, and a `TICKET_INFO` tag with a `NUMBER`.
+12. `on_status` for that `order.id` returns the same order.
+13. The gateway log shows a registry lookup and a fan-out to two subscriber URIs
+    during `search`, and no gateway involvement in any later action.
+14. Every request between participants carries an `Authorization` header, and
+    tampering with a body in flight causes the receiver to reject it.
+
+**Pricing**
+
+15. `quote.price.value` on `on_select` equals the sum of
+    `breakup[].price.value`.
+16. The quoted fare matches the source's fare exactly. With the fixture source,
+    the fixture's `farePaise`; with the HTTP source, the planner's `farePaise`.
+    **Assert integer paise in and rupee string out with no rounding drift** -
+    `2700` paise must render as `"27"`, never `"27.000000000000004"`.
+17. The two orders' totals sum to the journey total shown by the consuming app.
+
+**Ticket** (in the consuming application)
+
+18. `ticketFromOndcOrder` produces a `Ticket` whose `validUntilMs` equals the
+    parsed `authorization.valid_to`.
+19. The rendered ticket carries the SPECIMEN mark and a "not issued by BMRCL or
+    BMTC" line.
+20. With `ONDC_ENABLED=false` the app behaves exactly as it does today, and the
+    entire existing test suite passes unchanged.
+
+### 11.3 The tests
+
+This project tests heavily, and so must this one. Four layers.
+
+**A. Unit tests on the mapping layer** - `tests/trv11/`. Pure functions, no
+network, no containers. Given a `TransitOffer[]`, assert the produced `catalog`
+has one provider with the right `descriptor.name`, one item per offer with
+`price.value` as the correct rupee string, one `TRIP` fulfillment whose `stops`
+are `START`, `INTERMEDIATE_STOP`…, `END` in travel order with `parent_stop_id`
+chained correctly, and `vehicle.category` matching the operator. The highest
+value per minute of any test here, because this is where a spec is most easily
+misread.
+
+**B. Contract tests against ONDC's own examples** -
+`tests/contract/trv11-examples.test.ts`. **This is the test that stops the build
+drifting into something that merely looks like Beckn.**
+
+- Vendor ONDC's example YAML files from `release-TRV11-2.0.1` into
+  `tests/fixtures/trv11-examples/` at a pinned commit, with the source URL and
+  commit SHA recorded in a sibling `SOURCE.md`.
+- Assert every generated `on_*` body has **the same key structure** as the
+  corresponding official example: same required keys at every level, same enum
+  values for `type`, `category`, `status`, `title`. Values differ - our fares
+  and stops are Bengaluru's - but shape must not.
+- Assert ONDC's own examples pass our schema validator. If they do not, the
+  schemas were generated wrong, and that is worth knowing on day one rather than
+  during the demo.
+
+**C. Schema-validation tests** - `tests/protocol/validate.test.ts`. Every
+generated payload validates. A payload with a required field removed does not.
+The `NACK` body matches the documented envelope, including
+`error.type: JSON-SCHEMA-ERROR`.
+
+**D. One end-to-end test** - `tests/e2e/happy-path.test.ts`, tagged so it is
+skipped unless `E2E=1` and the stack is up. Drives the full eighteen hops and
+asserts criteria 4, 9, 11, 12 and 17. **One** such test, not a suite: they are
+slow, they need Docker, and everything else is better tested at layer A or B.
+
+**In the consuming application:** unit tests for `context.ts` (transaction-id
+continuity, message-id freshness), `client.ts` against a stubbed protocol server,
+`ticketFromOndcOrder`, and an extension of the existing SPECIMEN-mark assertions
+to the ONDC-sourced ticket. No container required for any of them.
+
+### 11.4 What must be logged
+
+Every hop, structured, with `transaction_id`, `message_id`, `action`,
+`subscriber_id` and outcome. ONIX already threads `transaction_id` and
+`message_id` through its logs as context keys.[^onix-bpp-adapter] The provider
+backend must use the same key names so a single `grep` follows one order across
+seven containers. This is what makes the demo legible and what makes debugging
+possible at all.
+
+---
+
+## 12. The demo sequence
+
+Ninety seconds. `docs/demo.md` holds the script; `scripts/demo.sh` drives it so
+that nothing depends on typing accurately on the day.
+
+| Time | Screen | Said |
+|---|---|---|
+| 0:00-0:12 | The app: a journey from Indiranagar to Majestic. Bus leg, metro leg, fare per leg. | "One journey, two operators. A BMTC bus and a Namma Metro ride." |
+| 0:12-0:25 | Cut to a headline: BMRCL QR ticketing live on ONDC, July 2025. Then a list of intracity bus operators on ONDC - DTC, CRUT, BEST - with Bengaluru absent. | "Namma Metro already sells tickets over ONDC. BMTC does not. Bengaluru's buses are not on the network its metro is already on." |
+| 0:25-0:35 | `docker compose ps`: registry, gateway, two BPP pairs, the provider backend. | "So we stood the network up locally. A real registry, a real gateway, and two operator platforms - one for the metro, one for the bus." |
+| 0:35-0:55 | Split screen. Left: tap Book. Right: the log, scrolling. The **gateway fan-out line highlighted**. | "One search goes to the gateway. The gateway looks both operators up in the registry and asks them both. Two catalogues come back, independently." |
+| 0:55-1:12 | The log continues: `select`, `init`, `confirm` per operator. `on_confirm` expanded to show `authorization.type: QR`, `status: UNCLAIMED`. | "Select, initialise, confirm - the Beckn lifecycle, signed and schema-validated at every hop. The metro operator returns a QR ticket in the field the specification says a QR ticket goes in." |
+| 1:12-1:25 | The ticket in the app. **SPECIMEN mark clearly legible.** Hold on it. | "And it is a specimen. Not valid for travel, no money moved, and it says so on its face." |
+| 1:25-1:30 | The fidelity table, the real column and the stubbed column side by side. | "The protocol is real. The participants are not. Here is exactly which is which." |
+
+Three rules for the recording:
+
+1. **The gateway fan-out is the money shot.** It is the one frame that proves
+   this is a network and not two HTTP calls. Highlight it, slow it, hold it.
+2. **Do not say "BMTC on ONDC".** Say "what BMTC joining ONDC would look like".
+   Every time. The claim is the argument; overstating it destroys it.
+3. **Do not cut away from the SPECIMEN mark quickly.** Hold it long enough to
+   read.
+
+---
+
+## 13. Effort, risk, and what to cut
+
+### 13.1 The estimate
+
+Engineering days, one person, at the pace this project has been moving.
+
+| Stage | Work | Days |
+|---|---|---|
+| **0. Spike** | Bring `beckn-onix` up via option 4. Fire one `search`. **Settle the synchronous-mode question of §5.4.** Confirm the amd64 images run acceptably. | **0.5** |
+| **1. Schemas** | Generate TRV11 2.0.1 JSON Schemas from the specification's `build.yaml`; verify ONDC's own examples validate. | **0.5** |
+| **2. Provider backend, happy path** | The five actions, the mapping layer, the fixture source, the order store, the QR. Layer A and C tests alongside. | **1.0** |
+| **3. Network configuration** | Two BPP pairs, registry seeding, key generation, one Compose file, `Makefile`. | **0.5** |
+| **4. BAP client** *(consuming app)* | `src/ondc/`, four routes, unit tests. | **0.5** |
+| **5. Ticket** *(consuming app)* | `ticketFromOndcOrder`, extend the SPECIMEN assertions. | **0.25** |
+| **6. Contract tests + E2E** | Layer B against ONDC's examples; one end-to-end test. | **0.5** |
+| **7. Repo furniture** | README, LICENCE, `docs/`, `demo.sh`, fidelity page. | **0.25** |
+| | **Total** | **4.0** |
+
+**With a following wind, 2.5 days**, if stage 0 confirms synchronous mode
+aggregates both BPPs and the amd64 images behave. **Comfortably 4** otherwise.
+
+**This is down from 7-9 days** for the from-scratch build this document
+originally set out to specify. Three things account for the drop, in order of
+size:
+
+1. **Synchronous BAP mode deletes the async callback layer** in the consuming
+   app - five endpoints, a correlation store, a timeout policy, a reachability
+   problem, and the tests for all of it. Roughly 1.5 days.
+2. **`beckn-onix` supplies the registry, gateway and both protocol servers.**
+   Writing a credible gateway with registry lookup and Ed25519 signing is 2-3
+   days on its own, and it would be a worse gateway.
+3. **TRV11's examples remove all payload design work.** Every shape is copied,
+   which is faster *and* correct, where inventing them would be slower and
+   wrong.
+
+**The smallest shippable increment, named:** *stages 0, 1, 2 and 3, with one BPP
+(BMRCL), the fixture source, and `curl` as the BAP.* That is **two days** and it
+already demonstrates a real gateway, a real registry, real signing, the full
+five-action lifecycle and a TRV11 QR ticket. It has no app integration and no
+second operator, so it loses the fan-out - which is the best part - but it is a
+genuine ONDC transaction and it is defensible on its own.
+
+### 13.2 Is it achievable before 27 August?
+
+**Yes, and here is the honest caveat.**
+
+Eight calendar days remain. Four engineering days of work fits, with slack - but
+only if this is not the only outstanding deliverable, which the brief says it is
+not. The realistic read:
+
+- **Stages 0-3 (the network and the provider backend, 2.5 days): high
+  confidence.** The dependencies are installed and configured, not written.
+- **Stages 4-5 (the app integration, 0.75 days): high confidence *if* stage 0
+  resolves synchronous mode favourably. Medium if not** - add a day, and it
+  becomes the piece most likely to slip.
+- **Stages 6-7: cuttable to half.**
+
+**The single decision that governs the schedule is stage 0, and it must happen
+first.** Half a day, on day one. If synchronous mode does not aggregate two
+BPPs' callbacks, the honest response is to cut to one operator rather than to
+build the async layer under deadline pressure.
+
+**Where this could genuinely go wrong**, ranked:
+
+| Risk | Likelihood | Impact | Response |
+|---|---|---|---|
+| Synchronous mode returns only the first `on_search` | Medium | High | Cut to one BPP, or one `search` per BPP with `bpp_id` pinned. Decide on day one. |
+| amd64 emulation makes the stack too slow to demo | Medium | High | Pre-record the terminal half of the demo. Not a compromise: it is a video. |
+| TRV11 schema generation from `build.yaml` is fiddly | Medium | Medium | Fall back to hand-written JSON Schemas covering only the five actions in scope. Half a day. |
+| Registry seeding or key registration fights back | Medium | Medium | The installer script does it; drive the script rather than reimplementing it. |
+| ONIX images change under us | Low | High | **Pin every image by digest, not by tag, on day one.** |
+| Two BPP pairs exceed available memory | Low | Medium | Cut to one BPP. Do not fake the fan-out. |
+
+**The thing that would make this not worth doing** is if it consumes days that
+the rest of the submission needs. It is an addition, not a foundation. If by
+**24 August** stages 0-3 are not done, ship the smallest increment, record the
+demo against it, and say plainly in the write-up that app integration is next.
+An honest partial is worth more than a rushed whole, and it is consistent with
+everything else this project says about itself.
+
+### 13.3 The cut list, in the order to cut
+
+1. The second BPP. Costs the fan-out - the best part - so cut it last among the
+   demo-visible items.
+2. The `HttpJourneySource`. Demo runs on fixtures. Costs realism, not protocol.
+3. The end-to-end test. Layers A, B and C already cover the logic.
+4. `status` / `on_status`. `on_confirm` already returns the ticket.
+5. The app-side ticket integration. Show the `on_confirm` JSON instead.
+6. The consuming app's BAP client entirely. `curl` is a perfectly good BAP and
+   the protocol is what is being demonstrated.
+
+Never cut: schema validation, the signing pipeline, the SPECIMEN mark, or the
+fidelity table.
+
+---
+
+## 14. This repository: shape, name and licences
+
+### 14.1 Does it still deserve to exist?
+
+**Yes - but it is a provider platform, not a mock network, and the difference is
+the whole reason it is worth publishing.**
+
+The network comes from `beckn-onix`. If this repository were only a Compose file
+plus a stub, the honest answer would be "fold it into the consuming app and move
+on". It is not. What it holds is a **TRV11 provider platform for Bengaluru
+public transport**: the mapping from journeys and fares onto ONDC's metro and
+intracity-bus specification, with fixtures, schemas and tests. That is a real,
+reusable artefact. It is roughly the thing BMTC would have to build.
+
+It is also **useful to someone who has never heard of the consuming app**: a
+runnable Bengaluru TRV11 BPP, a worked example of the specification, and a
+documented `JourneySource` contract any planner can implement. There are very
+few public TRV11 provider implementations. That is a genuine contribution.
+
+What it should **not** contain: a hand-rolled gateway, a hand-rolled registry, a
+copy of `beckn-onix`, or anything that only makes sense in the presence of one
+particular transit app.
+
+### 14.2 The name
+
+`mock-ondc-server` now describes something this repository is not. It is not a
+mock server; it is a real BPP implementation that happens to be exercised
+against a local network.
+
+Preferred: **`ondc-transit-bpp`** - accurate, searchable, and it says what it is
+to someone scanning a list of repositories.
+
+Alternatives, in order: `trv11-transit-bpp` (most precise, least legible);
+`bengaluru-transit-bpp` (says the city, hides the protocol);
+`namma-ondc-bpp` (local flavour, less clear).
+
+Rename before making it public. Afterwards it costs redirects and stale links.
+
+### 14.3 Licences and what follows from them
+
+| Project | Licence | Obligation on us |
+|---|---|---|
+| `beckn/beckn-onix` | **MIT**, "Copyright (c) 2024 Beckn Protocol"[^onix-licence] | We run its published Docker images and write our own configuration. No source is copied, so no notice obligation arises. **If any ONIX file is ever vendored** - an installer script, a Compose file, a schema - the MIT notice must travel with it in a `THIRD_PARTY_NOTICES.md`. Note the README badge claims Apache 2.0 while the `LICENSE` file says MIT; the file governs, and the discrepancy is worth an upstream issue. |
+| `ONDC-Official/mobility-specification` | See the repository; it is a published specification, and the examples this document quotes are quoted as specification, with attribution. | Cite the repository, branch and commit wherever an example is vendored into `tests/fixtures/trv11-examples/`. Record it in `SOURCE.md` alongside. |
+| `beckn/beckn-sandbox` | **MIT**, "Copyright (c) 2022 Beckn"[^beckn-sandbox-licence] | Used as prior art only; nothing is copied. If any code ever is, carry the notice. |
+| `ONDC-Official/ondc-mock-server` | **No `LICENSE` file**[^mockserver-nolicense] | Default is all rights reserved. **Copy nothing from it.** It is cited for documented behaviour, which is fine, and that is the extent of the relationship. |
+| `beckn/starter-kit`, `beckn/BAP-sync-adapter` | **No `LICENSE` file**[^starterkit-nolicense] | Same. Do not vendor. If `BAP-sync-adapter` becomes necessary, run its published image or ask upstream to add a licence first. |
+
+**This repository: MIT.** It is the licence of the ecosystem it sits in, it
+imposes nothing on anyone who wants to run a BPP, and it is what a public-good
+piece of infrastructure should carry.
+
+The `README.md` must state, above the fold, that this is not affiliated with
+BMTC, BMRCL or ONDC, and that nothing it issues is valid for travel.
+
+---
+
+## 15. Open questions
+
+Collected from the sections above so they can be worked in one sitting. The
+first is the only one that affects the schedule.
+
+| # | Question | How to settle it | Blocks |
+|---|---|---|---|
+| 1 | Does the BAP protocol server's synchronous mode aggregate `on_search` from **two** BPPs, or return only the first within the `search` TTL? | Stage 0. Bring the stack up, register two BPPs, fire one `search`, read the response. Fifteen minutes. | §6.2, the whole estimate |
+| 2 | The exact enumeration of `authorization.status`. `UNCLAIMED` is the only value in the metro examples. | Read `api/components/enum/index.yaml` on `release-TRV11-2.0.1`. | An assertion in §11.2 criterion 11 |
+| 3 | The canonical required/optional field list for Beckn core 1.1.0 `Context`. The old developer docs now redirect to `docs.nfh.global`, which documents a different generation. | Read `schemas/core/v1.1.0/definitions.json#/$defs/Context` inside `beckn-onix`'s `schemas.zip`. | Nothing; TRV11's examples are sufficient to build from |
+| 4 | Whether ONDC publishes generated JSON Schemas for TRV11, or whether they must be built from `api/build/build.yaml`. | Check `api/components/ondc-build-utility` and `api/build/build.yaml` on the release branch. | Stage 1 |
+| 5 | Whether the gateway needs per-domain configuration to route `ONDC:TRV11`, or whether it fans out on subscriber domain alone. | `install/gateway_data/config/networks/onix.json-sample`. | Stage 3 |
+| 6 | Whether `fidedocker/*` images publish digests to pin against, and which tags are current. | `docker manifest inspect`, day one. | The pinning risk in §13.2 |
+
+Each of these is a lookup, not a research project. None of them is a reason to
+delay starting.
 
 ---
 
