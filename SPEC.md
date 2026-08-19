@@ -744,6 +744,404 @@ per BPP with `bpp_id` pinned. Budget for it in section 12.
 
 ---
 
+---
+
+## 6. What we build, and in which repository
+
+Two pieces of work, on opposite sides of a boundary that must not be crossed.
+
+| Piece | Repository | Depends on |
+|---|---|---|
+| **A. The TRV11 provider backend** and the Compose stack that runs the network around it | **this repository** | Nothing outside itself. No transit app, no planner library. |
+| **B. The BAP client** - the code that speaks to the network | **the consuming transit application** | This repository only as a running service on a URL. No source dependency in either direction. |
+
+**This repository must never import from, vendor, or require a consuming
+application.** It is a standalone Beckn provider platform for Bengaluru public
+transport that happens to have been written alongside one. Any BAP - written in
+any language, by anyone - must be able to transact against it by following this
+document.
+
+Section 7 defines the interface that keeps that true. Section 8 is work item B
+and is marked as such throughout.
+
+### 6.1 Piece A: the provider backend (this repository)
+
+A single small HTTP service. Node 22 + TypeScript, matching the tooling most
+likely to be on the machine and matching `beckn-sandbox`'s shape (section 4.4).
+
+**It receives** a POST from the BPP protocol server for every inbound action.
+The protocol server delivers to whatever URL is configured as
+`client.webhook.url`.[^onix-bpp-client-config]
+
+**It replies** twice: an immediate `ACK` on the open connection, and then a
+separate POST of the `on_*` payload back to the **BPP client** endpoint
+(`http://bpp-client:6001/on_search` and so on), which signs it and dispatches it
+onto the network. This two-step is exactly how `beckn-sandbox` works and is why
+its README asks for both a webhook URL *and* a BPP Client URL.[^beckn-sandbox-readme]
+
+Endpoints, one set per operator prefix:
+
+| Method | Path | Receives | Then POSTs to bpp-client |
+|---|---|---|---|
+| POST | `/{operator}/search` | TRV11 `search` | `/on_search` |
+| POST | `/{operator}/select` | TRV11 `select` | `/on_select` |
+| POST | `/{operator}/init` | TRV11 `init` | `/on_init` |
+| POST | `/{operator}/confirm` | TRV11 `confirm` | `/on_confirm` |
+| POST | `/{operator}/status` | TRV11 `status` | `/on_status` |
+| GET | `/healthz` | - | - |
+| GET | `/orders/{order_id}` | - | - (debug/inspection only, not protocol) |
+
+`{operator}` is `bmtc` or `bmrcl`. Two BPP protocol-server pairs, two webhook
+URLs, one process.
+
+**Every response body is validated against the TRV11 schema before it is sent.**
+Not optional. A provider backend that emits payloads the network would `NACK` is
+worse than no provider backend, because it looks like it works. See section 10.
+
+### 6.2 Piece B: the BAP client (the consuming application)
+
+**This section describes work in the consuming transit application, not in this
+repository.** It is written against a Next.js App Router backend with existing
+routes under `app/api/`, because that is the first consumer; the shape
+generalises.
+
+Given synchronous mode (section 5.4), the consuming app needs **no inbound
+callback endpoints** for the happy path. It needs one new module and a small
+number of routes.
+
+New module, `src/ondc/`:
+
+| File | Responsibility |
+|---|---|
+| `context.ts` | Build a TRV11 `context` for an action. Owns `transaction_id` continuity and `message_id` freshness. |
+| `client.ts` | POST an action to the BAP protocol server and return the parsed callback. One function per action. |
+| `types.ts` | TypeScript types for the TRV11 subset in play: `Context`, `Order`, `Item`, `Fulfillment`, `Quote`, `Payment`, `Authorization`. |
+| `order.ts` | Drive one order through `search → select → init → confirm → status` and return the confirmed order. |
+| `journey.ts` | Drive the two per-operator orders for one multimodal journey (section 6.4). |
+| `config.ts` | `ONDC_BAP_CLIENT_URL`, `ONDC_BAP_ID`, `ONDC_ENABLED`. |
+
+New routes under `app/api/ondc/`:
+
+| Route | Purpose |
+|---|---|
+| `POST /api/ondc/quote` | Takes a chosen itinerary, runs `search → select` per operator, returns the quotes. |
+| `POST /api/ondc/book` | Runs `init → confirm` per operator, issues the specimen ticket, returns it. |
+| `GET /api/ondc/status/[transactionId]` | Runs `status`, returns `on_status`. |
+| `GET /api/ondc/health` | Reports whether the local network is reachable. Drives the UI's "ONDC network: connected" indicator. |
+
+**`ONDC_ENABLED` defaults to false and the app must work identically with the
+network absent.** The network is a development and demonstration dependency, not
+a runtime one. A journey planner that stops planning journeys because a Docker
+stack is down has been made worse, not better.
+
+**If synchronous mode turns out not to aggregate two BPPs** (the `UNRESOLVED:`
+in section 5.4), add these under `app/api/ondc/callback/`, one per action, and a
+correlation store keyed by `transaction_id` + `message_id`:
+`on_search`, `on_select`, `on_init`, `on_confirm`, `on_status`. That is roughly
+a day of extra work and it is the largest single schedule risk in the project.
+
+### 6.3 The call sequence, end to end
+
+```
+consuming app                bap-client   gateway   registry   bmtc-bpp   bmrcl-bpp   transit-bpp
+     │                            │          │          │          │          │            │
+     │ POST /search ─────────────▶│          │          │          │          │            │
+     │                            │─ search ─▶          │          │          │            │
+     │                            │          │─ lookup ─▶          │          │            │
+     │                            │          │◀── 2 BPPs ─         │          │            │
+     │                            │          │─ search ────────────▶          │            │
+     │                            │          │─ search ───────────────────────▶            │
+     │                            │          │                     │ webhook  │            │
+     │                            │          │                     ├──────────┼───────────▶│
+     │                            │          │                     │          ├───────────▶│
+     │                            │◀── on_search ────────────────────          │            │
+     │                            │◀── on_search ───────────────────────────────            │
+     │◀─ on_search × 2 (sync) ────│          │          │          │          │            │
+     │                            │          │          │          │          │            │
+     │ POST /select (bpp_id set) ─▶─ select ──────────────────────▶│ ─────────────────────▶│
+     │◀─ on_select ───────────────│◀─────────────────────────────── ◀──────────────────────│
+     │                    ... init, confirm, status: same shape, no gateway ...
+```
+
+Note the gateway appears **once**. Everything after `on_search` is addressed
+directly using the `bpp_id` and `bpp_uri` the BPP stamped into its own
+`on_search` context.
+
+### 6.4 One journey is two orders
+
+A BPP can only sell what its operator runs. A bus leg and a metro leg are sold
+by two different operators, so a multimodal journey produces **two independent
+Beckn transactions**, each with its own `transaction_id`, its own order id, and
+its own ticket.
+
+This is not a limitation of the mock. It is how the real network works today,
+and it is the reason ONDC's multimodal ambition is hard. The consuming app is
+what makes two orders read as one journey, and saying so out loud is a stronger
+demonstration than hiding it.
+
+Consequences the builder must handle:
+
+- **Partial failure is real.** If the bus order confirms and the metro order
+  does not, the traveller holds half a journey. In scope for this build: detect
+  it and surface it honestly ("1 of 2 legs booked"). Out of scope: compensating
+  cancellation, which needs `cancel` (section 2.2).
+- **Walk legs are not sold by anyone.** They appear in the itinerary and in no
+  order.
+- **Two `transaction_id`s per journey.** The consuming app needs a journey-level
+  identifier of its own that groups them. Do not reuse a `transaction_id` across
+  operators; it is the network's correlation key, not ours.
+
+---
+
+## 7. How the provider backend produces its answers
+
+This is the section that decides whether the project is a standalone thing or a
+satellite of one application. The answer is a **two-layer design with a
+documented interface between them**.
+
+### 7.1 The `JourneySource` interface
+
+The protocol layer knows nothing about Bengaluru, buses, or any planner. It
+knows one interface:
+
+```ts
+/** Where a provider backend gets journeys and fares from. */
+export interface JourneySource {
+  /** Static facts about the operator this source speaks for. */
+  readonly operator: OperatorProfile
+
+  /** Answer one TRV11 search. Returns zero or more sellable offers. */
+  search(query: SearchQuery): Promise<TransitOffer[]>
+}
+
+export interface OperatorProfile {
+  /** Provider id in the catalogue, e.g. "bmtc" -> P1. */
+  id: string
+  /** Display name, e.g. "Bengaluru Metropolitan Transport Corporation". */
+  name: string
+  /** TRV11 vehicle category: "BUS" or "METRO". */
+  vehicleCategory: 'BUS' | 'METRO'
+  /** Operating window, used for provider.time.range. */
+  serviceWindow: { startHHMM: string; endHHMM: string }
+}
+
+export interface SearchQuery {
+  /** Present when the BAP searched by station/stop code. */
+  fromCode?: string
+  toCode?: string
+  /** Present when the BAP searched by GPS. Decimal degrees. */
+  fromGps?: { lat: number; lon: number }
+  toGps?: { lat: number; lon: number }
+  /** Absolute departure instant, ISO 8601. Defaults to now. */
+  departAt?: string
+  /** Echoed from context.location.city.code, e.g. "std:080". */
+  cityCode: string
+}
+
+export interface TransitOffer {
+  /** Stable within one search response; becomes Item.id (I1, I2, ...). */
+  offerId: string
+  /** Becomes Item.descriptor: SJT for a single journey ticket. */
+  productCode: 'SJT'
+  productName: string
+  /** Integer paise. The protocol layer converts to a rupee string. */
+  farePaise: number
+  /** How long the ticket stays valid once issued, ISO 8601 duration. */
+  validity: string
+  /** The ride this offer sells, in travel order. */
+  route: RouteStop[]
+  /** Human route identity: BMTC "500D", metro "Purple Line". */
+  routeId: string
+  routeName: string
+  /** Optional colour for the line, hex. Metro only. */
+  routeColor?: string
+}
+
+export interface RouteStop {
+  /** Stable stop identifier; becomes location.descriptor.code where known. */
+  code?: string
+  name: string
+  /** Optional local-script name. Carried through as a tag, not dropped. */
+  nameLocal?: string
+  lat: number
+  lon: number
+  /** True at an interchange; becomes stop type TRANSIT_STOP. */
+  isInterchange?: boolean
+  /** Rendered into instructions.short_desc at a TRANSIT_STOP. */
+  changeHint?: string
+}
+```
+
+Everything downstream of `TransitOffer` is pure protocol shaping and lives in
+this repository. Everything upstream is somebody's transit data.
+
+### 7.2 Two implementations ship, and the default is fixtures
+
+**`FixtureJourneySource` - the default, and the right boundary for a standalone
+project.**
+
+Reads `TransitOffer[]` from JSON under `fixtures/{operator}/`, matching on
+origin and destination code (or nearest-stop for a GPS search, by plain
+haversine). No planner, no graph, no GTFS, no 1.5 GB of memory, no cold start.
+The repository is cloneable, runnable and testable by anyone in under five
+minutes with no other project present.
+
+This is the honest default for an open-source provider platform, and it is what
+makes this repository worth publishing at all. A stranger who clones it gets a
+working Bengaluru TRV11 BPP.
+
+**`HttpJourneySource` - the optional adapter that makes a demo real.**
+
+Calls an external planner over HTTP and maps the response into `TransitOffer[]`.
+Configured by one environment variable:
+
+```
+JOURNEY_SOURCE=http
+JOURNEY_SOURCE_URL=http://host.docker.internal:3000/api/ondc/offers
+```
+
+The contract it expects is published in this repository as
+`docs/journey-source-http.md` and as a JSON Schema in
+`schemas/journey-source-response.json`, so that **any** planner can satisfy it:
+
+```
+POST {JOURNEY_SOURCE_URL}
+Content-Type: application/json
+
+{ "operator": "bmtc",
+  "from": { "code": "…", "lat": 12.9784, "lon": 77.6408 },
+  "to":   { "code": "…", "lat": 12.9774, "lon": 77.5726 },
+  "departAt": "2026-08-27T09:00:00.000Z" }
+
+200 OK
+{ "offers": [ TransitOffer, … ] }
+```
+
+Timeout 5 seconds; on timeout or error, fall back to fixtures and log that it
+did. A demo must not die because a planner is cold.
+
+### 7.3 Worked example: a transit planner as the HTTP journey source
+
+**This subsection describes work in a consuming application.** It uses the Tatak
+journey planner as the worked example because it is the first consumer; nothing
+in this repository depends on it.
+
+That application already computes everything `TransitOffer` needs. Its planner
+entry point is:
+
+```ts
+planJourney(graph, req: PlanRequest, lineColors, zones, lineNetworks): PlanResponse
+```
+
+returning `{ itineraries: Itinerary[], earliestServiceSeconds: number | null }`,
+where an `Itinerary` is `{ legs: LegInfo[], totalDurationSeconds, totalFarePaise,
+transfers, tags }`. Fares are integer paise, computed per leg by
+`busFarePaise(metres, tier, city)` for bus and `metroRunFarePaise({bands, metres},
+rules)` for a maximal same-network metro run.
+
+The adapter is one new route in that application - `POST /api/ondc/offers` - that
+calls `planJourney`, filters the itinerary's legs to the requested operator's
+mode, and maps each contiguous run onto one `TransitOffer`. The mapping:
+
+| `TransitOffer` field | Source in that planner |
+|---|---|
+| `farePaise` | `LegInfo.farePaise` for a bus run; the metro run's fare from `metroRunFarePaise` for a metro run. Already integer paise; no conversion, no rounding. |
+| `routeId`, `routeName` | `LegInfo.routeShortName` (bus: `500D`); the line name for metro. |
+| `routeColor` | `LegInfo.lineColor`, already the official line colour. |
+| `route[]` | `LegInfo.stopPoints`, which is `{lat, lon, name}` per called stop, in travel order. **Not** `LegInfo.path`, which is road geometry from `shapes.txt` and has a vertex wherever the road bends, not one per stop. Confusing the two would publish a catalogue with hundreds of fictional stops. |
+| `route[].nameLocal` | `LegInfo.fromStopNameLocal` / `toStopNameLocal` carry Kannada names for the endpoints. |
+| `route[].isInterchange` | True where a metro run changes line. |
+| `validity` | Derived from `Itinerary.totalDurationSeconds` plus a grace window. |
+| `productCode` | Always `SJT`. |
+
+Two facts about that planner that the mapping must respect, both documented in
+its own source:
+
+1. **`LegInfo.durationSeconds` already includes the wait before boarding.**
+   Accumulate durations across legs from the journey's departure; never add
+   `departureSeconds + durationSeconds` for a leg in isolation. Getting this
+   wrong produces a catalogue whose times drift later with every leg.
+2. **`LegInfo.waitIsEstimated`** is true when the wait is `headway / 2` rather
+   than a published departure - always true for metro, since the feed carries no
+   metro timetable. If a `TransitOffer` ever grows a departure time, that flag
+   must travel with it. Publishing an estimate as a timetable in a catalogue
+   would be exactly the kind of quiet dishonesty the honesty contract exists to
+   prevent.
+
+### 7.4 Which source for which purpose
+
+| Purpose | Source | Why |
+|---|---|---|
+| This repository's own tests | `fixture` | Deterministic, fast, no external service. |
+| A stranger cloning this repository | `fixture` | It works immediately. |
+| The demo video | `http` | The catalogue then carries real BMTC route numbers, real Kannada station names and real fares, which is the whole point. |
+| CI | `fixture` | No network, no planner. |
+
+---
+
+## 8. The ticket, and the honesty contract in force
+
+**This section describes work in a consuming application.** The provider backend
+mints the ONDC-shaped ticket; the consuming app renders it.
+
+### 8.1 What the BPP returns
+
+Per section 3.5, `on_confirm` carries one `TICKET`-type fulfillment per ticket,
+each with `stops[0].authorization` holding `type: QR`, a base64 `token`, a
+`valid_to` expiry and `status: UNCLAIMED`, plus a `TICKET_INFO` tag whose
+`NUMBER` is the human-readable ticket number.
+
+The provider backend generates that token itself. Two acceptable choices:
+
+- **Preferred:** encode a plainly-marked specimen string as a real QR PNG, e.g.
+  `SPECIMEN|TRV11|{order_id}|{ticket_number}|NOT VALID FOR TRAVEL`. Anyone who
+  scans it reads a disclaimer.
+- **Acceptable:** a deterministic placeholder image derived from the order id.
+
+**Never** encode anything that could be mistaken for a real operator's ticket
+payload, and never reproduce a real BMRCL or BMTC QR format.
+
+### 8.2 Turning an order into a specimen ticket
+
+In the consuming application, a new pure function alongside the existing ticket
+issuer:
+
+```ts
+ticketFromOndcOrder(order: OndcOrder, opts?): Ticket
+```
+
+- `id` ← `order.id` from `on_confirm`.
+- `totalFarePaise` ← `order.quote.price.value` rupee string → paise.
+  **Parse to integer paise, do not carry a float.** `"120"` → `12000`.
+- `validUntilMs` ← `authorization.valid_to`, parsed. The BPP's expiry wins over
+  any locally computed one; that is what makes it an ONDC ticket rather than a
+  local one wearing a costume.
+- `legs` ← the `TRIP` fulfillment's `START` and `END` stops.
+- `qrPayload` ← the `authorization.token`.
+- The existing local issuer stays exactly as it is and remains the path when
+  `ONDC_ENABLED` is false. Two producers, one `Ticket` type, one renderer.
+
+### 8.3 It stays a specimen
+
+Non-negotiable, and the reviewer will look for it:
+
+- **The SPECIMEN mark stays on every render.** Coming from an ONDC-shaped
+  `on_confirm` does not make a ticket valid; it makes it a well-formed invalid
+  ticket. If anything, the mark matters *more* now, because the artefact is more
+  convincing.
+- **The ticket surface must say where it came from** - something like "issued by
+  a local mock ONDC network, not by BMRCL" - in the ticket UI itself, not only
+  in a README a judge will not read.
+- **`payments[].status: PAID` is a protocol field, not a claim.** No gateway is
+  called. The consuming app must never render "Paid" from it without the
+  specimen framing.
+- **`authorization.status: UNCLAIMED` must not be presented as "ready to
+  scan".** It is ready to scan at a gate that does not exist.
+- Existing tests that assert the SPECIMEN mark appears must be extended to cover
+  the ONDC-sourced ticket, not merely left passing on the local one.
+
+---
+
 [^bmrcl]: BMRCL enables QR ticketing via ONDC on nine apps, July 2025. https://www.theweek.in/wire-updates/national/2025/07/08/srg8-ka-metro-tickets.html
 [^uber]: "Now buy Metro Tickets on Uber powered by ONDC". https://www.uber.com/en-IN/newsroom/now-buy-metro-tickets-on-uber-powered-by-ondc-b2b-logistics-next
 [^navi]: "Bengaluru's Namma Metro QR tickets now on Navi UPI", Deccan Herald. https://www.deccanherald.com/india/karnataka/bengaluru/bengalurus-namma-metro-qr-tickets-now-on-navi-upi-3807355
