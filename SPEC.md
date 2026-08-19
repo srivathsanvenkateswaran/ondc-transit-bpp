@@ -1610,18 +1610,19 @@ particular transit app.
 
 ### 14.2 The name
 
-`mock-ondc-server` now describes something this repository is not. It is not a
-mock server; it is a real BPP implementation that happens to be exercised
-against a local network.
+**Settled: `ondc-transit-bpp`.** The repository was initialised as
+`mock-ondc-server` and renamed before any of it was published.
 
-Preferred: **`ondc-transit-bpp`** - accurate, searchable, and it says what it is
-to someone scanning a list of repositories.
+The old name described something this is not. Nothing here is a mock: the
+registry, gateway and protocol servers are Beckn's own reference
+implementations run locally, and what this repository adds is a real TRV11 BPP.
+The only thing standing in for the world is the transit data behind it, and
+section 12 states exactly which parts those are.
 
-Alternatives, in order: `trv11-transit-bpp` (most precise, least legible);
-`bengaluru-transit-bpp` (says the city, hides the protocol);
-`namma-ondc-bpp` (local flavour, less clear).
-
-Rename before making it public. Afterwards it costs redirects and stale links.
+Names considered and passed over: `trv11-transit-bpp` (most precise, least
+legible to anyone who does not already know the domain codes),
+`bengaluru-transit-bpp` (names the city, hides the protocol), `namma-ondc-bpp`
+(local flavour, less clear to a reader outside Karnataka).
 
 ### 14.3 Licences and what follows from them
 
