@@ -39,6 +39,21 @@ test("unsupported journey source fails at startup", () => {
   assert.throws(() => loadConfig(environment), /Unsupported JOURNEY_SOURCE tatak/);
 });
 
+test("http journey source requires and loads its planner URL", () => {
+  const environment = validEnvironment();
+  environment.JOURNEY_SOURCE = "http";
+  assert.throws(
+    () => loadConfig(environment),
+    /Missing required environment variable JOURNEY_SOURCE_URL/,
+  );
+
+  environment.JOURNEY_SOURCE_URL =
+    "http://host.docker.internal:3000/api/ondc/offers";
+  const config = loadConfig(environment);
+  assert.equal(config.journeySource, "http");
+  assert.equal(config.journeySourceUrl, environment.JOURNEY_SOURCE_URL);
+});
+
 test("invalid port fails at startup", () => {
   const environment = validEnvironment();
   environment.PROVIDER_PORT = "not-a-port";

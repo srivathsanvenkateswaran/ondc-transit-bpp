@@ -6,6 +6,10 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     port: 0,
     publicBaseUrl: "https://provider.example.test",
     journeySource: "fixture",
+    journeySourceResponseSchema: new URL(
+      "../schemas/journey-source-response.json",
+      import.meta.url,
+    ).pathname,
     fixtureRoot: new URL("../fixtures", import.meta.url).pathname,
     schemaRoot: new URL("../schemas/ondc_trv11/2.0.1", import.meta.url).pathname,
     callbackTimeoutMs: 1000,

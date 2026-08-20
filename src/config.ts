@@ -14,7 +14,9 @@ export interface AppConfig {
   host: string;
   port: number;
   publicBaseUrl: string;
-  journeySource: "fixture";
+  journeySource: "fixture" | "http";
+  journeySourceUrl?: string;
+  journeySourceResponseSchema: string;
   fixtureRoot: string;
   schemaRoot: string;
   callbackTimeoutMs: number;
@@ -41,14 +43,28 @@ function positiveInteger(env: NodeJS.ProcessEnv, name: string): number {
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const journeySource = env.JOURNEY_SOURCE?.trim() || "fixture";
-  if (journeySource !== "fixture") {
+  if (journeySource !== "fixture" && journeySource !== "http") {
     throw new Error(`Unsupported JOURNEY_SOURCE ${journeySource}`);
+  }
+  const journeySourceUrl = env.JOURNEY_SOURCE_URL?.trim();
+  if (journeySource === "http" && !journeySourceUrl) {
+    throw new Error("Missing required environment variable JOURNEY_SOURCE_URL");
+  }
+  if (journeySourceUrl) {
+    const protocol = new URL(journeySourceUrl).protocol;
+    if (protocol !== "http:" && protocol !== "https:") {
+      throw new Error("JOURNEY_SOURCE_URL must use http or https");
+    }
   }
   return {
     host: required(env, "PROVIDER_HOST"),
     port: positiveInteger(env, "PROVIDER_PORT"),
     publicBaseUrl: required(env, "PROVIDER_PUBLIC_BASE_URL"),
     journeySource,
+    ...(journeySourceUrl ? { journeySourceUrl } : {}),
+    journeySourceResponseSchema:
+      env.JOURNEY_SOURCE_RESPONSE_SCHEMA ??
+      join(process.cwd(), "schemas", "journey-source-response.json"),
     fixtureRoot: env.FIXTURE_ROOT ?? join(process.cwd(), "fixtures"),
     schemaRoot:
       env.TRV11_SCHEMA_ROOT ??

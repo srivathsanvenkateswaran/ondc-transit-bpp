@@ -73,9 +73,9 @@ buy the bus half. That gap is the reason this exists.
   specification.
 - **Anyone with a journey planner.** The provider platform gets its journeys
   through a small documented `JourneySource` interface. Fixtures are the
-  current default, so it runs standalone. A real source can be added later
-  behind the same interface. Nothing here depends on any particular transit
-  app.
+  default, so it runs standalone. The optional HTTP adapter accepts real
+  planner routes and integer-paise fares behind the same interface. Nothing
+  here depends on any particular transit app.
 
 ## Honesty
 
@@ -174,7 +174,9 @@ public URLs, or ports.
 | `PROVIDER_HOST` | `0.0.0.0` | Provider HTTP bind address |
 | `PROVIDER_PORT` | `7001` | Provider container and host port |
 | `PROVIDER_PUBLIC_BASE_URL` | `http://transit-bpp:7001` | Public base used in protocol URLs such as static terms |
-| `JOURNEY_SOURCE` | `fixture` | Journey source selector; Phase 1 accepts only `fixture` |
+| `JOURNEY_SOURCE` | `fixture` | Journey source selector: `fixture` or `http` |
+| `JOURNEY_SOURCE_URL` | empty | Required planner endpoint when `JOURNEY_SOURCE=http` |
+| `JOURNEY_SOURCE_RESPONSE_SCHEMA` | `/app/schemas/journey-source-response.json` | Planner response JSON Schema |
 | `FIXTURE_ROOT` | `/app/fixtures` | Fixture data directory |
 | `TRV11_SCHEMA_ROOT` | `/app/schemas/ondc_trv11/2.0.1` | Input and output schema directory |
 | `CALLBACK_TIMEOUT_MS` | `3000` | Provider-to-BPP-client HTTP timeout |

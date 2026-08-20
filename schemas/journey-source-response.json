@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ondc.local/schemas/journey-source-response.json",
+  "title": "HTTP journey source response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["offers"],
+  "properties": {
+    "offers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/transitOffer" }
+    }
+  },
+  "$defs": {
+    "routeStop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "lat", "lon"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "nameLocal": { "type": "string", "minLength": 1 },
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lon": { "type": "number", "minimum": -180, "maximum": 180 },
+        "isInterchange": { "type": "boolean" },
+        "changeHint": { "type": "string", "minLength": 1 }
+      }
+    },
+    "transitOffer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "offerId",
+        "productCode",
+        "productName",
+        "farePaise",
+        "validity",
+        "route",
+        "routeId",
+        "routeName"
+      ],
+      "properties": {
+        "offerId": { "type": "string", "minLength": 1 },
+        "productCode": { "const": "SJT" },
+        "productName": { "type": "string", "minLength": 1 },
+        "farePaise": { "type": "integer", "minimum": 0 },
+        "validity": { "type": "string", "pattern": "^P" },
+        "route": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/routeStop" }
+        },
+        "routeId": { "type": "string", "minLength": 1 },
+        "routeName": { "type": "string", "minLength": 1 },
+        "routeColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      }
+    }
+  }
+}

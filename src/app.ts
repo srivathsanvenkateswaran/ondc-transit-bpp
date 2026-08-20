@@ -22,6 +22,7 @@ import {
   type ValidationResult,
 } from "./protocol/validate.js";
 import { FixtureJourneySource } from "./sources/fixture.js";
+import { HttpJourneySource } from "./sources/http.js";
 import type { JourneySource, OperatorKey } from "./sources/types.js";
 import { buildOnSearch, searchQueryFromRequest } from "./trv11/catalog.js";
 
@@ -121,13 +122,26 @@ export async function createApp(
   eventLogger: typeof logEvent = logEvent,
 ) {
   const validator = createProtocolValidator(config.schemaRoot);
+  if (config.journeySource === "http" && !config.journeySourceUrl) {
+    throw new Error("HTTP journey source requires journeySourceUrl");
+  }
+  const fixtureSources: Record<OperatorKey, JourneySource> = {
+    bmtc: await FixtureJourneySource.load(config.fixtureRoot, "bmtc"),
+    bmrcl: await FixtureJourneySource.load(config.fixtureRoot, "bmrcl"),
+  };
+  const configuredSource = (operatorKey: OperatorKey): JourneySource =>
+    config.journeySource === "http"
+      ? new HttpJourneySource({
+          operatorKey,
+          url: config.journeySourceUrl!,
+          fallback: fixtureSources[operatorKey],
+          responseSchemaPath: config.journeySourceResponseSchema,
+          eventLogger,
+        })
+      : fixtureSources[operatorKey];
   const sources: Record<OperatorKey, JourneySource> = {
-    bmtc:
-      sourceOverrides.bmtc ??
-      (await FixtureJourneySource.load(config.fixtureRoot, "bmtc")),
-    bmrcl:
-      sourceOverrides.bmrcl ??
-      (await FixtureJourneySource.load(config.fixtureRoot, "bmrcl")),
+    bmtc: sourceOverrides.bmtc ?? configuredSource("bmtc"),
+    bmrcl: sourceOverrides.bmrcl ?? configuredSource("bmrcl"),
   };
   const store = new InMemoryOrderStore();
   const orders: Record<OperatorKey, TransitOrderService> = {
