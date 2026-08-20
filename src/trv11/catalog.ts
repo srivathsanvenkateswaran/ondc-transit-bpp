@@ -81,10 +81,14 @@ function mapStop(stop: RouteStop, index: number, count: number) {
   };
 }
 
-function fulfillment(
+export function fulfillmentIdForOffer(offerId: string): string {
+  return `F-${offerId}`;
+}
+
+export function tripFulfillmentForOffer(
   offer: TransitOffer,
   category: "BUS" | "METRO",
-  id: string,
+  id = fulfillmentIdForOffer(offer.offerId),
 ) {
   return {
     id,
@@ -121,7 +125,7 @@ export async function buildOnSearch(
   const offers = await source.search(searchQueryFromRequest(request));
   const mappedOffers = offers.map((offer) => ({
     offer,
-    fulfillmentId: `F-${offer.offerId}`,
+    fulfillmentId: fulfillmentIdForOffer(offer.offerId),
   }));
   const provider = {
     id: source.operator.id,
@@ -153,7 +157,11 @@ export async function buildOnSearch(
       },
     })),
     fulfillments: mappedOffers.map(({ offer, fulfillmentId }) =>
-      fulfillment(offer, source.operator.vehicleCategory, fulfillmentId),
+      tripFulfillmentForOffer(
+        offer,
+        source.operator.vehicleCategory,
+        fulfillmentId,
+      ),
     ),
     payments: [
       {
