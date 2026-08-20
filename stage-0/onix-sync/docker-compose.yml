@@ -27,6 +27,7 @@ services:
   bap-client:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
+    command: ["node", "dist/app.js"]
     depends_on: [sync-mongo, sync-rabbitmq, sync-redis]
     ports: ["5001:5001"]
     networks: [beckn]
@@ -36,6 +37,7 @@ services:
   bap-network:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
+    command: ["node", "dist/app.js"]
     depends_on: [sync-mongo, sync-rabbitmq, sync-redis]
     ports: ["5002:5002"]
     networks: [beckn]
@@ -45,6 +47,7 @@ services:
   bmtc-bpp-client:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
+    command: ["node", "dist/app.js"]
     depends_on: [sync-rabbitmq, sync-redis]
     ports: ["6001:6001"]
     networks: [beckn]
@@ -54,6 +57,7 @@ services:
   bmtc-bpp-network:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
+    command: ["node", "dist/app.js"]
     depends_on: [sync-rabbitmq, sync-redis]
     ports: ["6002:6002"]
     networks: [beckn]
@@ -63,6 +67,7 @@ services:
   bmrcl-bpp-client:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
+    command: ["node", "dist/app.js"]
     depends_on: [sync-rabbitmq, sync-redis]
     ports: ["6101:6101"]
     networks: [beckn]
@@ -72,6 +77,7 @@ services:
   bmrcl-bpp-network:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
+    command: ["node", "dist/app.js"]
     depends_on: [sync-rabbitmq, sync-redis]
     ports: ["6102:6102"]
     networks: [beckn]

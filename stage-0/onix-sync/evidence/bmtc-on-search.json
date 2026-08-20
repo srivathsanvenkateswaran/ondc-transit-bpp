@@ -1,0 +1,25 @@
+{
+  "context": {
+    "domain": "ONDC:TRV11",
+    "country": "IND",
+    "city": "std:080",
+    "location": {},
+    "action": "on_search",
+    "version": "1.1.0",
+    "bap_id": "bap.transit.localhost",
+    "bap_uri": "http://bap-network:5002",
+    "bpp_id": "bmtc.bpp.transit.localhost",
+    "bpp_uri": "http://bmtc-bpp-network:6002",
+    "transaction_id": "acf5aff7-3dde-4f31-8698-4cf6c18f1537",
+    "message_id": "70068ed7-cf0d-4555-a7a9-55510ba870ac",
+    "timestamp": "2026-08-20T04:05:40Z",
+    "ttl": "PT15S"
+  },
+  "message": {
+    "catalog": {
+      "descriptor": {
+        "name": "BMTC test catalog"
+      }
+    }
+  }
+}
