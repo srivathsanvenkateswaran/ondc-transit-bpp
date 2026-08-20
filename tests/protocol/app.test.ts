@@ -68,3 +68,45 @@ test("malformed search returns NACK and sends no callback", async (t) => {
   assert.equal(result.message.ack.status, "NACK");
   assert.equal(result.error.type, "JSON-SCHEMA-ERROR");
 });
+
+test("category mismatch logs SKIPPED and dispatches no callback", async (t) => {
+  let callbackCount = 0;
+  const callbackServer = createServer((_request, response) => {
+    callbackCount += 1;
+    response.writeHead(202, { "content-type": "application/json" });
+    response.end(JSON.stringify({ message: { ack: { status: "ACK" } } }));
+  });
+  t.after(() => callbackServer.close());
+  const callbackPort = await listen(callbackServer);
+
+  const events: Record<string, unknown>[] = [];
+  const config = testConfig();
+  config.operators.bmtc.callbackUrl = `http://127.0.0.1:${callbackPort}/on_search`;
+  const app = await createApp(config, {}, (event) => events.push(event));
+  t.after(() => app.close());
+  const appPort = await listen(app);
+
+  const response = await fetch(`http://127.0.0.1:${appPort}/bmtc/search`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(searchRequest("METRO")),
+  });
+  assert.equal(response.status, 202);
+  assert.deepEqual(await response.json(), { message: { ack: { status: "ACK" } } });
+
+  await new Promise((resolve) => setTimeout(resolve, 25));
+  assert.equal(callbackCount, 0);
+  assert.deepEqual(events, [
+    {
+      transaction_id: searchRequest("METRO").context.transaction_id,
+      message_id: searchRequest("METRO").context.message_id,
+      action: "search",
+      subscriber_id: config.operators.bmtc.subscriberId,
+      operator: "bmtc",
+      outcome: "SKIPPED",
+      reason: "Requested vehicle category METRO; expected BUS",
+      requested_category: "METRO",
+      expected_category: "BUS",
+    },
+  ]);
+});

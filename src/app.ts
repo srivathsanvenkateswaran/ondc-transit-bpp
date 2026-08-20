@@ -40,6 +40,7 @@ function sleep(milliseconds: number): Promise<void> {
 export async function createApp(
   config: AppConfig,
   sourceOverrides: Partial<Record<OperatorKey, JourneySource>> = {},
+  eventLogger: typeof logEvent = logEvent,
 ) {
   const validator = createProtocolValidator(config.schemaRoot);
   const sources: Record<OperatorKey, JourneySource> = {
@@ -68,7 +69,7 @@ export async function createApp(
         callback,
         config.callbackTimeoutMs,
       );
-      logEvent({
+      eventLogger({
         transaction_id: request.context.transaction_id,
         message_id: request.context.message_id,
         action: "on_search",
@@ -78,7 +79,7 @@ export async function createApp(
         offers: callback.message.catalog.providers.length,
       });
     } catch (error) {
-      logEvent({
+      eventLogger({
         transaction_id: request.context.transaction_id,
         message_id: request.context.message_id,
         action: "on_search",
@@ -133,12 +134,23 @@ export async function createApp(
     const expectedCategory = sources[operatorKey].operator.vehicleCategory;
     const requestedCategory = search.message.intent.fulfillment.vehicle?.category;
     if (requestedCategory && requestedCategory !== expectedCategory) {
+      eventLogger({
+        transaction_id: search.context.transaction_id,
+        message_id: search.context.message_id,
+        action: "search",
+        subscriber_id: config.operators[operatorKey].subscriberId,
+        operator: operatorKey,
+        outcome: "SKIPPED",
+        reason: `Requested vehicle category ${requestedCategory}; expected ${expectedCategory}`,
+        requested_category: requestedCategory,
+        expected_category: expectedCategory,
+      });
       json(response, 202, ack);
       return;
     }
 
     json(response, 202, ack);
-    logEvent({
+    eventLogger({
       transaction_id: search.context.transaction_id,
       message_id: search.context.message_id,
       action: "search",
