@@ -81,8 +81,11 @@ function mapStop(stop: RouteStop, index: number, count: number) {
   };
 }
 
-function fulfillment(offer: TransitOffer, category: "BUS" | "METRO") {
-  const id = `F${offer.offerId.replace(/\D/g, "") || "1"}`;
+function fulfillment(
+  offer: TransitOffer,
+  category: "BUS" | "METRO",
+  id: string,
+) {
   return {
     id,
     type: "TRIP",
@@ -116,6 +119,10 @@ export async function buildOnSearch(
 ): Promise<OnSearchResponse> {
   const now = options.now ?? (() => new Date());
   const offers = await source.search(searchQueryFromRequest(request));
+  const mappedOffers = offers.map((offer) => ({
+    offer,
+    fulfillmentId: `F-${offer.offerId}`,
+  }));
   const provider = {
     id: source.operator.id,
     descriptor: { name: source.operator.name },
@@ -132,21 +139,21 @@ export async function buildOnSearch(
         ),
       },
     },
-    items: offers.map((offer) => ({
+    items: mappedOffers.map(({ offer, fulfillmentId }) => ({
       id: offer.offerId,
       category_ids: ["C1"],
       descriptor: { name: offer.productName, code: offer.productCode },
       price: { currency: "INR", value: paiseToRupees(offer.farePaise) },
       quantity: { maximum: { count: 6 }, minimum: { count: 1 } },
-      fulfillment_ids: [`F${offer.offerId.replace(/\D/g, "") || "1"}`],
+      fulfillment_ids: [fulfillmentId],
       time: {
         label: "Validity",
         duration: offer.validity,
         timestamp: now().toISOString(),
       },
     })),
-    fulfillments: offers.map((offer) =>
-      fulfillment(offer, source.operator.vehicleCategory),
+    fulfillments: mappedOffers.map(({ offer, fulfillmentId }) =>
+      fulfillment(offer, source.operator.vehicleCategory, fulfillmentId),
     ),
     payments: [
       {

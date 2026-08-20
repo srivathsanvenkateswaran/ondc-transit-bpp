@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { createProtocolValidator } from "../../src/protocol/validate.js";
 import type { SearchRequest } from "../../src/protocol/types.js";
 import { FixtureJourneySource } from "../../src/sources/fixture.js";
+import type { JourneySource, TransitOffer } from "../../src/sources/types.js";
 import { buildOnSearch, paiseToRupees } from "../../src/trv11/catalog.js";
 import { searchRequest, testConfig } from "../helpers.js";
 
@@ -47,3 +48,55 @@ for (const [operatorKey, category, expectedFare] of [
     assert.equal("quote" in provider, false);
   });
 }
+
+test("catalogue preserves offer identity in distinct fulfillment IDs", async () => {
+  const offers: TransitOffer[] = ["I1A", "I1B"].map((offerId) => ({
+    offerId,
+    productCode: "SJT",
+    productName: "Single Journey Ticket",
+    farePaise: 2700,
+    validity: "PT2H",
+    routeId: `ROUTE-${offerId}`,
+    routeName: `Route ${offerId}`,
+    route: [
+      { code: "START", name: "Start", lat: 12.97, lon: 77.64 },
+      { code: "END", name: "End", lat: 12.98, lon: 77.57 },
+    ],
+  }));
+  const source: JourneySource = {
+    operator: {
+      id: "P1",
+      name: "Test Operator",
+      vehicleCategory: "BUS",
+      serviceWindow: { startHHMM: "05:00", endHHMM: "23:00" },
+    },
+    async search() {
+      return offers;
+    },
+  };
+  const config = testConfig();
+  const response = await buildOnSearch(
+    searchRequest("BUS") as unknown as SearchRequest,
+    source,
+    config.operators.bmtc,
+    {
+      publicBaseUrl: config.publicBaseUrl,
+      contextTtl: config.contextTtl,
+      now: () => new Date("2026-08-20T05:00:00.000Z"),
+    },
+  );
+  const provider = response.message.catalog.providers[0] as any;
+  const fulfillmentIds = provider.fulfillments.map(({ id }: { id: string }) => id);
+
+  assert.deepEqual(fulfillmentIds, ["F-I1A", "F-I1B"]);
+  assert.equal(new Set(fulfillmentIds).size, 2);
+  provider.items.forEach((item: any) => {
+    assert.equal(item.fulfillment_ids.length, 1);
+    assert.equal(
+      provider.fulfillments.filter(
+        (entry: { id: string }) => entry.id === item.fulfillment_ids[0],
+      ).length,
+      1,
+    );
+  });
+});
