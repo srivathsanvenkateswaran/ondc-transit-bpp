@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ondc.local/schemas/ondc-trv11/2.0.1/search.json",
+  "type": "object",
+  "required": ["context", "message"],
+  "properties": {
+    "context": {
+      "type": "object",
+      "required": [
+        "domain",
+        "location",
+        "action",
+        "version",
+        "bap_id",
+        "bap_uri",
+        "transaction_id",
+        "message_id",
+        "timestamp",
+        "ttl"
+      ],
+      "properties": {
+        "domain": { "const": "ONDC:TRV11" },
+        "location": {
+          "type": "object",
+          "required": ["country", "city"],
+          "properties": {
+            "country": {
+              "type": "object",
+              "required": ["code"],
+              "properties": { "code": { "const": "IND" } }
+            },
+            "city": {
+              "type": "object",
+              "required": ["code"],
+              "properties": { "code": { "type": "string", "minLength": 1 } }
+            }
+          }
+        },
+        "action": { "const": "search" },
+        "version": { "const": "2.0.1" },
+        "bap_id": { "type": "string", "minLength": 1 },
+        "bap_uri": { "type": "string", "minLength": 1 },
+        "transaction_id": { "type": "string", "minLength": 1 },
+        "message_id": { "type": "string", "minLength": 1 },
+        "timestamp": { "type": "string", "minLength": 1 },
+        "ttl": { "type": "string", "pattern": "^P" }
+      }
+    },
+    "message": {
+      "type": "object",
+      "required": ["intent"],
+      "properties": {
+        "intent": {
+          "type": "object",
+          "required": ["fulfillment"],
+          "properties": {
+            "fulfillment": {
+              "type": "object",
+              "required": ["stops"],
+              "properties": {
+                "stops": {
+                  "type": "array",
+                  "minItems": 2,
+                  "items": {
+                    "type": "object",
+                    "required": ["type", "location"],
+                    "properties": {
+                      "type": { "enum": ["START", "END"] },
+                      "location": {
+                        "type": "object",
+                        "anyOf": [
+                          { "required": ["gps"] },
+                          { "required": ["descriptor"] }
+                        ],
+                        "properties": {
+                          "gps": { "type": "string", "minLength": 3 },
+                          "descriptor": {
+                            "type": "object",
+                            "required": ["code"],
+                            "properties": {
+                              "code": { "type": "string", "minLength": 1 }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "vehicle": {
+                  "type": "object",
+                  "required": ["category"],
+                  "properties": {
+                    "category": { "enum": ["BUS", "METRO"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

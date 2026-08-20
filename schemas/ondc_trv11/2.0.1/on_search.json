@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ondc.local/schemas/ondc-trv11/2.0.1/on_search.json",
+  "type": "object",
+  "required": ["context", "message"],
+  "properties": {
+    "context": {
+      "type": "object",
+      "required": [
+        "domain",
+        "location",
+        "action",
+        "version",
+        "bap_id",
+        "bap_uri",
+        "bpp_id",
+        "bpp_uri",
+        "transaction_id",
+        "message_id",
+        "timestamp",
+        "ttl"
+      ],
+      "properties": {
+        "domain": { "const": "ONDC:TRV11" },
+        "location": { "type": "object" },
+        "action": { "const": "on_search" },
+        "version": { "const": "2.0.1" },
+        "bap_id": { "type": "string", "minLength": 1 },
+        "bap_uri": { "type": "string", "minLength": 1 },
+        "bpp_id": { "type": "string", "minLength": 1 },
+        "bpp_uri": { "type": "string", "minLength": 1 },
+        "transaction_id": { "type": "string", "minLength": 1 },
+        "message_id": { "type": "string", "minLength": 1 },
+        "timestamp": { "type": "string", "minLength": 1 },
+        "ttl": { "type": "string", "pattern": "^P" }
+      }
+    },
+    "message": {
+      "type": "object",
+      "required": ["catalog"],
+      "properties": {
+        "catalog": {
+          "type": "object",
+          "required": ["descriptor", "providers"],
+          "properties": {
+            "descriptor": { "$ref": "#/$defs/descriptor" },
+            "providers": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/provider" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "descriptor": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "code": { "type": "string", "minLength": 1 }
+      }
+    },
+    "price": {
+      "type": "object",
+      "required": ["currency", "value"],
+      "properties": {
+        "currency": { "const": "INR" },
+        "value": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]{1,2})?$" }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "required": [
+        "id",
+        "descriptor",
+        "categories",
+        "time",
+        "items",
+        "fulfillments",
+        "payments"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "descriptor": { "$ref": "#/$defs/descriptor" },
+        "categories": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "descriptor"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "descriptor": { "$ref": "#/$defs/descriptor" }
+            }
+          }
+        },
+        "time": {
+          "type": "object",
+          "required": ["range"],
+          "properties": {
+            "range": {
+              "type": "object",
+              "required": ["start", "end"],
+              "properties": {
+                "start": { "type": "string", "minLength": 1 },
+                "end": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "category_ids",
+              "descriptor",
+              "price",
+              "quantity",
+              "fulfillment_ids",
+              "time"
+            ],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "category_ids": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string" }
+              },
+              "descriptor": { "$ref": "#/$defs/descriptor" },
+              "price": { "$ref": "#/$defs/price" },
+              "quantity": {
+                "type": "object",
+                "required": ["minimum", "maximum"]
+              },
+              "fulfillment_ids": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string" }
+              },
+              "time": {
+                "type": "object",
+                "required": ["label", "duration", "timestamp"]
+              }
+            }
+          }
+        },
+        "fulfillments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "stops", "vehicle", "tags"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "type": { "const": "TRIP" },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "required": ["id", "type", "location"],
+                  "properties": {
+                    "id": { "type": "string", "minLength": 1 },
+                    "parent_stop_id": { "type": "string", "minLength": 1 },
+                    "type": {
+                      "enum": ["START", "INTERMEDIATE_STOP", "TRANSIT_STOP", "END"]
+                    },
+                    "location": {
+                      "type": "object",
+                      "required": ["descriptor", "gps"],
+                      "properties": {
+                        "descriptor": { "$ref": "#/$defs/descriptor" },
+                        "gps": { "type": "string", "minLength": 3 }
+                      }
+                    }
+                  }
+                }
+              },
+              "vehicle": {
+                "type": "object",
+                "required": ["category"],
+                "properties": {
+                  "category": { "enum": ["BUS", "METRO"] }
+                }
+              },
+              "tags": { "type": "array", "minItems": 1 }
+            }
+          }
+        },
+        "payments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["collected_by", "tags"],
+            "properties": {
+              "collected_by": { "enum": ["BAP", "BPP"] },
+              "tags": { "type": "array", "minItems": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
