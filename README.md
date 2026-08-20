@@ -127,6 +127,11 @@ external `beckn_network` Docker network. Stage 0 records the exact installation
 and registration topology in
 [`stage-0/onix-sync/RESULTS.md`](stage-0/onix-sync/RESULTS.md).
 
+To bring all of that up from nothing, including the registry, the gateway, the
+Docker network and the registry seeding, see
+[Deploying to a server](#deploying-to-a-server). Those scripts work on a
+laptop too and remove the manual installer step.
+
 ```console
 cp .env.example .env
 ./stage-0/onix-sync/prepare-runtime.sh
@@ -167,6 +172,345 @@ curl -sS -H 'Content-Type: application/json' \
 Phase 2 request and response pairs are under [`phase-2/evidence/`](phase-2/evidence/).
 Later actions must be sent directly to the selected response's `bpp_uri`; they
 must not be sent to the gateway.
+
+## Deploying to a server
+
+[Run locally](#run-locally) above assumes the registry and gateway are already
+on the machine. They got there through beckn-onix's installer menu, and
+[`stage-0/onix-sync/RESULTS.md`](stage-0/onix-sync/RESULTS.md) records the step
+honestly as `bash install/beckn-onix.sh` followed by "selection: 4". A server
+has nobody sitting at a menu. The scripts under [`deploy/`](deploy/) do the
+same work without one.
+
+```console
+./deploy/bring-up.sh     # network, registry, gateway, keys, seeding, whole stack
+./deploy/verify.sh       # the proof: one search, two on_search callbacks
+./deploy/teardown.sh     # stop everything and remove the volumes
+```
+
+`bring-up.sh` prompts before anything that changes system packages; pass
+`--yes` to run it unattended. `teardown.sh` is destructive and always lists
+what it will remove before asking. Every script says what it is about to do and
+stops on the first thing that is wrong rather than continuing.
+
+### What a human must supply before the first run
+
+A host, and nothing else. There is no key to paste, no account to create and no
+secret to configure:
+
+- **A `.env` is not required.** `bring-up.sh` copies `.env.example` if `.env` is
+  missing, and leaves an existing one alone. Only edit it if you want to move
+  a port or point `JOURNEY_SOURCE` at a planner.
+- **Signing keys are generated on the host.** `prepare-runtime.sh` makes a
+  fresh Ed25519 pair per identity; the private keys never leave the ignored
+  `stage-0/onix-sync/runtime/` directory and are never committed.
+- **The registry admin credentials are beckn-onix's defaults**, `root`/`root`,
+  which is what its own installer logs in with. They are local test
+  credentials for a `.localhost` network that cannot resolve on the public
+  internet. Set `REGISTRY_ADMIN_USER` and `REGISTRY_ADMIN_PASSWORD` before
+  putting any of this anywhere reachable, and read the port table below first.
+
+### One thing to fix before the first deploy
+
+`package-lock.json` resolves every one of its 88 tarballs from
+`artifactory.global.mgmt.moveworks.io`, a private registry. The provider image
+is built by `npm ci` inside a container that has only public internet, so on
+any host outside that network the build hangs for npm's five minute fetch
+timeout and then fails with `npm error Exit handler never called!`, naming no
+host at all.
+
+Regenerate the lockfile once, on a machine that can reach the public registry:
+
+```console
+rm package-lock.json
+npm install --registry=https://registry.npmjs.org
+```
+
+and commit the result. `bring-up.sh` checks for this before it starts anything
+and names the offending host rather than letting the build discover it five
+minutes in.
+
+Until that is done, build the provider image yourself and run
+`deploy/bring-up.sh --no-build`.
+
+### Prerequisites
+
+| Requirement | Note |
+| --- | --- |
+| **x86_64 Linux** | Ubuntu 22.04 or 24.04. See [why x86_64 only](#x86_64-only-and-why). |
+| Docker Engine with the Compose v2 plugin | `docker compose version` must work, and the deploying user must be in the `docker` group. |
+| `curl`, `tar`, `python3` | Ubuntu ships all three. |
+| `yq` and `jq` | The **python** yq, [`kislyuk/yq`](https://github.com/kislyuk/yq), which is what `apt-get install yq` gives you. `prepare-runtime.sh` calls `yq -yi --arg`, which the Go yq of the same name does not understand. `bring-up.sh` checks the flavour and offers to install it. |
+| Outbound access to Docker Hub | For the pinned images. |
+| Outbound access to `codeload.github.com` | For the pinned beckn-onix revision, from which the registry and gateway configuration is rendered. Set `ONIX_SRC=/path/to/beckn-onix` to use a local checkout instead and skip the fetch. |
+| About 4 GB free disk | Images alone are roughly 1.4 GB. |
+| A `package-lock.json` that resolves from the public npm registry | See [the previous section](#one-thing-to-fix-before-the-first-deploy). |
+
+### x86_64 only, and why
+
+Every image in this topology is pinned `platform: linux/amd64`, following
+beckn-onix upstream. On x86_64 that pinning is native and costs nothing. On
+Apple Silicon or any other ARM host it means emulation, and the message queue
+does not survive it:
+
+- The installer's RabbitMQ 3.8 amd64 image **segfaulted** under emulation.
+  `stage-0/onix-sync/docker-compose.yml` moved to the multi-arch
+  `rabbitmq:3.13-management-alpine` for that reason.
+- 3.13 later **died with an Erlang `{badmap,provided_by}`** on the same kind of
+  host.
+
+Without a working queue the BPP protocol servers never receive anything, the
+search returns nothing, and the failure surfaces several layers away from its
+cause. So the target is x86_64 Linux, where none of this happens.
+
+`bring-up.sh` refuses to start on a non-x86_64 host. Pass `--allow-non-x86` if
+you are developing on one and accept that the queue may die.
+
+### Memory and images
+
+Per-container resident memory from a real run:
+
+| Container | Resident |
+| --- | ---: |
+| `protocol-server` x6 | 92 MB each |
+| `mongo:4.4` | 109 MB |
+| `redis` | 12 MB |
+| **Six protocol servers, Mongo and Redis** | **about 1.5 GB** |
+| `registry` (JVM) | about 540 MB |
+| `gateway` (JVM) | about 550 MB |
+| **Whole topology including registry and gateway** | **about 2.6 GB** |
+
+The registry and gateway are Java services started with `-Xmx4g`. They are not
+in the 1.5 GB figure, which covers the protocol servers and their backing
+stores; count them separately when sizing a host.
+
+Image sizes: protocol-server 446 MB, mongo 594 MB, rabbitmq 277 MB, redis
+46 MB, registry 747 MB, gateway of a similar order.
+
+**Every figure above was measured under ARM emulation, not on x86.** Emulation
+adds overhead rather than removing it, so a native x86_64 host should be the
+same or lower. They are not presented as x86 numbers.
+
+`bring-up.sh` warns below 3 GB of host RAM. **4 GB is the practical floor** and
+more is better once the provider image build is included.
+
+### Ports
+
+| Port | Service | Published by default |
+| ---: | --- | --- |
+| 3030 | Registry, admin and `POST /subscribers/lookup` | `127.0.0.1` only |
+| 4030 | Gateway | `127.0.0.1` only |
+| 5001 | BAP synchronous client, `POST /search` | all interfaces |
+| 5002 | BAP network | all interfaces |
+| 6001 / 6002 | BMTC BPP client / network | all interfaces |
+| 6101 / 6102 | BMRCL BPP client / network | all interfaces |
+| 7001 | Provider, `GET /healthz` | all interfaces |
+
+Two notes on that table.
+
+beckn-onix's own Compose files also publish **3000 and 4000**. Those are the
+JVM's JDWP debug ports, wired up in each image's `bin/service-start` as
+`-agentlib:jdwp=...address=${dport}`. An open JDWP port is remote code
+execution. [`deploy/network.compose.yml`](deploy/network.compose.yml)
+deliberately does not publish them; they remain reachable from inside
+`beckn_network` if anyone needs to attach a debugger.
+
+The registry and gateway are bound to `127.0.0.1`. Override with
+`REGISTRY_BIND_ADDR` and `GATEWAY_BIND_ADDR` if you know why you want to. The
+six ONIX ports and the provider port come from
+`stage-0/onix-sync/docker-compose.yml` and are published on all interfaces;
+put a firewall in front of the host rather than editing that file.
+
+### Registry seeding, and why it is the step that eats an evening
+
+All six ONIX client and network configurations run with `auth: true`. Every
+request between participants is signed, and every receiver checks the signature
+against the sender's public key **as held by the registry**. If the two differ
+by a byte, every request is rejected and nothing works.
+
+`prepare-runtime.sh` generates a fresh key pair per identity on each run. So on
+a fresh host the registry starts empty, and on a rerun the registry holds keys
+that no longer exist. Both cases produce the same symptom: 401s everywhere.
+[`phase-2/RESULTS.md`](phase-2/RESULTS.md) records acceptance criterion 1 as
+PARTIAL for exactly this reason, in the author's own words: there is no
+`make seed`.
+
+[`deploy/seed-registry.sh`](deploy/seed-registry.sh) is that missing step. It:
+
+1. logs in to the registry admin API and takes an ApiKey;
+2. creates the `ONDC:TRV11` network domain, without which the registry rejects
+   every registration with `Invalid domain ONDC:TRV11`;
+3. registers the BAP and both BPP subscribers with the public keys
+   `prepare-runtime.sh` just generated, or rotates the stored key if the
+   subscriber already exists, because the registry refuses to change a key
+   through `register` once a record is there;
+4. moves those three and the gateway's own self-registered record from
+   `INITIATED` to `SUBSCRIBED`, because the registry creates every record
+   `INITIATED` and a lookup only returns subscribed ones;
+5. proves, through the same `POST /subscribers/lookup` the gateway itself uses,
+   that all four are `SUBSCRIBED` and that every signing public key matches the
+   generated runtime key exactly.
+
+It is idempotent. Running it again is a no-op; running it after regenerating
+keys rotates the registry's copy to match.
+
+### What the bring-up deliberately does not start
+
+beckn-onix's option 4 installs more than a registry and a gateway. It also
+renders a BAP and a BPP protocol-server topology of its own, each with its own
+Mongo, Redis and RabbitMQ, and offers to install the ONIX adapter with another
+Redis and a Vault. `install/docker-compose-bpp-with-sandbox.yml` additionally
+starts `fidedocker/sandbox-api` as a stub provider backend.
+
+`deploy/bring-up.sh` starts **only the registry and the gateway** from
+beckn-onix. Everything else in the topology is
+`stage-0/onix-sync/docker-compose.yml`, which brings its own Mongo, Redis and
+RabbitMQ and its own six protocol servers.
+
+That removes two duplications without editing anything:
+
+- **One set of backing services, not two.** Roughly 240 MB and three containers
+  that would otherwise sit idle. No change was needed in
+  `stage-0/onix-sync/docker-compose.yml`; the saving comes from not starting
+  beckn-onix's set in the first place.
+- **No `sandbox-api`.** It would be dead weight even if it ran:
+  `stage-0/onix-sync/RESULTS.md` records that the published sandbox image does
+  not recognise `ONDC:TRV11` at all and answers HTTP 404 `Domain not found`.
+  The provider in this repository is the BPP's business logic.
+
+One leftover is worth naming rather than changing. The two BPP **network**
+configurations still carry `client.webhook.url: http://bmtc-sandbox:3000/...`
+and `.../bmrcl-sandbox:3000/...`, hostnames that no longer exist. In network
+mode the protocol server hands work to the queue and the **client** process is
+the one that calls a webhook, so those two lines are inert. They are left
+untouched.
+
+### Two gateway settings that are not written down anywhere
+
+beckn-onix ships `gateway_data/config/networks/onix.json-sample` with no
+`domains` in it and `core_version` at `1.1.0`. Neither is usable for
+`ONDC:TRV11` 2.0.1, and neither failure announces itself. `bring-up.sh` renders
+both correctly; they are recorded here because the symptoms are misleading.
+
+**No matching entry in `domains`.** `POST /bg/search` throws, before the
+gateway looks anything up:
+
+```text
+java.lang.NullPointerException: Cannot invoke
+  "in.succinct.onet.core.adaptor.NetworkAdaptor$Domain.getExtensionPackage()"
+  because the return value of "...NetworkAdaptor$Domains.get(String)" is null
+```
+
+The BAP still receives HTTP 200 with an empty `responses` array, so from the
+caller's side it looks like "no sellers answered".
+
+**`core_version` left at `1.1.0`.** With `domains` present but the version
+unchanged, the gateway does the registry lookup, finds both BPPs, logs the
+outbound `curl` for each of them, and then never opens the connection. No error
+is logged on either side. Setting `core_version` to the domain's version puts
+the fan-out on the wire. That was established by pointing a BPP's registered
+`subscriber_url` at a bare HTTP sink and watching the request arrive or not.
+
+### Verifying
+
+`bring-up.sh` finishing means the stack started. It does not mean the network
+works. [`deploy/verify.sh`](deploy/verify.sh) is the script that proves the
+thing a demonstration actually depends on:
+
+> One `POST /search`, routed through the **gateway**, returns **two**
+> `on_search` callbacks from **two distinct BPP subscriber IDs**, under one
+> `transaction_id`.
+
+Anything less than that is a failure and the script exits non-zero. It does not
+invent a request: it reuses
+[`phase-2/evidence/stack-smoke-search-request.json`](phase-2/evidence/stack-smoke-search-request.json),
+the broad search already captured in Phase 2, with a fresh `transaction_id`,
+`message_id` and `timestamp` so the run is genuinely new rather than served
+from a cached response. It refuses to run at all if that request names a
+`bpp_id`, since a request that names one bypasses the gateway and proves
+nothing about fan-out.
+
+Raw request and response bodies land in `deploy/runtime/verify/<timestamp>/`,
+which is ignored by git. Nothing under `phase-1/` or `phase-2/` is written to.
+
+### When it does not come up
+
+| Symptom | Where to look |
+| --- | --- |
+| `bring-up.sh` stops at the yq check | The `yq` on `PATH` is the Go one. `apt-get install -y yq jq` gives you the python one; put it first on `PATH`. |
+| `network beckn_network declared as external, but could not be found` | `bring-up.sh` creates it. If you ran `docker compose up` by hand first, run `docker network create beckn_network`. |
+| Registry never answers `POST /subscribers/lookup` | `docker logs registry`. On a cold host the JVM takes a minute or more. If the container is restarting, check `docker inspect registry --format '{{.RestartCount}}'`. |
+| Seeding fails with `Invalid domain ONDC:TRV11` | The network domain was not created. Re-run `deploy/seed-registry.sh`; it creates the domain before registering anyone. |
+| Seeding reports a key mismatch | The registry holds a key from an earlier run. Re-run `deploy/seed-registry.sh`, which rotates it, or `deploy/teardown.sh` for a clean start. |
+| The gateway registered itself as the literal string `SUBSCRIBER_ID` | Its `swf.properties` was rendered without substituting the placeholder. `deploy/teardown.sh` then `deploy/bring-up.sh`; the gateway's identity is written into its own database on first boot and cannot be edited afterwards. |
+| `verify.sh` returns HTTP 200 with **one** callback | One BPP did not answer inside the collection window. `SEARCH_TTL` is `PT4S`; `phase-1/RESULTS.md` documents a callback arriving late being dropped. Check `docker compose logs bmtc-bpp-client bmrcl-bpp-client`. |
+| `verify.sh` returns **zero** callbacks | Read the gateway window in the run directory first. A `NullPointerException` on `getExtensionPackage()` means the gateway network config has no `domains` entry. An outbound `curl` logged with no response and nothing at the BPP means `core_version` is wrong. Otherwise it is signing: check `deploy/runtime/registry-lookup.raw.json` against `stage-0/onix-sync/runtime/public-keys.tsv`. |
+| The gateway logs the fan-out `curl` but the BPP never logs the request | The gateway is not opening the connection. Check `core_version` in `deploy/runtime/gateway-config/networks/onix.json`. This was also seen unresolved under ARM emulation with the config correct; see [what was verified](#what-was-verified-and-what-was-not). |
+| Callbacks come back as 401 / `Authentication failed` | Same cause. Re-run `deploy/seed-registry.sh`. |
+| The provider image build fails with `npm error Exit handler never called!` after about five minutes | npm's fetch timeout. `package-lock.json` points at a private registry the build container cannot reach. See [One thing to fix before the first deploy](#one-thing-to-fix-before-the-first-deploy). |
+| RabbitMQ keeps dying | You are on ARM. See [x86_64 only](#x86_64-only-and-why). |
+| Everything is slow and the provider build times out | Under 3 GB of RAM, or an emulated host. |
+
+### What was verified, and what was not
+
+The deployment scripts were written and exercised on an **arm64 macOS host
+under amd64 emulation**, which is the machine that was available and is the
+architecture this section tells you not to deploy on. Being precise about that:
+
+**Verified by running, more than once:**
+
+- preflight, `beckn_network` creation, and rendering the registry and gateway
+  config from the pinned beckn-onix templates;
+- the registry and gateway starting, answering, and the gateway registering
+  itself;
+- `prepare-runtime.sh` generating keys behind its new dependency check;
+- the whole of `deploy/seed-registry.sh` on an empty registry, and again on a
+  rerun after every key had been regenerated, which exercised the key-rotation
+  path;
+- both lookup assertions, including the narrow BPP lookup the gateway issues;
+- `docker compose up` bringing all six protocol servers and the provider to
+  listening, and `GET /healthz` returning 200;
+- `deploy/verify.sh` sending its search through the BAP and the gateway,
+  capturing raw evidence, asserting, and failing loudly with the right
+  diagnosis when the network was not ready;
+- `deploy/teardown.sh` removing both Compose projects, the network, the
+  volumes and the generated keys, after which a bring-up started from nothing.
+
+**Verified as gateway behaviour, by experiment:** that a missing `domains`
+entry causes the `getExtensionPackage()` NullPointerException, and that
+`core_version: 1.1.0` causes the gateway to log an outbound request it never
+sends. The second was pinned down by replacing a BPP with a bare HTTP sink at
+the same host and port and watching the request arrive.
+
+**NOT verified: the green result.** On this host `deploy/verify.sh` never
+passed. Two blockers were hit, both of them properties of the machine rather
+than of these scripts:
+
+1. **RabbitMQ.** The locally cached `rabbitmq:3.13-management-alpine` was the
+   amd64 image, and under emulation it died with the Erlang
+   `{badmap,provided_by}` this section describes. Pulling the **native arm64**
+   variant of the same tag started cleanly, first try, which is direct evidence
+   that the crash is an emulation artifact and not an image defect. On x86_64
+   the amd64 image is native and this does not arise.
+2. **The last hop.** With the gateway configured correctly, it fans the search
+   out and a bare HTTP sink standing in for a BPP at the same host and port
+   receives it. The real ONIX BPP protocol server at that same host and port
+   never sees the request, and neither side logs anything. The same server
+   accepts and processes a byte-similar request sent by hand from inside the
+   gateway container, headers and all. This was not root-caused, and it is
+   recorded as an open question rather than a solved one.
+
+**Also not verified:** the provider image build. `package-lock.json` resolves
+from a private registry (see
+[One thing to fix before the first deploy](#one-thing-to-fix-before-the-first-deploy)).
+For local testing the image was built against the public registry outside these
+scripts and `bring-up.sh --no-build` was used.
+
+**Not verified on x86_64 Linux at all.** No x86_64 host was available, and no
+remote machine was contacted. Treat the first run on a real target as a first
+run, and run `deploy/verify.sh` before believing it.
+
+Anything in `deploy/` that could not be verified says so in the file itself.
 
 ## Configuration
 
