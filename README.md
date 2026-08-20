@@ -188,21 +188,36 @@ public URLs, or ports.
 | `BMTC_BPP_CLIENT_PORT` | `6001` | BMTC BPP client port |
 | `BMTC_BPP_NETWORK_PORT` | `6002` | BMTC BPP network port |
 | `BMTC_CALLBACK_URL` | `http://bmtc-bpp-client:6001/on_search` | Provider callback destination |
-| `BMTC_WEBHOOK_URL` | `http://transit-bpp:7001/bmtc/search` | BPP client webhook seam into the provider |
+| `BMTC_WEBHOOK_URL` | `http://transit-bpp:7001/bmtc/inbound` | BPP client webhook seam into the provider |
 | `BMTC_CALLBACK_DELAY_MS` | `0` | Test-only artificial callback delay |
 | `BMRCL_BPP_ID` | `bmrcl.bpp.transit.localhost` | BMRCL BPP subscriber ID |
 | `BMRCL_BPP_URI` | `http://bmrcl-bpp-network:6102` | BMRCL BPP network subscriber URI |
 | `BMRCL_BPP_CLIENT_PORT` | `6101` | BMRCL BPP client port |
 | `BMRCL_BPP_NETWORK_PORT` | `6102` | BMRCL BPP network port |
 | `BMRCL_CALLBACK_URL` | `http://bmrcl-bpp-client:6101/on_search` | Provider callback destination |
-| `BMRCL_WEBHOOK_URL` | `http://transit-bpp:7001/bmrcl/search` | BPP client webhook seam into the provider |
+| `BMRCL_WEBHOOK_URL` | `http://transit-bpp:7001/bmrcl/inbound` | BPP client webhook seam into the provider |
 | `BMRCL_CALLBACK_DELAY_MS` | `0` | Test-only artificial callback delay |
 | `SEARCH_TTL` | `PT4S` | ONIX synchronous discovery collection window |
 
-The published ONIX image does not bundle a file named for Beckn core `2.0.1`.
-Compose exposes its bundled core `1.1.0` schema under that filename so the
-protocol server can transport `version: 2.0.1`; the provider performs the
-TRV11-specific 2.0.1 validation at its own boundary.
+The pinned ONIX protocol server exposes one `client.webhook.url` per BPP, not a
+separate configurable webhook URL per action. This contradicts the per-action
+webhook assumption in SPEC section 6.1. The running ONIX clients therefore post
+all inbound actions to `/{operator}/inbound`, where the provider dispatches by
+`context.action`. The action-specific `/{operator}/search`, `/select`, `/init`,
+`/confirm` and `/status` routes remain available for direct provider tests.
+
+The published ONIX image does not bundle a schema that can validate TRV11
+2.0.1 payments. Its core 1.1 schema uses `PRE-ORDER` and `NOT-PAID`, while the
+TRV11 contract uses `PRE_ORDER` and `NOT_PAID`. Compose therefore mounts the
+official generated OpenAPI artifact from ONDC's `release-TRV11-2.0.1` branch.
+The unmodified file is
+`stage-0/onix-sync/schemas/upstream-release-TRV11-2.0.1.yaml`. ONIX mounts
+`core_2.0.1.yaml`, a compatibility copy that additionally permits the
+`core_version`, `country` and `city` fields its own context builder adds, plus
+local-name tags on stops. The provider also performs its action-specific subset
+validation at its own boundary. `openAPIValidator.cachedFileLimit` is four so
+ONIX compiles the mounted 2.0.1 schema before opening its port, instead of
+spending roughly 14 seconds compiling it during the first action.
 
 ## TRV11 schema provenance and scope
 
@@ -211,6 +226,12 @@ purpose-built subsets. They are not copies of ONDC's published schemas. They
 were derived from the examples and contract on ONDC's
 [`release-TRV11-2.0.1`](https://github.com/ONDC-Official/mobility-specification/tree/release-TRV11-2.0.1)
 release branch.
+
+The separate
+`stage-0/onix-sync/schemas/upstream-release-TRV11-2.0.1.yaml` file is the
+unmodified generated upstream OpenAPI artifact. The adjacent
+`core_2.0.1.yaml` is its documented ONIX compatibility copy. Neither is one of
+the provider's local JSON Schema subsets.
 
 The local schemas enforce the boundary this service currently implements:
 

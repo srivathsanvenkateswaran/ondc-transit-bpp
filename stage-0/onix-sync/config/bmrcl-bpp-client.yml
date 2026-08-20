@@ -7,7 +7,7 @@ cache:
   db: 1
 client:
   webhook:
-    url: http://transit-bpp:7001/bmrcl/search
+    url: http://transit-bpp:7001/bmrcl/inbound
 app:
   mode: bpp
   gateway:
@@ -19,8 +19,24 @@ app:
     requests:
       search:
         ttl: PT4S
+      select:
+        ttl: PT4S
+      init:
+        ttl: PT4S
+      confirm:
+        ttl: PT4S
+      status:
+        ttl: PT4S
     responses:
       on_search:
+        ttl: PT4S
+      on_select:
+        ttl: PT4S
+      on_init:
+        ttl: PT4S
+      on_confirm:
+        ttl: PT4S
+      on_status:
         ttl: PT4S
   privateKey: RUNTIME_PRIVATE_KEY
   publicKey: RUNTIME_PUBLIC_KEY
@@ -34,6 +50,8 @@ app:
   ttl: PT10M
   httpTimeout: PT3S
   httpRetryCount: 2
+  openAPIValidator:
+    cachedFileLimit: 4
   telemetry:
     enabled: false
     url: ""

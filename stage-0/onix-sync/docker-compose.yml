@@ -27,62 +27,68 @@ services:
   bap-client:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
-    command: ["/bin/sh", "-c", "cp schemas/core_1.1.0.yaml schemas/core_2.0.1.yaml && cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
+    command: ["/bin/sh", "-c", "cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
     depends_on: [sync-mongo, sync-rabbitmq, sync-redis]
     ports: ["${BAP_CLIENT_PORT:-5001}:${BAP_CLIENT_PORT:-5001}"]
     networks: [beckn]
     volumes:
       - ./runtime/config/bap-client.yml:/usr/src/app/config/default.yml:ro
+      - ./schemas/core_2.0.1.yaml:/usr/src/app/schemas/core_2.0.1.yaml:ro
 
   bap-network:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
-    command: ["/bin/sh", "-c", "cp schemas/core_1.1.0.yaml schemas/core_2.0.1.yaml && cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
+    command: ["/bin/sh", "-c", "cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
     depends_on: [sync-mongo, sync-rabbitmq, sync-redis]
     ports: ["${BAP_NETWORK_PORT:-5002}:${BAP_NETWORK_PORT:-5002}"]
     networks: [beckn]
     volumes:
       - ./runtime/config/bap-network.yml:/usr/src/app/config/default.yml:ro
+      - ./schemas/core_2.0.1.yaml:/usr/src/app/schemas/core_2.0.1.yaml:ro
 
   bmtc-bpp-client:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
-    command: ["/bin/sh", "-c", "cp schemas/core_1.1.0.yaml schemas/core_2.0.1.yaml && cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
+    command: ["/bin/sh", "-c", "cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
     depends_on: [sync-rabbitmq, sync-redis]
     ports: ["${BMTC_BPP_CLIENT_PORT:-6001}:${BMTC_BPP_CLIENT_PORT:-6001}"]
     networks: [beckn]
     volumes:
       - ./runtime/config/bmtc-bpp-client.yml:/usr/src/app/config/default.yml:ro
+      - ./schemas/core_2.0.1.yaml:/usr/src/app/schemas/core_2.0.1.yaml:ro
 
   bmtc-bpp-network:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
-    command: ["/bin/sh", "-c", "cp schemas/core_1.1.0.yaml schemas/core_2.0.1.yaml && cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
+    command: ["/bin/sh", "-c", "cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
     depends_on: [sync-rabbitmq, sync-redis]
     ports: ["${BMTC_BPP_NETWORK_PORT:-6002}:${BMTC_BPP_NETWORK_PORT:-6002}"]
     networks: [beckn]
     volumes:
       - ./runtime/config/bmtc-bpp-network.yml:/usr/src/app/config/default.yml:ro
+      - ./schemas/core_2.0.1.yaml:/usr/src/app/schemas/core_2.0.1.yaml:ro
 
   bmrcl-bpp-client:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
-    command: ["/bin/sh", "-c", "cp schemas/core_1.1.0.yaml schemas/core_2.0.1.yaml && cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
+    command: ["/bin/sh", "-c", "cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
     depends_on: [sync-rabbitmq, sync-redis]
     ports: ["${BMRCL_BPP_CLIENT_PORT:-6101}:${BMRCL_BPP_CLIENT_PORT:-6101}"]
     networks: [beckn]
     volumes:
       - ./runtime/config/bmrcl-bpp-client.yml:/usr/src/app/config/default.yml:ro
+      - ./schemas/core_2.0.1.yaml:/usr/src/app/schemas/core_2.0.1.yaml:ro
 
   bmrcl-bpp-network:
     image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
     platform: linux/amd64
-    command: ["/bin/sh", "-c", "cp schemas/core_1.1.0.yaml schemas/core_2.0.1.yaml && cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
+    command: ["/bin/sh", "-c", "cp schemas/context_1.1.0.json schemas/context_2.0.1.json && exec node dist/app.js"]
     depends_on: [sync-rabbitmq, sync-redis]
     ports: ["${BMRCL_BPP_NETWORK_PORT:-6102}:${BMRCL_BPP_NETWORK_PORT:-6102}"]
     networks: [beckn]
     volumes:
       - ./runtime/config/bmrcl-bpp-network.yml:/usr/src/app/config/default.yml:ro
+      - ./schemas/core_2.0.1.yaml:/usr/src/app/schemas/core_2.0.1.yaml:ro
 
   transit-bpp:
     build:
