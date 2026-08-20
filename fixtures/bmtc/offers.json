@@ -1,0 +1,59 @@
+{
+  "operator": {
+    "id": "P1",
+    "name": "Bengaluru Metropolitan Transport Corporation",
+    "vehicleCategory": "BUS",
+    "serviceWindow": {
+      "startHHMM": "05:00",
+      "endHHMM": "23:00"
+    }
+  },
+  "offers": [
+    {
+      "offerId": "I1",
+      "productCode": "SJT",
+      "productName": "Single Journey Ticket",
+      "farePaise": 2700,
+      "validity": "PT2H",
+      "routeId": "314",
+      "routeName": "Indiranagar to Kempegowda Bus Station",
+      "route": [
+        {
+          "code": "BMTC_INDIRANAGAR_6TH_MAIN",
+          "name": "Indiranagar 6th Main",
+          "nameLocal": "ಇಂದಿರಾನಗರ 6ನೇ ಮುಖ್ಯ ರಸ್ತೆ",
+          "lat": 12.97838,
+          "lon": 77.64082
+        },
+        {
+          "code": "BMTC_DOMLUR",
+          "name": "Domlur",
+          "nameLocal": "ದೊಮ್ಮಲೂರು",
+          "lat": 12.96086,
+          "lon": 77.63872
+        },
+        {
+          "code": "BMTC_RICHMOND_CIRCLE",
+          "name": "Richmond Circle",
+          "nameLocal": "ರಿಚ್ಮಂಡ್ ವೃತ್ತ",
+          "lat": 12.96458,
+          "lon": 77.60148
+        },
+        {
+          "code": "BMTC_CORPORATION",
+          "name": "Corporation",
+          "nameLocal": "ಕಾರ್ಪೊರೇಷನ್",
+          "lat": 12.96991,
+          "lon": 77.59058
+        },
+        {
+          "code": "BMTC_KEMPEGOWDA_BUS_STATION",
+          "name": "Kempegowda Bus Station",
+          "nameLocal": "ಕೆಂಪೇಗೌಡ ಬಸ್ ನಿಲ್ದಾಣ",
+          "lat": 12.97738,
+          "lon": 77.57263
+        }
+      ]
+    }
+  ]
+}
