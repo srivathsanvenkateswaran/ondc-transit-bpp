@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ondc.local/schemas/ondc-trv11/2.0.1/confirm.json",
+  "type": "object",
+  "required": ["context", "message"],
+  "properties": {
+    "context": {
+      "allOf": [
+        { "$ref": "https://ondc.local/schemas/ondc-trv11/2.0.1/common.json#/$defs/context" },
+        { "type": "object", "properties": { "action": { "const": "confirm" } } }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "required": ["order"],
+      "properties": {
+        "order": {
+          "allOf": [
+            {
+              "$ref": "https://ondc.local/schemas/ondc-trv11/2.0.1/common.json#/$defs/selectionOrder"
+            },
+            {
+              "type": "object",
+              "required": ["billing", "payments"],
+              "properties": {
+                "billing": {
+                  "$ref": "https://ondc.local/schemas/ondc-trv11/2.0.1/common.json#/$defs/billing"
+                },
+                "payments": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "https://ondc.local/schemas/ondc-trv11/2.0.1/common.json#/$defs/payment"
+                      },
+                      {
+                        "type": "object",
+                        "required": ["id", "params"],
+                        "properties": {
+                          "status": { "const": "PAID" },
+                          "params": {
+                            "type": "object",
+                            "required": ["transaction_id", "currency", "amount"],
+                            "properties": {
+                              "transaction_id": { "type": "string", "minLength": 1 },
+                              "currency": { "const": "INR" },
+                              "amount": { "type": "string", "minLength": 1 }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

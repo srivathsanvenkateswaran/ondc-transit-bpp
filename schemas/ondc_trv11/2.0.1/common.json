@@ -1,0 +1,421 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ondc.local/schemas/ondc-trv11/2.0.1/common.json",
+  "$defs": {
+    "context": {
+      "type": "object",
+      "required": [
+        "domain",
+        "location",
+        "action",
+        "version",
+        "bap_id",
+        "bap_uri",
+        "bpp_id",
+        "bpp_uri",
+        "transaction_id",
+        "message_id",
+        "timestamp",
+        "ttl"
+      ],
+      "properties": {
+        "domain": { "const": "ONDC:TRV11" },
+        "location": {
+          "type": "object",
+          "required": ["country", "city"],
+          "properties": {
+            "country": {
+              "type": "object",
+              "required": ["code"],
+              "properties": { "code": { "const": "IND" } }
+            },
+            "city": {
+              "type": "object",
+              "required": ["code"],
+              "properties": { "code": { "type": "string", "minLength": 1 } }
+            }
+          }
+        },
+        "action": { "type": "string", "minLength": 1 },
+        "version": { "const": "2.0.1" },
+        "bap_id": { "type": "string", "minLength": 1 },
+        "bap_uri": { "type": "string", "minLength": 1 },
+        "bpp_id": { "type": "string", "minLength": 1 },
+        "bpp_uri": { "type": "string", "minLength": 1 },
+        "transaction_id": { "type": "string", "minLength": 1 },
+        "message_id": { "type": "string", "minLength": 1 },
+        "timestamp": { "type": "string", "minLength": 1 },
+        "ttl": { "type": "string", "pattern": "^P" }
+      }
+    },
+    "descriptor": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "code": { "type": "string", "minLength": 1 }
+      }
+    },
+    "price": {
+      "type": "object",
+      "required": ["currency", "value"],
+      "properties": {
+        "currency": { "const": "INR" },
+        "value": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]{1,2})?$" }
+      }
+    },
+    "selectedItem": {
+      "type": "object",
+      "required": ["id", "quantity"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "quantity": {
+          "type": "object",
+          "required": ["selected"],
+          "properties": {
+            "selected": {
+              "type": "object",
+              "required": ["count"],
+              "properties": {
+                "count": { "type": "integer", "minimum": 1, "maximum": 6 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "selectionOrder": {
+      "type": "object",
+      "required": ["items", "provider"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/selectedItem" }
+        },
+        "provider": {
+          "type": "object",
+          "required": ["id"],
+          "properties": { "id": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
+    "billing": {
+      "type": "object",
+      "required": ["name", "phone"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "email": { "type": "string", "minLength": 1 },
+        "phone": { "type": "string", "minLength": 1 }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "required": ["collected_by", "status", "type"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "collected_by": { "enum": ["BAP", "BPP"] },
+        "status": { "enum": ["NOT_PAID", "PAID"] },
+        "type": { "const": "PRE_ORDER" },
+        "params": { "type": "object" },
+        "tags": { "type": "array" }
+      }
+    },
+    "tag": {
+      "type": "object",
+      "required": ["descriptor", "list"],
+      "properties": {
+        "descriptor": {
+          "type": "object",
+          "required": ["code"],
+          "properties": { "code": { "type": "string", "minLength": 1 } }
+        },
+        "display": { "type": "boolean" },
+        "list": { "type": "array", "minItems": 1 }
+      }
+    },
+    "stop": {
+      "type": "object",
+      "required": ["id", "type", "location"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "parent_stop_id": { "type": "string", "minLength": 1 },
+        "type": {
+          "enum": ["START", "INTERMEDIATE_STOP", "TRANSIT_STOP", "END"]
+        },
+        "instructions": { "type": "object" },
+        "location": {
+          "type": "object",
+          "required": ["descriptor", "gps"],
+          "properties": {
+            "descriptor": { "$ref": "#/$defs/descriptor" },
+            "gps": { "type": "string", "minLength": 3 }
+          }
+        },
+        "tags": { "type": "array" }
+      }
+    },
+    "tripFulfillment": {
+      "type": "object",
+      "required": ["id", "type", "stops", "vehicle", "tags"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "TRIP" },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/stop" }
+        },
+        "vehicle": {
+          "type": "object",
+          "required": ["category"],
+          "properties": { "category": { "enum": ["BUS", "METRO"] } }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/tag" }
+        }
+      }
+    },
+    "ticketFulfillment": {
+      "type": "object",
+      "required": ["id", "type", "tags"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "TICKET" },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/tag" }
+        }
+      }
+    },
+    "confirmedTicketFulfillment": {
+      "type": "object",
+      "required": ["id", "type", "stops", "tags"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "TICKET" },
+        "stops": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["type", "authorization"],
+            "properties": {
+              "type": { "const": "START" },
+              "authorization": {
+                "type": "object",
+                "required": ["type", "token", "valid_to", "status"],
+                "properties": {
+                  "type": { "const": "QR" },
+                  "token": { "type": "string", "minLength": 1 },
+                  "valid_to": { "type": "string", "format": "date-time" },
+                  "status": { "const": "UNCLAIMED" }
+                }
+              }
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/tag" },
+          "contains": {
+            "type": "object",
+            "properties": {
+              "descriptor": {
+                "type": "object",
+                "properties": { "code": { "const": "TICKET_INFO" } },
+                "required": ["code"]
+              }
+            },
+            "required": ["descriptor"]
+          }
+        }
+      }
+    },
+    "orderItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "category_ids",
+        "descriptor",
+        "price",
+        "quantity",
+        "fulfillment_ids",
+        "time"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "category_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "descriptor": { "$ref": "#/$defs/descriptor" },
+        "price": { "$ref": "#/$defs/price" },
+        "quantity": {
+          "type": "object",
+          "required": ["selected"],
+          "properties": {
+            "selected": {
+              "type": "object",
+              "required": ["count"],
+              "properties": {
+                "count": { "type": "integer", "minimum": 1, "maximum": 6 }
+              }
+            }
+          }
+        },
+        "fulfillment_ids": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "time": {
+          "type": "object",
+          "required": ["label", "duration", "timestamp"]
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "required": ["id", "descriptor", "time"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "descriptor": { "$ref": "#/$defs/descriptor" },
+        "time": {
+          "type": "object",
+          "required": ["range"],
+          "properties": {
+            "range": {
+              "type": "object",
+              "required": ["start", "end"],
+              "properties": {
+                "start": { "type": "string", "minLength": 1 },
+                "end": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "quote": {
+      "type": "object",
+      "required": ["price", "breakup"],
+      "properties": {
+        "price": { "$ref": "#/$defs/price" },
+        "breakup": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["title", "item", "price"],
+            "properties": {
+              "title": { "const": "BASE_FARE" },
+              "item": {
+                "type": "object",
+                "required": ["id", "price", "quantity"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "price": { "$ref": "#/$defs/price" },
+                  "quantity": {
+                    "type": "object",
+                    "required": ["selected"]
+                  }
+                }
+              },
+              "price": { "$ref": "#/$defs/price" }
+            }
+          }
+        }
+      }
+    },
+    "baseOrder": {
+      "type": "object",
+      "required": [
+        "items",
+        "provider",
+        "fulfillments",
+        "quote",
+        "cancellation_terms",
+        "tags"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/orderItem" }
+        },
+        "provider": { "$ref": "#/$defs/provider" },
+        "fulfillments": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/tripFulfillment" },
+              { "$ref": "#/$defs/ticketFulfillment" }
+            ]
+          }
+        },
+        "billing": { "$ref": "#/$defs/billing" },
+        "quote": { "$ref": "#/$defs/quote" },
+        "payments": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/payment" }
+        },
+        "cancellation_terms": { "type": "array", "minItems": 1 },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/tag" }
+        }
+      }
+    },
+    "confirmedOrder": {
+      "allOf": [
+        { "$ref": "#/$defs/baseOrder" },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "status",
+            "billing",
+            "payments",
+            "created_at",
+            "updated_at"
+          ],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "status": { "const": "ACTIVE" },
+            "fulfillments": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "oneOf": [
+                  { "$ref": "#/$defs/tripFulfillment" },
+                  { "$ref": "#/$defs/confirmedTicketFulfillment" }
+                ]
+              },
+              "contains": { "$ref": "#/$defs/confirmedTicketFulfillment" }
+            },
+            "created_at": { "type": "string", "format": "date-time" },
+            "updated_at": { "type": "string", "format": "date-time" }
+          }
+        }
+      ]
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "type", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

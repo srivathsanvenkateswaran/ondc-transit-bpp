@@ -13,6 +13,7 @@ import type {
   StatusRequest,
   Trv11Context,
 } from "../../src/protocol/types.js";
+import { createProtocolValidator } from "../../src/protocol/validate.js";
 import type {
   OperatorKey,
   OperatorProfile,
@@ -177,12 +178,11 @@ test("on_select quote equals BASE_FARE breakup with integer-paise pricing", () =
   const orders = service("bmtc", store);
   orders.cacheCatalogue(transactionId, [offer("I1", 2700), offer("I2", 1005)]);
 
-  const order = orders.select(
-    selectRequest("bmtc", [
+  const request = selectRequest("bmtc", [
       ["I1", 2],
       ["I2", 3],
-    ]),
-  ) as any;
+    ]);
+  const order = orders.select(request) as any;
   assert.equal(order.items[0].descriptor.code, "SJT");
   assert.equal(order.items[0].price.value, "27");
   assert.equal(order.quote.price.value, "84.15");
@@ -196,6 +196,15 @@ test("on_select quote equals BASE_FARE breakup with integer-paise pricing", () =
       (sum: number, line: any) => sum + rupeesToPaise(line.price.value),
       0,
     ),
+  );
+  const validator = createProtocolValidator(testConfig().schemaRoot);
+  assert.equal(validator.select(request).valid, true);
+  assert.deepEqual(
+    validator.onSelect({
+      context: { ...request.context, action: "on_select" },
+      message: { order },
+    }),
+    { valid: true, errors: [] },
   );
 });
 
@@ -216,11 +225,21 @@ test("init carries the quote, billing and NOT_PAID payment forward", () => {
   const orders = service("bmtc", store);
   orders.cacheCatalogue(transactionId, [offer("I1", 2700)]);
 
-  const order = orders.init(initRequest("bmtc", [["I1", 2]])) as any;
+  const request = initRequest("bmtc", [["I1", 2]]);
+  const order = orders.init(request) as any;
   assert.equal(order.quote.price.value, "54");
   assert.equal(order.billing.name, "Specimen Rider");
   assert.equal(order.payments[0].status, "NOT_PAID");
   assert.match(order.payments[0].id, /^PAY-BMTC-/);
+  const validator = createProtocolValidator(testConfig().schemaRoot);
+  assert.equal(validator.init(request).valid, true);
+  assert.deepEqual(
+    validator.onInit({
+      context: { ...request.context, action: "on_init" },
+      message: { order },
+    }),
+    { valid: true, errors: [] },
+  );
 });
 
 test("confirm mints one clearly marked QR ticket per selected unit", async () => {
@@ -228,9 +247,8 @@ test("confirm mints one clearly marked QR ticket per selected unit", async () =>
   const orders = service("bmtc", store);
   orders.cacheCatalogue(transactionId, [offer("I1", 2700)]);
 
-  const order = (await orders.confirm(
-    confirmRequest("bmtc", [["I1", 2]]),
-  )) as any;
+  const request = confirmRequest("bmtc", [["I1", 2]]);
+  const order = (await orders.confirm(request)) as any;
   assert.match(order.id, /^SPECIMEN-ORD-BMTC-/);
   assert.equal(order.status, "ACTIVE");
   const tickets = order.fulfillments.filter(
@@ -260,6 +278,15 @@ test("confirm mints one clearly marked QR ticket per selected unit", async () =>
     );
     assert.match(encoded, /NOT VALID FOR TRAVEL/);
   });
+  const validator = createProtocolValidator(testConfig().schemaRoot);
+  assert.equal(validator.confirm(request).valid, true);
+  assert.deepEqual(
+    validator.onConfirm({
+      context: { ...request.context, action: "on_confirm" },
+      message: { order },
+    }),
+    { valid: true, errors: [] },
+  );
 });
 
 test("status returns the exact stored order", async () => {
@@ -273,7 +300,17 @@ test("status returns the exact stored order", async () => {
     message: { order_id: orderId },
   };
 
-  assert.deepEqual(orders.status(request), confirmed);
+  const statusOrder = orders.status(request);
+  assert.deepEqual(statusOrder, confirmed);
+  const validator = createProtocolValidator(testConfig().schemaRoot);
+  assert.equal(validator.status(request).valid, true);
+  assert.deepEqual(
+    validator.onStatus({
+      context: { ...request.context, action: "on_status" },
+      message: { order: statusOrder },
+    }),
+    { valid: true, errors: [] },
+  );
 });
 
 test("shared store keeps bus and metro orders independent", async () => {

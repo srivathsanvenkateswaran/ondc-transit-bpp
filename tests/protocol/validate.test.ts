@@ -27,3 +27,26 @@ test("search without context domain fails schema validation", () => {
   assert.equal(result.valid, false);
   assert.ok(result.errors.some((error) => error.instancePath === "/context"));
 });
+
+test("on_select domain error passes callback schema validation", () => {
+  const validator = createProtocolValidator(testConfig().schemaRoot);
+  const config = testConfig();
+  const context = {
+    ...searchRequest("BUS").context,
+    action: "on_select",
+    bpp_id: config.operators.bmtc.subscriberId,
+    bpp_uri: config.operators.bmtc.subscriberUri,
+  };
+
+  assert.deepEqual(
+    validator.onSelect({
+      context,
+      error: {
+        code: "ITEM-NOT-FOUND",
+        type: "DOMAIN-ERROR",
+        message: "Unknown item.id UNKNOWN",
+      },
+    }),
+    { valid: true, errors: [] },
+  );
+});
