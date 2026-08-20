@@ -1,0 +1,16 @@
+07:50:33.376332 IP 172.18.0.3.48372 > 172.18.0.15.6002: Flags [P.], seq 1:855, ack 1, win 502, options [nop,nop,TS val 845151448 ecr 1699098001], length 854
+POST /search HTTP/1.1
+Connection: Upgrade, HTTP2-Settings
+Content-Length: 522
+Host: bmtc-bpp-network:6002
+HTTP2-Settings: AAEAAEAAAAIAAAABAAMAAABkAAQBAAAAAAUAAEAA
+Upgrade: h2c
+User-Agent: Java-http-client/17.0.12
+ACCEPT: application/json
+Accept-Encoding: gzip
+AUTHORIZATION: Signature keyId="bap.transit.localhost|bap-transit-key|ed25519",algorithm="ed25519",created="1787212173",expires="1787215773",headers="(created) (expires) digest",signature="PnqUnbN7KqJTh+JYrEDsforutuknUAaPqlKCxPVehIxlvJfHL2kGkKzZ/gbJgcXqLbrmamm6FdrRz2xAVratDA=="
+CONTENT-TYPE: application/json
+X-GATEWAY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787212233",expires="1787812233",headers="(created) (expires) digest",signature="cLiR8sLAU86r8neb7PYzHVnivEMRxSt05pEQAcgKTQr1udNiTkN2YuTJShfCbk15/ggGssumLymKmoTOvgjMCQ=="
+
+07:50:33.376558 IP 172.18.0.3.48372 > 172.18.0.15.6002: Flags [P.], seq 855:1377, ack 1, win 502, options [nop,nop,TS val 845151448 ecr 1699098003], length 522
+{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T07:50:33.292Z","message_id":"d5433a57-d8a5-4ae9-9dc1-d8389249ad37","transaction_id":"7cfed067-cf23-4a2f-a7ba-86c219434bb3","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"intent":{"fulfillment":{"stops":[{"type":"START","location":{"gps":"12.9784, 77.6408"}},{"type":"END","location":{"gps":"12.9774, 77.5726"}}]}}}}

@@ -27,7 +27,7 @@ app:
   subscriberId: bmtc.bpp.transit.localhost
   subscriberUri: http://bmtc-bpp-network:6002
   registryUrl: http://registry:3030/subscribers
-  auth: false
+  auth: true
   uniqueKey: bmtc-bpp-key
   city: std:080
   country: IND

@@ -46,6 +46,35 @@ under the 2.0.1 filename so ONIX can transport a `version: 2.0.1` envelope.
 The provider validates the TRV11 2.0.1 discovery input and output with the
 schemas under [`../schemas/ondc_trv11/2.0.1`](../schemas/ondc_trv11/2.0.1).
 
+## Authentication and tamper rejection
+
+SPEC acceptance criterion 14 passes. Authentication is enabled with
+`auth: true` in all six ONIX client and network configurations. The local
+registry's `signing_public_key` and `unique_key_id` values match the ignored
+runtime key pairs for the BAP, BMTC BPP and BMRCL BPP identities.
+
+[`evidence/auth-search.pcap`](evidence/auth-search.pcap) is the raw packet
+capture of a gateway-to-BMTC BPP `POST /search`. Its decoded HTTP request is in
+[`evidence/auth-wire-request.txt`](evidence/auth-wire-request.txt). The wire
+request carries both the originating participant signature:
+
+```text
+AUTHORIZATION: Signature keyId="bap.transit.localhost|bap-transit-key|ed25519",...
+```
+
+and the gateway signature in `X-GATEWAY-AUTHORIZATION`.
+
+The captured body and exact captured headers were first replayed unchanged.
+The BMTC BPP network server returned HTTP 202 with `ACK`; the unmodified result
+is [`evidence/auth-untampered-response.raw.txt`](evidence/auth-untampered-response.raw.txt).
+The origin latitude was then changed by one byte from `12.9784` to `12.9785`
+while keeping both signature headers byte-identical. The same receiver returned
+HTTP 401 with `NACK` and `Authentication failed`; the unmodified result is
+[`evidence/auth-tampered-response.raw.txt`](evidence/auth-tampered-response.raw.txt).
+Representations of the two replay bodies are in
+[`evidence/auth-replay-request.json`](evidence/auth-replay-request.json) and
+[`evidence/auth-tampered-request.json`](evidence/auth-tampered-request.json).
+
 ## Request and raw response
 
 The only protocol request submitted for the recorded successful run was:
@@ -117,4 +146,6 @@ docker image: ondc-transit-bpp:local built successfully
 docker compose config --quiet: passing
 live search: HTTP 200, two responses
 delayed search: HTTP 200, one response
+signed search replay: HTTP 202, ACK
+one-byte tampered replay: HTTP 401, NACK
 ```

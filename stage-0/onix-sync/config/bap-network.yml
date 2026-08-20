@@ -30,7 +30,7 @@ app:
   subscriberId: bap.transit.localhost
   subscriberUri: http://bap-network:5002
   registryUrl: http://registry:3030/subscribers
-  auth: false
+  auth: true
   uniqueKey: bap-transit-key
   city: std:080
   country: IND

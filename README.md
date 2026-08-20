@@ -131,6 +131,12 @@ registry already contains subscriber records, either keep the matching ignored
 runtime files or update the registry records with the newly generated public
 keys in `stage-0/onix-sync/runtime/public-keys.tsv`.
 
+All six ONIX client and network configurations have authentication enabled.
+The registry public keys must match the generated runtime keys or signed
+requests will be rejected. Phase 1 includes a raw wire capture of the
+`Authorization` header and a controlled one-byte body-tampering rejection in
+[`phase-1/RESULTS.md`](phase-1/RESULTS.md#authentication-and-tamper-rejection).
+
 Run the automated checks with:
 
 ```console

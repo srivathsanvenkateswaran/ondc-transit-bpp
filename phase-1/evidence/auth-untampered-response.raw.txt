@@ -1,0 +1,11 @@
+HTTP/1.1 202 Accepted
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 400
+ETag: W/"190-1bdEvOXnVB6yiUuczF6WaNC30QM"
+Date: Thu, 20 Aug 2026 07:51:01 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T07:50:33.292Z","message_id":"d5433a57-d8a5-4ae9-9dc1-d8389249ad37","transaction_id":"7cfed067-cf23-4a2f-a7ba-86c219434bb3","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"ack":{"status":"ACK"}}}

@@ -27,7 +27,7 @@ app:
   subscriberId: bmrcl.bpp.transit.localhost
   subscriberUri: http://bmrcl-bpp-network:6102
   registryUrl: http://registry:3030/subscribers
-  auth: false
+  auth: true
   uniqueKey: bmrcl-bpp-key
   city: std:080
   country: IND
