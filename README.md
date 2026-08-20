@@ -91,7 +91,13 @@ This governs everything in the repository.
   or production registry.
 - **The transit fixture is plausible; the transaction is not.** The fixture
   uses real Bengaluru place and station names with illustrative routes and
-  fares. No output is live operator data.
+  placeholder whole-route fares. No output is live operator data.
+- **Fixture fares are not distance-based.** `wholeRouteFarePaise` is a
+  placeholder for one complete fixture journey. Slicing that route for a
+  shorter search does not reprice it, so sliced fixture offers must not be
+  demonstrated as accurately priced journeys. Distance-correct fares come
+  from the optional HTTP journey source, which consumes integer paise from a
+  planner.
 - **BMTC is not on ONDC**, and no output of this software should be presented as
   showing that it is. The claim is "here is what it would look like", and that
   claim is worth making honestly.

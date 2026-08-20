@@ -137,6 +137,18 @@ therefore explicit: any seller response that completes outside the four-second
 window is dropped from that synchronous result. The delay was restored to zero
 after the experiment.
 
+## Fixture fare limitation
+
+The fixture source is not a fare model. Each fixture records a
+`wholeRouteFarePaise` placeholder for its complete illustrative route. Route
+slicing preserves that value, so a one-stop slice and the complete route have
+the same fixture price. Do not demonstrate a sliced fixture offer as a
+distance-priced journey.
+
+Distance-correct fares arrive with the Phase 2 HTTP journey source. That source
+reads the planner's per-offer `farePaise` as integer paise and does not invent a
+fare formula in the fixture adapter.
+
 ## Verification
 
 ```text

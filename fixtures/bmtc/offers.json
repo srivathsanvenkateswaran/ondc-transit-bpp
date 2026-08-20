@@ -13,7 +13,7 @@
       "offerId": "I1",
       "productCode": "SJT",
       "productName": "Single Journey Ticket",
-      "farePaise": 2700,
+      "wholeRouteFarePaise": 2700,
       "validity": "PT2H",
       "routeId": "314",
       "routeName": "Indiranagar to Kempegowda Bus Station",

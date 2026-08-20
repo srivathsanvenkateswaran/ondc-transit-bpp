@@ -29,6 +29,7 @@ test("fixture source matches and slices a metro offer by stop code", async () =>
     offers[0].route.map((stop) => stop.code),
     ["TRINITY", "MAHATMA_GANDHI_ROAD", "CUBBON_PARK"],
   );
+  assert.equal(offers[0].farePaise, 3000);
 });
 
 test("fixture source matches a bus offer by nearest GPS stops", async () => {

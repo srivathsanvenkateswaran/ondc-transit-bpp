@@ -86,8 +86,12 @@ export class FixtureJourneySource implements JourneySource {
     if (!fixture.operator || !Array.isArray(fixture.offers)) {
       throw new Error(`Invalid fixture file: ${path}`);
     }
+    const offers = fixture.offers.map(({ wholeRouteFarePaise, ...offer }) => ({
+      ...offer,
+      farePaise: wholeRouteFarePaise,
+    }));
     return new FixtureJourneySource(
-      fixture.offers,
+      offers,
       fixture.operator,
       nearestStopRadiusKm,
     );

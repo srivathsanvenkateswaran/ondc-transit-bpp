@@ -13,7 +13,7 @@
       "offerId": "I1",
       "productCode": "SJT",
       "productName": "Single Journey Ticket",
-      "farePaise": 3000,
+      "wholeRouteFarePaise": 3000,
       "validity": "PT2H",
       "routeId": "PURPLE_LINE",
       "routeName": "Purple Line",

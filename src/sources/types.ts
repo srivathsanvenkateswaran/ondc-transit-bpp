@@ -37,6 +37,11 @@ export interface TransitOffer {
   routeColor?: string;
 }
 
+export interface FixtureOffer extends Omit<TransitOffer, "farePaise"> {
+  /** Placeholder fare for the complete fixture route, not a distance model. */
+  wholeRouteFarePaise: number;
+}
+
 export interface RouteStop {
   code?: string;
   name: string;
@@ -49,5 +54,5 @@ export interface RouteStop {
 
 export interface FixtureFile {
   operator: OperatorProfile;
-  offers: TransitOffer[];
+  offers: FixtureOffer[];
 }
