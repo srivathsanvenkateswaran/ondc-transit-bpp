@@ -1,0 +1,19 @@
+{
+  "context": {
+    "domain": "ONDC:TRV11",
+    "location": { "country": { "code": "IND" }, "city": { "code": "std:080" } },
+    "action": "status",
+    "version": "2.0.1",
+    "bap_id": "bap.transit.localhost",
+    "bap_uri": "http://bap-network:5002",
+    "bpp_id": "bmtc.bpp.transit.localhost",
+    "bpp_uri": "http://bmtc-bpp-network:6002",
+    "transaction_id": "20000000-0000-4000-8000-000000000001",
+    "message_id": "20000000-0000-4000-8000-000000000155",
+    "timestamp": "2026-08-20T08:25:00.000Z",
+    "ttl": "PT30S"
+  },
+  "message": {
+    "order_id": "SPECIMEN-ORD-BMTC-01E273F9"
+  }
+}

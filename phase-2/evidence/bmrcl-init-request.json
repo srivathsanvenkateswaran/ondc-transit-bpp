@@ -1,0 +1,24 @@
+{
+  "context": {
+    "domain": "ONDC:TRV11",
+    "location": { "country": { "code": "IND" }, "city": { "code": "std:080" } },
+    "action": "init",
+    "version": "2.0.1",
+    "bap_id": "bap.transit.localhost",
+    "bap_uri": "http://bap-network:5002",
+    "bpp_id": "bmrcl.bpp.transit.localhost",
+    "bpp_uri": "http://bmrcl-bpp-network:6102",
+    "transaction_id": "20000000-0000-4000-8000-000000000002",
+    "message_id": "20000000-0000-4000-8000-000000000223",
+    "timestamp": "2026-08-20T08:25:50.000Z",
+    "ttl": "PT30S"
+  },
+  "message": {
+    "order": {
+      "items": [{ "id": "I1", "quantity": { "selected": { "count": 1 } } }],
+      "provider": { "id": "P1" },
+      "billing": { "name": "SPECIMEN RIDER", "phone": "+910000000000" },
+      "payments": [{ "collected_by": "BAP", "status": "NOT_PAID", "type": "PRE_ORDER" }]
+    }
+  }
+}

@@ -1,0 +1,56 @@
+
+> ondc-transit-bpp@0.1.0 test
+> tsx --test tests/**/*.test.ts
+
+✔ captured registry lookup and provider health identify the live stack (1.287083ms)
+✔ broad search evidence has two distinct BPP callbacks (0.624333ms)
+✔ all captured Phase 2 callbacks pass the local TRV11 validators (83.79625ms)
+✔ captured request and callback identities preserve correlation (2.807458ms)
+✔ captured quotes equal BASE_FARE sums with exact fixture paise (0.348834ms)
+✔ captured confirmed orders contain distinct specimen PNG tickets (0.496334ms)
+✔ captured status responses return the exact confirmed orders (0.669083ms)
+✔ malformed and unknown-item evidence are explicit errors (0.29025ms)
+✔ gateway and authentication artifacts prove routing and rejection (1.603833ms)
+✔ the two captured order totals sum without rounding drift (0.387792ms)
+✔ on_select quote equals BASE_FARE breakup with integer-paise pricing (79.764958ms)
+✔ unknown selected item returns a domain error instead of a quote (0.295708ms)
+✔ init carries the quote, billing and NOT_PAID payment forward (51.714459ms)
+✔ confirm mints one clearly marked QR ticket per selected unit (38.587708ms)
+✔ status returns the exact stored order (33.972917ms)
+✔ shared store keeps bus and metro orders independent (0.776083ms)
+✔ production QR encoder returns a PNG and parseable validity (13.55125ms)
+{"timestamp":"2026-08-20T08:50:40.559Z","transaction_id":"acf5aff7-3dde-4f31-8698-4cf6c18f1537","message_id":"70068ed7-cf0d-4555-a7a9-55510ba870ac","action":"search","subscriber_id":"bmtc.provider.example.test","operator":"bmtc","outcome":"ACK"}
+✔ search ACKs immediately and dispatches a validated on_search callback (106.613958ms)
+{"timestamp":"2026-08-20T08:50:40.612Z","transaction_id":"acf5aff7-3dde-4f31-8698-4cf6c18f1537","message_id":"70068ed7-cf0d-4555-a7a9-55510ba870ac","action":"on_search","subscriber_id":"bmtc.provider.example.test","operator":"bmtc","outcome":"ACK"}
+✔ malformed search returns NACK and sends no callback (49.950625ms)
+✔ category mismatch logs SKIPPED and dispatches no callback (64.445292ms)
+✔ provider serves the complete order lifecycle and stable status (76.145583ms)
+✔ deployment configuration is loaded from environment values (0.431291ms)
+✔ unsupported journey source fails at startup (0.214667ms)
+✔ http journey source requires and loads its planner URL (0.079833ms)
+✔ invalid port fails at startup (0.04725ms)
+✔ valid TRV11 search passes schema validation (77.952875ms)
+✔ broad TRV11 search without vehicle category passes validation (47.596584ms)
+✔ search without context domain fails schema validation (36.020541ms)
+✔ on_select domain error passes callback schema validation (32.815042ms)
+✔ haversine distance is zero for the same point (0.36775ms)
+✔ fixture source matches and slices a metro offer by stop code (2.700042ms)
+✔ fixture source matches a bus offer by nearest GPS stops (0.738208ms)
+✔ metro fixture sells exactly one offer in each direction (0.584875ms)
+✔ bus fixture sells exactly one offer in each direction (0.474833ms)
+✔ http source sends the published request and returns planner paise (35.065625ms)
+✔ http source falls back to fixtures and logs a planner error (12.549709ms)
+✔ http source rejects non-integer planner fares before fallback (9.174959ms)
+✔ http source times out after its deadline and falls back (13.080167ms)
+✔ paise converts to a stable rupee string without floating point (0.342208ms)
+✔ bmtc maps a fixture offer into a valid TRV11 catalogue (77.19425ms)
+✔ bmrcl maps a fixture offer into a valid TRV11 catalogue (60.611666ms)
+✔ catalogue preserves offer identity in distinct fulfillment IDs (0.415083ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 502.567792

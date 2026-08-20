@@ -1,0 +1,442 @@
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:44:33 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:44:33 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:44:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:03 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:03 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:05 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:33 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:33 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Api Called:/bg/search
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in IOTaskManager Queue : 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Started Task:com.venky.swf.plugins.background.eventloop.jetty.HttpCoreEvent
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Completed Task:com.venky.swf.plugins.background.eventloop.jetty.HttpCoreEvent
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in AsyncTaskManager Queue : 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of AsyncTaskManager workers working 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :AsyncTaskManager:1:Started Task:com.venky.swf.plugins.background.eventloop.CoreEvent
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Headers:{ACCEPT=application/json, text/plain, */*, AUTHORIZATION=Signature keyId="bap.transit.localhost|bap-transit-key|ed25519",algorithm="ed25519",created="1787213696",expires="1787217296",headers="(created) (expires) digest",signature="XbPU8GXYMpV+46RuIADhTw1fyU5FoIo4Lf7SUyxhOrWmUeXAwIFFrwh2+zhncigBx6o4lRDwXNSTYjXyKEoGDA==", CONNECTION=close, CONTENT-LENGTH=551, CONTENT-TYPE=application/json, HOST=gateway:4030, USER-AGENT=axios/0.26.1}
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Payload:{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:15:55.401Z","message_id":"20000000-0000-4000-8000-000000000101","transaction_id":"20000000-0000-4000-8000-000000000001","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"intent":{"fulfillment":{"stops":[{"type":"START","location":{"gps":"12.9784, 77.6408"}},{"type":"END","location":{"gps":"12.9774, 77.5726"}}],"vehicle":{"category":"BUS"}}}}}
+Aug 20, 2026 1:45:56 PM in.succinct.beckn.Request getSigningPublicKey
+INFO: s4+IalwWNUQN0lypBTqJCAaQXfpXkov85FVIxaQlVg8= resolved to org.bouncycastle.jcajce.provider.asymmetric.edec.BC15EdDSAPublicKey
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Transaction:0 Started : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Opened Connection:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: {"message":{"ack":{"status":"ACK"}}}
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Connection.commit:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Connection closed : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in DbTaskManager Queue : 2
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :AsyncTaskManager:1:Completed Task:com.venky.swf.plugins.background.eventloop.CoreEvent
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Started Task:in.succinct.beckn.gateway.controller.BgController$Search
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Transaction:0 Started : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of AsyncTaskManager workers working 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Connection.commit:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in IOTaskManager Queue : 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Completed Task:in.succinct.beckn.gateway.controller.BgController$Search
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Started Task:com.venky.swf.plugins.background.eventloop.jetty.HttpCoreEvent
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in DbTaskManager Queue : 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Started Task:in.succinct.beckn.gateway.controller.BgController$Search
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Completed Task:com.venky.swf.plugins.background.eventloop.jetty.HttpCoreEvent
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Transaction:0 Started : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in IOTaskManager Queue : 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Started Task:in.succinct.beckn.gateway.controller.BgController$Search$$Lambda$512/0x00007fff9a3b96a0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+WARNING: Thread :DbTaskManager:1:Worker thread Rolling back due to exception java.lang.ClassCastException: class java.lang.String cannot be cast to class org.json.simple.JSONAware (java.lang.String is in module java.base of loader 'bootstrap'; org.json.simple.JSONAware is in unnamed module of loader 'app')
+	at in.succinct.json.JSONAwareWrapper.get(JSONAwareWrapper.java:139)
+	at in.succinct.json.JSONAwareWrapper.get(JSONAwareWrapper.java:124)
+	at in.succinct.beckn.Vehicle.getCategory(Vehicle.java:6)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:92)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:117)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:117)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:117)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:117)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:25)
+	at in.succinct.beckn.gateway.controller.BgController$Search.execute(BgController.java:354)
+	at com.venky.swf.plugins.background.core.TaskHolder.execute(TaskHolder.java:18)
+	at com.venky.swf.plugins.background.core.AsyncTaskWorker.run(AsyncTaskWorker.java:41)
+
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Connection Rollback:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Completed Task:in.succinct.beckn.gateway.controller.BgController$Search
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in DbTaskManager Queue : 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Started Task:com.venky.swf.plugins.background.messaging.EventEmitter$$Lambda$509/0x00007fff9a3a8970
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Transaction:0 Started : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Opened Connection:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Connection.commit:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Completed Task:com.venky.swf.plugins.background.messaging.EventEmitter$$Lambda$509/0x00007fff9a3a8970
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger fine
+FINE: Connection closed : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Request :
+ curl  -H 'ACCEPT: application/json'  -H 'AUTHORIZATION: Signature keyId="bap.transit.localhost|bap-transit-key|ed25519",algorithm="ed25519",created="1787213696",expires="1787217296",headers="(created) (expires) digest",signature="XbPU8GXYMpV+46RuIADhTw1fyU5FoIo4Lf7SUyxhOrWmUeXAwIFFrwh2+zhncigBx6o4lRDwXNSTYjXyKEoGDA=="'  -H 'CONTENT-TYPE: application/json'  -H 'PROXY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787213756",expires="1787813756",headers="(created) (expires) digest",signature="dZazASSSGHTTpQ62bDsj/ngLrI2zRXWU5oasBrLv56MlehtAVP9IoB+Ab+oWl/yIFrZau+DdGvVR8ObECrILAQ=="'  -H 'X-GATEWAY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787213756",expires="1787813756",headers="(created) (expires) digest",signature="dZazASSSGHTTpQ62bDsj/ngLrI2zRXWU5oasBrLv56MlehtAVP9IoB+Ab+oWl/yIFrZau+DdGvVR8ObECrILAQ=="' 'http://bmtc-bpp-network:6002/search' -d '{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:15:55.401Z","message_id":"20000000-0000-4000-8000-000000000101","transaction_id":"20000000-0000-4000-8000-000000000001","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"intent":{"fulfillment":{"stops":[{"type":"START","location":{"gps":"12.9784, 77.6408"}},{"type":"END","location":{"gps":"12.9774, 77.5726"}}],"vehicle":{"category":"BUS"}}}}}'
+ Response:
+{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:15:55.401Z","message_id":"20000000-0000-4000-8000-000000000101","transaction_id":"20000000-0000-4000-8000-000000000001","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"ack":{"status":"ACK"}}}
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Completed Task:in.succinct.beckn.gateway.controller.BgController$Search$$Lambda$512/0x00007fff9a3b96a0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in IOTaskManager Queue : 0
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 1
+Aug 20, 2026 1:45:56 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Started Task:in.succinct.beckn.gateway.controller.BgController$Search$$Lambda$512/0x00007fff9a3b96a0
+Aug 20, 2026 1:45:57 PM com.venky.core.log.BetterLogger info
+INFO: Request :
+ curl  -H 'ACCEPT: application/json'  -H 'AUTHORIZATION: Signature keyId="bap.transit.localhost|bap-transit-key|ed25519",algorithm="ed25519",created="1787213696",expires="1787217296",headers="(created) (expires) digest",signature="XbPU8GXYMpV+46RuIADhTw1fyU5FoIo4Lf7SUyxhOrWmUeXAwIFFrwh2+zhncigBx6o4lRDwXNSTYjXyKEoGDA=="'  -H 'CONTENT-TYPE: application/json'  -H 'PROXY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787213756",expires="1787813756",headers="(created) (expires) digest",signature="dZazASSSGHTTpQ62bDsj/ngLrI2zRXWU5oasBrLv56MlehtAVP9IoB+Ab+oWl/yIFrZau+DdGvVR8ObECrILAQ=="'  -H 'X-GATEWAY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787213756",expires="1787813756",headers="(created) (expires) digest",signature="dZazASSSGHTTpQ62bDsj/ngLrI2zRXWU5oasBrLv56MlehtAVP9IoB+Ab+oWl/yIFrZau+DdGvVR8ObECrILAQ=="' 'http://bmrcl-bpp-network:6102/search' -d '{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:15:55.401Z","message_id":"20000000-0000-4000-8000-000000000101","transaction_id":"20000000-0000-4000-8000-000000000001","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"intent":{"fulfillment":{"stops":[{"type":"START","location":{"gps":"12.9784, 77.6408"}},{"type":"END","location":{"gps":"12.9774, 77.5726"}}],"vehicle":{"category":"BUS"}}}}}'
+ Response:
+{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:15:55.401Z","message_id":"20000000-0000-4000-8000-000000000101","transaction_id":"20000000-0000-4000-8000-000000000001","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"ack":{"status":"ACK"}}}
+Aug 20, 2026 1:45:57 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Completed Task:in.succinct.beckn.gateway.controller.BgController$Search$$Lambda$512/0x00007fff9a3b96a0
+Aug 20, 2026 1:45:57 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 0
+Aug 20, 2026 1:45:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:46:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:46:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:46:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:46:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:46:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:46:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:47:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:47:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:47:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:47:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:47:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:47:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:48:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:48:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:48:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:48:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:48:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:48:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:49:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:49:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:49:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:49:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:49:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:49:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:50:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:50:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:50:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:50:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:50:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:50:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:51:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:51:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:51:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:51:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:51:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:51:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:52:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:52:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:52:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:52:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:52:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:52:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:53:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:53:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:53:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:53:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:53:56 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:53:57 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:54:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:54:26 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:54:27 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Api Called:/bg/search
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in IOTaskManager Queue : 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Started Task:com.venky.swf.plugins.background.eventloop.jetty.HttpCoreEvent
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Completed Task:com.venky.swf.plugins.background.eventloop.jetty.HttpCoreEvent
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in AsyncTaskManager Queue : 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of AsyncTaskManager workers working 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :AsyncTaskManager:1:Started Task:com.venky.swf.plugins.background.eventloop.CoreEvent
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Headers:{ACCEPT=application/json, text/plain, */*, AUTHORIZATION=Signature keyId="bap.transit.localhost|bap-transit-key|ed25519",algorithm="ed25519",created="1787214215",expires="1787217815",headers="(created) (expires) digest",signature="OXXYlKeGVtrg0SIcdWWlE9Q+wXlyA1wGKIrGOv3hk9/D/hC2PA5Y7BmYbXsCH8ZP/sJX7SJUNcCoPN8MypmvBA==", CONNECTION=close, CONTENT-LENGTH=602, CONTENT-TYPE=application/json, HOST=gateway:4030, USER-AGENT=axios/0.26.1}
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Payload:{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:24:35.059Z","message_id":"20000000-0000-4000-8000-000000000221","transaction_id":"20000000-0000-4000-8000-000000000002","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"intent":{"fulfillment":{"stops":[{"type":"START","location":{"descriptor":{"code":"INDIRANAGAR"}}},{"type":"END","location":{"descriptor":{"code":"NADAPRABHU_KEMPEGOWDA_STATION_MAJESTIC"}}}],"vehicle":{"category":"METRO"}}}}}
+Aug 20, 2026 1:54:35 PM in.succinct.beckn.Request getSigningPublicKey
+INFO: s4+IalwWNUQN0lypBTqJCAaQXfpXkov85FVIxaQlVg8= resolved to org.bouncycastle.jcajce.provider.asymmetric.edec.BC15EdDSAPublicKey
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Transaction:0 Started : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Opened Connection:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: {"message":{"ack":{"status":"ACK"}}}
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Connection.commit:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in DbTaskManager Queue : 2
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Started Task:in.succinct.beckn.gateway.controller.BgController$Search
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Connection closed : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :AsyncTaskManager:1:Completed Task:com.venky.swf.plugins.background.eventloop.CoreEvent
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of AsyncTaskManager workers working 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in IOTaskManager Queue : 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Transaction:0 Started : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Started Task:com.venky.swf.plugins.background.eventloop.jetty.HttpCoreEvent
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Completed Task:com.venky.swf.plugins.background.eventloop.jetty.HttpCoreEvent
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+WARNING: Thread :DbTaskManager:1:Worker thread Rolling back due to exception java.lang.ClassCastException: class java.lang.String cannot be cast to class org.json.simple.JSONAware (java.lang.String is in module java.base of loader 'bootstrap'; org.json.simple.JSONAware is in unnamed module of loader 'app')
+	at in.succinct.json.JSONAwareWrapper.get(JSONAwareWrapper.java:139)
+	at in.succinct.json.JSONAwareWrapper.get(JSONAwareWrapper.java:124)
+	at in.succinct.beckn.Vehicle.getCategory(Vehicle.java:6)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:92)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:117)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:117)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:117)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:117)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:28)
+	at in.succinct.beckn.BecknObjectBase.update(BecknObjectBase.java:25)
+	at in.succinct.beckn.gateway.controller.BgController$Search.execute(BgController.java:354)
+	at com.venky.swf.plugins.background.core.TaskHolder.execute(TaskHolder.java:18)
+	at com.venky.swf.plugins.background.core.AsyncTaskWorker.run(AsyncTaskWorker.java:41)
+
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Connection Rollback:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Completed Task:in.succinct.beckn.gateway.controller.BgController$Search
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in DbTaskManager Queue : 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Started Task:in.succinct.beckn.gateway.controller.BgController$Search
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Transaction:0 Started : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Connection.commit:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Completed Task:in.succinct.beckn.gateway.controller.BgController$Search
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in IOTaskManager Queue : 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in DbTaskManager Queue : 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Started Task:in.succinct.beckn.gateway.controller.BgController$Search$$Lambda$512/0x00007fff9a3b96a0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Started Task:com.venky.swf.plugins.background.messaging.EventEmitter$$Lambda$509/0x00007fff9a3a8970
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Transaction:0 Started : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Opened Connection:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Connection.commit:com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :DbTaskManager:1:Completed Task:com.venky.swf.plugins.background.messaging.EventEmitter$$Lambda$509/0x00007fff9a3a8970
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger fine
+FINE: Connection closed : com.venky.swf.db.Database.getCaller(Database.java:490)
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of DbTaskManager workers working 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Request :
+ curl  -H 'ACCEPT: application/json'  -H 'AUTHORIZATION: Signature keyId="bap.transit.localhost|bap-transit-key|ed25519",algorithm="ed25519",created="1787214215",expires="1787217815",headers="(created) (expires) digest",signature="OXXYlKeGVtrg0SIcdWWlE9Q+wXlyA1wGKIrGOv3hk9/D/hC2PA5Y7BmYbXsCH8ZP/sJX7SJUNcCoPN8MypmvBA=="'  -H 'CONTENT-TYPE: application/json'  -H 'PROXY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787214275",expires="1787814275",headers="(created) (expires) digest",signature="NBut5bjRg5KbqQCxu1VX8GKlqLSeSd0Gkw//5MyT684baI1XutyfTGaNDmcewfxzdyrttxffDIb0rgOryA5FCw=="'  -H 'X-GATEWAY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787214275",expires="1787814275",headers="(created) (expires) digest",signature="NBut5bjRg5KbqQCxu1VX8GKlqLSeSd0Gkw//5MyT684baI1XutyfTGaNDmcewfxzdyrttxffDIb0rgOryA5FCw=="' 'http://bmrcl-bpp-network:6102/search' -d '{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:24:35.059Z","message_id":"20000000-0000-4000-8000-000000000221","transaction_id":"20000000-0000-4000-8000-000000000002","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"intent":{"fulfillment":{"stops":[{"type":"START","location":{"descriptor":{"code":"INDIRANAGAR"}}},{"type":"END","location":{"descriptor":{"code":"NADAPRABHU_KEMPEGOWDA_STATION_MAJESTIC"}}}],"vehicle":{"category":"METRO"}}}}}'
+ Response:
+{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:24:35.059Z","message_id":"20000000-0000-4000-8000-000000000221","transaction_id":"20000000-0000-4000-8000-000000000002","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"ack":{"status":"ACK"}}}
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Completed Task:in.succinct.beckn.gateway.controller.BgController$Search$$Lambda$512/0x00007fff9a3b96a0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Number of Tasks remaining in IOTaskManager Queue : 0
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 1
+Aug 20, 2026 1:54:35 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Started Task:in.succinct.beckn.gateway.controller.BgController$Search$$Lambda$512/0x00007fff9a3b96a0
+Aug 20, 2026 1:54:36 PM com.venky.core.log.BetterLogger info
+INFO: Request :
+ curl  -H 'ACCEPT: application/json'  -H 'AUTHORIZATION: Signature keyId="bap.transit.localhost|bap-transit-key|ed25519",algorithm="ed25519",created="1787214215",expires="1787217815",headers="(created) (expires) digest",signature="OXXYlKeGVtrg0SIcdWWlE9Q+wXlyA1wGKIrGOv3hk9/D/hC2PA5Y7BmYbXsCH8ZP/sJX7SJUNcCoPN8MypmvBA=="'  -H 'CONTENT-TYPE: application/json'  -H 'PROXY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787214275",expires="1787814275",headers="(created) (expires) digest",signature="NBut5bjRg5KbqQCxu1VX8GKlqLSeSd0Gkw//5MyT684baI1XutyfTGaNDmcewfxzdyrttxffDIb0rgOryA5FCw=="'  -H 'X-GATEWAY-AUTHORIZATION: Signature keyId="gateway|gateway.k1|ed25519",algorithm="ed25519",created="1787214275",expires="1787814275",headers="(created) (expires) digest",signature="NBut5bjRg5KbqQCxu1VX8GKlqLSeSd0Gkw//5MyT684baI1XutyfTGaNDmcewfxzdyrttxffDIb0rgOryA5FCw=="' 'http://bmtc-bpp-network:6002/search' -d '{"context":{"ttl":"PT10M","action":"search","timestamp":"2026-08-20T08:24:35.059Z","message_id":"20000000-0000-4000-8000-000000000221","transaction_id":"20000000-0000-4000-8000-000000000002","domain":"ONDC:TRV11","version":"2.0.1","bap_id":"bap.transit.localhost","bap_uri":"http://bap-network:5002","location":{"country":{"code":"IND"},"city":{"code":"std:080"}}},"message":{"intent":{"fulfillment":{"stops":[{"type":"START","location":{"descriptor":{"code":"INDIRANAGAR"}}},{"type":"END","location":{"descriptor":{"code":"NADAPRABHU_KEMPEGOWDA_STATION_MAJESTIC"}}}],"vehicle":{"category":"METRO"}}}}}'
+Aug 20, 2026 1:54:36 PM com.venky.core.log.BetterLogger log
+INFO: Thread :IOTaskManager:1:Completed Task:in.succinct.beckn.gateway.controller.BgController$Search$$Lambda$512/0x00007fff9a3b96a0
+Aug 20, 2026 1:54:36 PM com.venky.core.log.BetterLogger info
+INFO: Number of IOTaskManager workers working 0
+Aug 20, 2026 1:54:36 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:55:05 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:55:05 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:55:06 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:55:35 PM com.venky.core.log.BetterLogger finest
+FINEST: Worker: going back to sleep as there is no work to be done.
+Aug 20, 2026 1:55:35 PM com.venky.core.log.BetterLogger finest

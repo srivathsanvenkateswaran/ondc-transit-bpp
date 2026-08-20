@@ -108,17 +108,19 @@ this, and it is published rather than buried.
 
 ## Status
 
-Phase 1 discovery is complete. A single fixture-backed service answers
-`search` for BMTC and BMRCL, validates every incoming `search` and generated
-`on_search`, and returns the callback through each BPP protocol server. One
-synchronous BAP request aggregates both catalogues without an application-side
-callback endpoint. See [`phase-1/RESULTS.md`](phase-1/RESULTS.md) for the raw
-evidence.
+Phase 1 discovery and the provider-side Phase 2 lifecycle are complete. A
+single service answers `search`, `select`, `init`, `confirm` and `status` for
+BMTC and BMRCL through two independent signed BPP identities. Confirmed orders
+contain clearly marked specimen QR tickets, and status returns the stored order
+unchanged. See [`phase-1/RESULTS.md`](phase-1/RESULTS.md) for discovery evidence
+and [`phase-2/RESULTS.md`](phase-2/RESULTS.md) for the lifecycle evidence and
+the audit of acceptance criteria 1 through 17.
 
-Phase 2, including `select`, `init`, `confirm`, `status`, and QR ticket
-issuance, has not started. This is the required stop point after Phase 1.
+The optional HTTP journey source is documented in
+[`docs/journey-source-http.md`](docs/journey-source-http.md). The consuming BAP
+client and ticket mapping in Tatak remain outside this repository.
 
-## Run Phase 1
+## Run locally
 
 The registry and gateway from beckn-onix option 4 must already be on the
 external `beckn_network` Docker network. Stage 0 records the exact installation
@@ -161,6 +163,10 @@ curl -sS -H 'Content-Type: application/json' \
   --data-binary @phase-1/evidence/search-request.json \
   http://127.0.0.1:5001/search
 ```
+
+Phase 2 request and response pairs are under [`phase-2/evidence/`](phase-2/evidence/).
+Later actions must be sent directly to the selected response's `bpp_uri`; they
+must not be sent to the gateway.
 
 ## Configuration
 

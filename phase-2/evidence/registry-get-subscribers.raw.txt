@@ -1,0 +1,9 @@
+HTTP/1.1 302 Found
+Date: Thu, 20 Aug 2026 08:50:07 GMT
+Set-Cookie: JSESSIONID=node01kit2d60kdroq82szp43g5m152.node0; Path=/
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Content-Type: text/plain
+Location: http://localhost:3030/login
+Content-Length: 0
+Server: Jetty(11.0.14)
+

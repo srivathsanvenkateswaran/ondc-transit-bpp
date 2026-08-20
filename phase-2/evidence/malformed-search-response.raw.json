@@ -1,0 +1,1 @@
+{"message":{"ack":{"status":"NACK"}},"error":{"code":"40000","type":"JSON-SCHEMA-ERROR","message":"search payload failed TRV11 validation","data":[{"instancePath":"/context","schemaPath":"#/properties/context/required","keyword":"required","params":{"missingProperty":"domain"},"message":"must have required property 'domain'"}]}}

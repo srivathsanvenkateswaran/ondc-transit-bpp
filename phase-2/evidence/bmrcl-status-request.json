@@ -1,0 +1,19 @@
+{
+  "context": {
+    "domain": "ONDC:TRV11",
+    "location": { "country": { "code": "IND" }, "city": { "code": "std:080" } },
+    "action": "status",
+    "version": "2.0.1",
+    "bap_id": "bap.transit.localhost",
+    "bap_uri": "http://bap-network:5002",
+    "bpp_id": "bmrcl.bpp.transit.localhost",
+    "bpp_uri": "http://bmrcl-bpp-network:6102",
+    "transaction_id": "20000000-0000-4000-8000-000000000002",
+    "message_id": "20000000-0000-4000-8000-000000000225",
+    "timestamp": "2026-08-20T08:26:10.000Z",
+    "ttl": "PT30S"
+  },
+  "message": {
+    "order_id": "SPECIMEN-ORD-BMRCL-F7022B24"
+  }
+}
