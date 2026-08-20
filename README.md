@@ -204,6 +204,38 @@ Compose exposes its bundled core `1.1.0` schema under that filename so the
 protocol server can transport `version: 2.0.1`; the provider performs the
 TRV11-specific 2.0.1 validation at its own boundary.
 
+## TRV11 schema provenance and scope
+
+The JSON Schemas under `schemas/ondc_trv11/2.0.1/` are locally authored,
+purpose-built subsets. They are not copies of ONDC's published schemas. They
+were derived from the examples and contract on ONDC's
+[`release-TRV11-2.0.1`](https://github.com/ONDC-Official/mobility-specification/tree/release-TRV11-2.0.1)
+release branch.
+
+The local schemas enforce the boundary this service currently implements:
+
+- Required `context` and `message` envelopes, TRV11 domain, action and version.
+- Required BAP and BPP correlation fields for each applicable callback.
+- Search endpoints, stop locations, and `BUS` or `METRO` vehicle categories.
+- Catalogue provider, fare-product item, `TRIP` fulfillment, stop, vehicle and
+  payment structure.
+- INR rupee-string prices, including at most two decimal places.
+
+They do not enforce the entire upstream contract. In particular, they omit:
+
+- Most URI, UUID, RFC 3339 timestamp and full ISO 8601 duration formats.
+- Unknown-field rejection and many nested cardinality constraints.
+- Full tag-group code and enumeration validation.
+- Cross-reference integrity, uniqueness, stop ordering and parent-stop chain
+  rules.
+- Complete quantity, payment, settlement and domain business rules.
+- Actions other than the schema files present in that directory.
+
+Application tests cover important omitted cross-field rules such as stable
+paise conversion and fulfillment references. A local validation pass therefore
+means "valid against this implemented TRV11 subset", not certification against
+the complete published ONDC schema.
+
 ## Licence
 
 MIT. See [`LICENSE`](LICENSE).
