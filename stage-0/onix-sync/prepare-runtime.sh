@@ -4,6 +4,23 @@ set -euo pipefail
 readonly ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly IMAGE="fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23"
 
+# Every substitution below is `yq -yi --arg`, which only the python (kislyuk)
+# yq understands; the Go (mikefarah) yq of the same name does not. The
+# dependency was undeclared, and on a host without it this script failed after
+# generating keys and part way through rendering the configs. Fail here
+# instead, naming the package.
+if ! command -v yq >/dev/null 2>&1; then
+  echo "prepare-runtime.sh requires yq, the python one from github.com/kislyuk/yq." >&2
+  echo "On Ubuntu: sudo apt-get install -y yq jq" >&2
+  exit 1
+fi
+if ! printf 'a: 1\n' | yq -y '.a' >/dev/null 2>&1; then
+  echo "The yq on PATH does not support 'yq -y', so it is not the python (kislyuk) yq." >&2
+  echo "Install github.com/kislyuk/yq and put it ahead of the other one on PATH." >&2
+  echo "On Ubuntu: sudo apt-get install -y yq jq" >&2
+  exit 1
+fi
+
 if [[ -f "${ROOT_DIR}/../../.env" ]]; then
   set -a
   source "${ROOT_DIR}/../../.env"
