@@ -1,0 +1,85 @@
+# beckn-onix registry and gateway, rendered non-interactively.
+#
+# stage-0/onix-sync/RESULTS.md records these two as installed by
+# `bash install/beckn-onix.sh` followed by "selection: 4", which is a menu. A
+# server has nobody sitting at a menu, so deploy/bring-up.sh renders the same
+# two components from the same upstream templates at the same pinned revision
+# and starts them from this file instead.
+#
+# This file is additive. It does not replace, include or modify
+# stage-0/onix-sync/docker-compose.yml, which still owns the six protocol
+# servers and the provider. Both attach to the same external beckn_network,
+# which deploy/bring-up.sh creates.
+#
+# Differences from beckn-onix's install/docker-compose-registry.yml and
+# install/docker-compose-gateway.yml, each deliberate:
+#
+#  1. Config is bind-mounted from deploy/runtime/ instead of being copied into
+#     an external Docker volume by a busybox container. Rendered config is then
+#     visible on disk and a rerun cannot silently keep a stale copy.
+#  2. Ports 3000 and 4000 are NOT published. In both images those are the JVM's
+#     JDWP debug ports (see /registry/bin/service-start: `-agentlib:jdwp=...
+#     address=${dport}`). beckn-onix publishes them; a deployed host should not.
+#     They stay reachable inside beckn_network if anyone needs them.
+#  3. Volume names are prefixed by this Compose project so deploy/teardown.sh
+#     can remove exactly what this file created.
+#  4. `command` keeps PID 1 alive after the image's own start script returns.
+#     Both images run `bin/service-start`, which backgrounds the JVM, sleeps 10
+#     seconds and then tails the JVM's log file. On a host slow enough that the
+#     JVM has not created that log within 10 seconds, the script falls off the
+#     end, PID 1 exits, and `restart: unless-stopped` kills a JVM that was
+#     still booting and starts another one. Observed as a restart loop on a
+#     first cold boot. Appending `tail -f /dev/null` holds the container open
+#     so the backgrounded JVM survives. Nothing about the images changes.
+#
+# The images are `platform: linux/amd64`, matching beckn-onix upstream. See the
+# deployment section of README.md for why the target is x86_64 Linux.
+
+name: ondc-transit-network
+
+services:
+  registry:
+    image: fidedocker/registry:latest
+    container_name: registry
+    platform: linux/amd64
+    # See note 4 in the header.
+    command: ["/bin/sh", "-c", "/bin/sh /registry/bin/service-start; exec tail -f /dev/null"]
+    networks:
+      beckn:
+        aliases: [registry]
+    ports:
+      - "${REGISTRY_BIND_ADDR:-127.0.0.1}:3030:3030"
+    restart: unless-stopped
+    volumes:
+      - ./runtime/registry-config:/registry/overrideProperties/config:ro
+      - registry_database:/registry/database
+      - registry_logs:/registry/tmp
+
+  gateway:
+    image: fidedocker/gateway:latest
+    container_name: gateway
+    platform: linux/amd64
+    # See note 4 in the header.
+    command: ["/bin/sh", "-c", "/bin/sh /gateway/bin/service-start; exec tail -f /dev/null"]
+    depends_on: [registry]
+    networks:
+      beckn:
+        aliases: [gateway]
+    ports:
+      - "${GATEWAY_BIND_ADDR:-127.0.0.1}:4030:4030"
+    restart: unless-stopped
+    volumes:
+      - ./runtime/gateway-config:/gateway/overrideProperties/config:ro
+      - gateway_database:/gateway/database
+      - gateway_logs:/gateway/tmp
+
+networks:
+  beckn:
+    external: true
+    name: beckn_network
+
+volumes:
+  registry_database:
+  registry_logs:
+  gateway_database:
+  gateway_logs:
