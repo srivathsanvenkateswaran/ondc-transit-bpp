@@ -449,6 +449,7 @@ which is ignored by git. Nothing under `phase-1/` or `phase-2/` is written to.
 | Callbacks come back as 401 / `Authentication failed` | Same cause. Re-run `deploy/seed-registry.sh`. |
 | The provider image build fails with `npm error Exit handler never called!` after about five minutes | npm's fetch timeout. `package-lock.json` points at a private registry the build container cannot reach. See [One thing to fix before the first deploy](#one-thing-to-fix-before-the-first-deploy). |
 | RabbitMQ keeps dying | You are on ARM. See [x86_64 only](#x86_64-only-and-why). |
+| A protocol server exits 0 shortly after starting, with `MQ_ConnectionFailed` in its log | It started before RabbitMQ was accepting connections. `depends_on` in `stage-0/onix-sync/docker-compose.yml` orders the start but does not wait for readiness. `bring-up.sh` brings the queue up first and waits for it; if you ran `docker compose up` by hand, run it again. |
 | Everything is slow and the provider build times out | Under 3 GB of RAM, or an emulated host. |
 
 ### What was verified, and what was not
@@ -474,7 +475,12 @@ architecture this section tells you not to deploy on. Being precise about that:
   capturing raw evidence, asserting, and failing loudly with the right
   diagnosis when the network was not ready;
 - `deploy/teardown.sh` removing both Compose projects, the network, the
-  volumes and the generated keys, after which a bring-up started from nothing.
+  volumes, the generated keys, the rendered config and the pulled registry and
+  gateway images, leaving no container, no volume and no `beckn_network`
+  behind;
+- the ordering fix that this shook out: a protocol server started alongside a
+  recreated RabbitMQ logs `MQ_ConnectionFailed` and exits 0, which looks like a
+  clean shutdown, so `bring-up.sh` brings the queue up first and waits for it.
 
 **Verified as gateway behaviour, by experiment:** that a missing `domains`
 entry causes the `getExtensionPackage()` NullPointerException, and that
@@ -492,13 +498,19 @@ than of these scripts:
    variant of the same tag started cleanly, first try, which is direct evidence
    that the crash is an emulation artifact and not an image defect. On x86_64
    the amd64 image is native and this does not arise.
-2. **The last hop.** With the gateway configured correctly, it fans the search
-   out and a bare HTTP sink standing in for a BPP at the same host and port
-   receives it. The real ONIX BPP protocol server at that same host and port
-   never sees the request, and neither side logs anything. The same server
-   accepts and processes a byte-similar request sent by hand from inside the
-   gateway container, headers and all. This was not root-caused, and it is
-   recorded as an open question rather than a solved one.
+2. **The last hop.** With the gateway configured correctly it fans the search
+   out, and a bare HTTP sink standing in for a BPP receives the request,
+   including when the sink is given the BPP's own hostname and port. The real
+   ONIX BPP protocol server never sees it. Neither side logs anything: the
+   gateway logs the outbound `curl` and completes its task, and the protocol
+   server's first middleware, which logs every request it does receive, records
+   nothing. That same protocol server accepts and processes a byte-similar
+   request sent by hand from inside the gateway container, with all three
+   signature headers and `Expect: 100-continue`, and answers 401 on the bad
+   signature as it should. Restarting the gateway after the protocol servers,
+   to rule out a stale DNS entry, changes nothing. This was not root-caused. It
+   is recorded as an open question rather than a solved one, and it is the one
+   thing to watch for on the first x86_64 run.
 
 **Also not verified:** the provider image build. `package-lock.json` resolves
 from a private registry (see

@@ -26,10 +26,12 @@
 #
 # Verification status
 # -------------------
-# VERIFIED by running once, on an arm64 macOS host under amd64 emulation,
-# against a stack this repository's deploy/bring-up.sh had brought up: both
-# Compose projects came down, the network and both runtime directories were
-# removed, and a subsequent bring-up started from nothing.
+# VERIFIED by running, on an arm64 macOS host under amd64 emulation, against a
+# stack deploy/bring-up.sh had brought up: both Compose projects came down with
+# their volumes, beckn_network was removed, stage-0/onix-sync/runtime/ and
+# deploy/runtime/ were removed, and the registry and gateway images were
+# removed. Nothing from either project was left in `docker ps -a` or
+# `docker network ls`.
 #
 # UNVERIFIED on x86_64 Linux, and unverified against a registry or gateway
 # container that some other tool started. The stray-container prompt exists for

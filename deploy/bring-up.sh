@@ -34,8 +34,9 @@
 # gateway coming up and answering, key generation through
 # prepare-runtime.sh, and registry seeding, on both a first run and a rerun.
 #
-# Also verified: `docker compose up` bringing all six protocol servers and the
-# provider to listening, and the provider answering GET /healthz.
+# Also verified: the backing services coming up ahead of the protocol servers,
+# the RabbitMQ readiness wait, all six protocol servers reaching listening after
+# a forced recreate, and the provider answering GET /healthz.
 #
 # UNVERIFIED: nothing in this file has been run on x86_64 Linux. No x86_64 host
 # was available and none was contacted. Treat the first run on a real target as
@@ -355,21 +356,45 @@ seed_registry() {
 start_stack() {
   step "Starting the six protocol servers and the provider"
 
-  # --force-recreate is not optional here. prepare-runtime.sh has just
-  # rewritten the six ONIX config files in place. A protocol server reads its
-  # config once, at startup, and those files are bind-mounted, so a plain
-  # `docker compose up -d` sees no change and leaves an already-running
-  # container holding the previous private key. The registry now holds the new
-  # public key, so every signed request from that container would be rejected
-  # with a 401 that points nowhere near the cause. Recreating costs nothing on
-  # a first run, because there is nothing to recreate.
-  if (( DO_BUILD == 1 )); then
-    ( cd "${REPO_ROOT}" && docker compose up -d --build --force-recreate ) \
-      || die "could not start the provider topology. Try: docker compose logs"
-  else
-    ( cd "${REPO_ROOT}" && docker compose up -d --force-recreate ) \
-      || die "could not start the provider topology. Try: docker compose logs"
+  # Two things have to be right here and neither is free.
+  #
+  # First, --force-recreate. prepare-runtime.sh has just rewritten the six ONIX
+  # config files in place. A protocol server reads its config once, at startup,
+  # and those files are bind-mounted, so a plain `docker compose up -d` sees no
+  # change and leaves an already-running container holding the previous private
+  # key. The registry now holds the new public key, so every signed request
+  # from that container would be rejected with a 401 that points nowhere near
+  # the cause. Recreating costs nothing on a first run.
+  #
+  # Second, ordering. The protocol servers `depends_on` Mongo, Redis and
+  # RabbitMQ, but depends_on without a condition only orders the start, it does
+  # not wait for readiness. A protocol server that finds RabbitMQ still booting
+  # logs MQ_ConnectionFailed and exits 0, which looks like a clean shutdown.
+  # Recreating everything at once makes that near certain. So bring the backing
+  # services up first, wait for the queue, and only then start the rest.
+  announce "starting Mongo, Redis and RabbitMQ"
+  ( cd "${REPO_ROOT}" && docker compose up -d --force-recreate sync-mongo sync-redis sync-rabbitmq ) \
+    || die "could not start Mongo, Redis and RabbitMQ. Try: docker compose logs"
+
+  if ! wait_until "RabbitMQ to accept connections" 300 \
+      bash -c "cd '${REPO_ROOT}' && docker compose exec -T sync-rabbitmq rabbitmq-diagnostics -q check_port_connectivity"; then
+    warn "Check 'docker compose logs sync-rabbitmq'. An Erlang {badmap,provided_by} or a"
+    warn "segfault there is the ARM emulation failure the README's x86_64 section describes."
+    die "RabbitMQ never came up. Without a queue the BPP protocol servers receive nothing."
   fi
+  ok "RabbitMQ accepting connections"
+
+  announce "starting the protocol servers and the provider"
+  local recreate_args=(--force-recreate --no-deps)
+  if (( DO_BUILD == 1 )); then
+    recreate_args+=(--build)
+  fi
+  ( cd "${REPO_ROOT}" && docker compose up -d "${recreate_args[@]}" \
+      bap-client bap-network \
+      bmtc-bpp-client bmtc-bpp-network \
+      bmrcl-bpp-client bmrcl-bpp-network \
+      transit-bpp ) \
+    || die "could not start the provider topology. Try: docker compose logs"
 
   local provider_port; provider_port="$(grep -E '^PROVIDER_PORT=' "${REPO_ROOT}/.env" | cut -d= -f2)"
   provider_port="${provider_port:-7001}"
