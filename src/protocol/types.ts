@@ -128,8 +128,8 @@ export type ProtocolOrder = Record<string, unknown> & {
 
 export type CallbackResponse = Record<string, unknown> & {
   context: Trv11Context & { bpp_id: string; bpp_uri: string };
-  message?: { order: ProtocolOrder };
-  error?: { code: string; type: string; message: string };
+  message?: { order?: ProtocolOrder };
+  error?: { code: string; paths?: string; message: string };
 };
 
 export type OnSearchResponse = Record<string, unknown> & {

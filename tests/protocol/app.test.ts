@@ -177,7 +177,7 @@ test("provider serves the complete order lifecycle and stable status", async (t)
   const unknownCallback = await callbackPromise;
   assert.equal(unknownCallback.path, "/on_select");
   assert.equal(unknownCallback.body.error.code, "ITEM-NOT-FOUND");
-  assert.equal("message" in unknownCallback.body, false);
+  assert.deepEqual(unknownCallback.body.message, {});
 
   const select = {
     context: addressedContext("select", "select-message"),

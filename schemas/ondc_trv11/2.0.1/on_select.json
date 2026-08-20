@@ -2,8 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ondc.local/schemas/ondc-trv11/2.0.1/on_select.json",
   "type": "object",
-  "required": ["context"],
-  "oneOf": [{ "required": ["message"] }, { "required": ["error"] }],
+  "required": ["context", "message"],
   "properties": {
     "context": {
       "allOf": [
@@ -13,7 +12,6 @@
     },
     "message": {
       "type": "object",
-      "required": ["order"],
       "properties": {
         "order": {
           "$ref": "https://ondc.local/schemas/ondc-trv11/2.0.1/common.json#/$defs/baseOrder"

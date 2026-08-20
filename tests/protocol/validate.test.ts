@@ -41,9 +41,9 @@ test("on_select domain error passes callback schema validation", () => {
   assert.deepEqual(
     validator.onSelect({
       context,
+      message: {},
       error: {
         code: "ITEM-NOT-FOUND",
-        type: "DOMAIN-ERROR",
         message: "Unknown item.id UNKNOWN",
       },
     }),

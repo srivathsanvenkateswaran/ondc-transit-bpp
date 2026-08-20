@@ -202,12 +202,12 @@ export async function createApp(
       if (action === "search") throw error;
       return {
         context,
+        message: {},
         error:
           error instanceof OrderLifecycleError
-            ? { code: error.code, type: error.type, message: error.message }
+            ? { code: error.code, message: error.message }
             : {
                 code: "INTERNAL-ERROR",
-                type: "CORE-ERROR",
                 message: error instanceof Error ? error.message : String(error),
               },
       };
