@@ -119,10 +119,16 @@ export async function buildOnSearch(
   request: SearchRequest,
   source: JourneySource,
   operator: OperatorRuntimeConfig,
-  options: { publicBaseUrl: string; contextTtl: string; now?: () => Date },
+  options: {
+    publicBaseUrl: string;
+    contextTtl: string;
+    now?: () => Date;
+    offers?: TransitOffer[];
+  },
 ): Promise<OnSearchResponse> {
   const now = options.now ?? (() => new Date());
-  const offers = await source.search(searchQueryFromRequest(request));
+  const offers =
+    options.offers ?? (await source.search(searchQueryFromRequest(request)));
   const mappedOffers = offers.map((offer) => ({
     offer,
     fulfillmentId: fulfillmentIdForOffer(offer.offerId),

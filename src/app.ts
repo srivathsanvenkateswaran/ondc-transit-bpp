@@ -1,16 +1,34 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 
-import type { AppConfig } from "./config.js";
+import type { AppConfig, OperatorRuntimeConfig } from "./config.js";
+import { logEvent } from "./log.js";
+import { TransitOrderService } from "./orders/service.js";
+import { InMemoryOrderStore, OrderLifecycleError } from "./orders/store.js";
 import { ack, nack } from "./protocol/ack.js";
 import { dispatchCallback } from "./protocol/dispatch.js";
-import type { SearchRequest } from "./protocol/types.js";
-import { createProtocolValidator } from "./protocol/validate.js";
+import type {
+  ActionRequest,
+  CallbackResponse,
+  ConfirmRequest,
+  InitRequest,
+  ProtocolOrder,
+  SearchRequest,
+  SelectRequest,
+  StatusRequest,
+} from "./protocol/types.js";
+import {
+  createProtocolValidator,
+  type ProtocolValidator,
+  type ValidationResult,
+} from "./protocol/validate.js";
 import { FixtureJourneySource } from "./sources/fixture.js";
 import type { JourneySource, OperatorKey } from "./sources/types.js";
-import { buildOnSearch } from "./trv11/catalog.js";
-import { logEvent } from "./log.js";
+import { buildOnSearch, searchQueryFromRequest } from "./trv11/catalog.js";
 
 const MAX_BODY_BYTES = 1_048_576;
+const requestActions = ["search", "select", "init", "confirm", "status"] as const;
+type RequestAction = (typeof requestActions)[number];
+type CallbackAction = `on_${RequestAction}`;
 
 function json(response: ServerResponse, status: number, body: unknown): void {
   const encoded = JSON.stringify(body);
@@ -37,6 +55,66 @@ function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+function isRequestAction(value: unknown): value is RequestAction {
+  return requestActions.includes(value as RequestAction);
+}
+
+function callbackUrl(operator: OperatorRuntimeConfig, action: CallbackAction) {
+  const url = new URL(operator.callbackUrl);
+  if (/\/on_[^/]+$/.test(url.pathname)) {
+    url.pathname = url.pathname.replace(/\/on_[^/]+$/, `/${action}`);
+  } else {
+    url.pathname = `${url.pathname.replace(/\/$/, "")}/${action}`;
+  }
+  return url.toString();
+}
+
+function callbackContext(
+  request: ActionRequest,
+  operator: OperatorRuntimeConfig,
+  action: CallbackAction,
+  contextTtl: string,
+) {
+  return {
+    ...request.context,
+    action,
+    bpp_id: operator.subscriberId,
+    bpp_uri: operator.subscriberUri,
+    timestamp: new Date().toISOString(),
+    ttl: contextTtl,
+  };
+}
+
+function requestValidation(
+  validator: ProtocolValidator,
+  action: RequestAction,
+  body: unknown,
+): ValidationResult {
+  const validators: Record<RequestAction, (value: unknown) => ValidationResult> = {
+    search: validator.search,
+    select: validator.select,
+    init: validator.init,
+    confirm: validator.confirm,
+    status: validator.status,
+  };
+  return validators[action](body);
+}
+
+function callbackValidation(
+  validator: ProtocolValidator,
+  action: CallbackAction,
+  body: unknown,
+): ValidationResult {
+  const validators: Record<CallbackAction, (value: unknown) => ValidationResult> = {
+    on_search: validator.onSearch,
+    on_select: validator.onSelect,
+    on_init: validator.onInit,
+    on_confirm: validator.onConfirm,
+    on_status: validator.onStatus,
+  };
+  return validators[action](body);
+}
+
 export async function createApp(
   config: AppConfig,
   sourceOverrides: Partial<Record<OperatorKey, JourneySource>> = {},
@@ -51,38 +129,117 @@ export async function createApp(
       sourceOverrides.bmrcl ??
       (await FixtureJourneySource.load(config.fixtureRoot, "bmrcl")),
   };
+  const store = new InMemoryOrderStore();
+  const orders: Record<OperatorKey, TransitOrderService> = {
+    bmtc: new TransitOrderService(
+      "bmtc",
+      sources.bmtc.operator,
+      config.operators.bmtc,
+      store,
+      { publicBaseUrl: config.publicBaseUrl },
+    ),
+    bmrcl: new TransitOrderService(
+      "bmrcl",
+      sources.bmrcl.operator,
+      config.operators.bmrcl,
+      store,
+      { publicBaseUrl: config.publicBaseUrl },
+    ),
+  };
 
-  async function answerSearch(operatorKey: OperatorKey, request: SearchRequest) {
+  async function buildCallback(
+    operatorKey: OperatorKey,
+    action: RequestAction,
+    request: ActionRequest,
+  ): Promise<CallbackResponse | Record<string, unknown>> {
     const operator = config.operators[operatorKey];
+    const onAction = `on_${action}` as CallbackAction;
+    const context = callbackContext(request, operator, onAction, config.contextTtl);
     try {
-      const callback = await buildOnSearch(request, sources[operatorKey], operator, {
-        publicBaseUrl: config.publicBaseUrl,
-        contextTtl: config.contextTtl,
-      });
-      const validation = validator.onSearch(callback);
+      let order: ProtocolOrder;
+      switch (action) {
+        case "search": {
+          const search = request as SearchRequest;
+          const offers = await sources[operatorKey].search(
+            searchQueryFromRequest(search),
+          );
+          orders[operatorKey].cacheCatalogue(search.context.transaction_id, offers);
+          return buildOnSearch(search, sources[operatorKey], operator, {
+            publicBaseUrl: config.publicBaseUrl,
+            contextTtl: config.contextTtl,
+            offers,
+          });
+        }
+        case "select":
+          order = orders[operatorKey].select(request as SelectRequest);
+          break;
+        case "init":
+          order = orders[operatorKey].init(request as InitRequest);
+          break;
+        case "confirm":
+          order = await orders[operatorKey].confirm(request as ConfirmRequest);
+          break;
+        case "status":
+          order = orders[operatorKey].status(request as StatusRequest);
+          break;
+      }
+      return { context, message: { order } };
+    } catch (error) {
+      if (action === "search") throw error;
+      return {
+        context,
+        error:
+          error instanceof OrderLifecycleError
+            ? { code: error.code, type: error.type, message: error.message }
+            : {
+                code: "INTERNAL-ERROR",
+                type: "CORE-ERROR",
+                message: error instanceof Error ? error.message : String(error),
+              },
+      };
+    }
+  }
+
+  async function answerAction(
+    operatorKey: OperatorKey,
+    action: RequestAction,
+    request: ActionRequest,
+  ) {
+    const operator = config.operators[operatorKey];
+    const onAction = `on_${action}` as CallbackAction;
+    try {
+      const callback = await buildCallback(operatorKey, action, request);
+      const validation = callbackValidation(validator, onAction, callback);
       if (!validation.valid) {
-        throw new Error(`Generated on_search failed schema validation: ${JSON.stringify(validation.errors)}`);
+        throw new Error(
+          `Generated ${onAction} failed schema validation: ${JSON.stringify(
+            validation.errors,
+          )}`,
+        );
       }
       await sleep(operator.callbackDelayMs);
       await dispatchCallback(
-        operator.callbackUrl,
+        callbackUrl(operator, onAction),
         callback,
         config.callbackTimeoutMs,
       );
+      const callbackRecord = callback as CallbackResponse;
+      const orderId = callbackRecord.message?.order?.id;
       eventLogger({
         transaction_id: request.context.transaction_id,
         message_id: request.context.message_id,
-        action: "on_search",
+        action: onAction,
         subscriber_id: operator.subscriberId,
         operator: operatorKey,
-        outcome: "ACK",
-        offers: callback.message.catalog.providers.length,
+        outcome: callbackRecord.error ? "ERROR" : "ACK",
+        ...(orderId ? { order_id: orderId } : {}),
+        ...(callbackRecord.error ? { error: callbackRecord.error } : {}),
       });
     } catch (error) {
       eventLogger({
         transaction_id: request.context.transaction_id,
         message_id: request.context.message_id,
-        action: "on_search",
+        action: onAction,
         subscriber_id: operator.subscriberId,
         operator: operatorKey,
         outcome: "ERROR",
@@ -108,56 +265,85 @@ export async function createApp(
       });
       return;
     }
+    const orderMatch = url.pathname.match(/^\/orders\/([^/]+)$/);
+    if (request.method === "GET" && orderMatch) {
+      const order = store.inspect(decodeURIComponent(orderMatch[1]));
+      json(response, order ? 200 : 404, order ?? { error: "Order not found" });
+      return;
+    }
 
-    const match = url.pathname.match(/^\/(bmtc|bmrcl)\/search$/);
+    const match = url.pathname.match(
+      /^\/(bmtc|bmrcl)\/(inbound|search|select|init|confirm|status)$/,
+    );
     if (request.method !== "POST" || !match) {
       json(response, 404, { error: "Not found" });
       return;
     }
 
     const operatorKey = match[1] as OperatorKey;
+    const pathAction = match[2];
     let body: unknown;
     try {
       body = await readJson(request);
     } catch (error) {
-      json(response, 400, nack(error instanceof Error ? error.message : "Invalid JSON"));
+      json(
+        response,
+        400,
+        nack(error instanceof Error ? error.message : "Invalid JSON"),
+      );
       return;
     }
 
-    const validation = validator.search(body);
+    const action = (body as { context?: { action?: unknown } }).context?.action;
+    if (!isRequestAction(action) || (pathAction !== "inbound" && pathAction !== action)) {
+      json(
+        response,
+        400,
+        nack(`Request action ${String(action)} does not match path ${pathAction}`),
+      );
+      return;
+    }
+    const validation = requestValidation(validator, action, body);
     if (!validation.valid) {
-      json(response, 400, nack("Search payload failed TRV11 validation", validation.errors));
+      json(
+        response,
+        400,
+        nack(`${action} payload failed TRV11 validation`, validation.errors),
+      );
       return;
     }
 
-    const search = body as SearchRequest;
-    const expectedCategory = sources[operatorKey].operator.vehicleCategory;
-    const requestedCategory = search.message.intent.fulfillment.vehicle?.category;
-    if (requestedCategory && requestedCategory !== expectedCategory) {
-      eventLogger({
-        transaction_id: search.context.transaction_id,
-        message_id: search.context.message_id,
-        action: "search",
-        subscriber_id: config.operators[operatorKey].subscriberId,
-        operator: operatorKey,
-        outcome: "SKIPPED",
-        reason: `Requested vehicle category ${requestedCategory}; expected ${expectedCategory}`,
-        requested_category: requestedCategory,
-        expected_category: expectedCategory,
-      });
-      json(response, 202, ack);
-      return;
+    const protocolRequest = body as ActionRequest;
+    if (action === "search") {
+      const search = protocolRequest as SearchRequest;
+      const expectedCategory = sources[operatorKey].operator.vehicleCategory;
+      const requestedCategory = search.message.intent.fulfillment.vehicle?.category;
+      if (requestedCategory && requestedCategory !== expectedCategory) {
+        eventLogger({
+          transaction_id: search.context.transaction_id,
+          message_id: search.context.message_id,
+          action,
+          subscriber_id: config.operators[operatorKey].subscriberId,
+          operator: operatorKey,
+          outcome: "SKIPPED",
+          reason: `Requested vehicle category ${requestedCategory}; expected ${expectedCategory}`,
+          requested_category: requestedCategory,
+          expected_category: expectedCategory,
+        });
+        json(response, 202, ack);
+        return;
+      }
     }
 
     json(response, 202, ack);
     eventLogger({
-      transaction_id: search.context.transaction_id,
-      message_id: search.context.message_id,
-      action: "search",
+      transaction_id: protocolRequest.context.transaction_id,
+      message_id: protocolRequest.context.message_id,
+      action,
       subscriber_id: config.operators[operatorKey].subscriberId,
       operator: operatorKey,
       outcome: "ACK",
     });
-    void answerSearch(operatorKey, search);
+    void answerAction(operatorKey, action, protocolRequest);
   });
 }
