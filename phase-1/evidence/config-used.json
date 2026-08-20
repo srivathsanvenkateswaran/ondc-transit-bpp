@@ -1,0 +1,37 @@
+{
+  "provider": {
+    "image": "ondc-transit-bpp:local",
+    "host": "0.0.0.0",
+    "port": 7001,
+    "public_base_url": "http://transit-bpp:7001",
+    "journey_source": "fixture",
+    "context_ttl": "PT30S",
+    "callback_timeout_ms": 3000,
+    "operators": {
+      "bmtc": {
+        "subscriber_id": "bmtc.bpp.transit.localhost",
+        "subscriber_uri": "http://bmtc-bpp-network:6002",
+        "callback_url": "http://bmtc-bpp-client:6001/on_search",
+        "webhook_url": "http://transit-bpp:7001/bmtc/search"
+      },
+      "bmrcl": {
+        "subscriber_id": "bmrcl.bpp.transit.localhost",
+        "subscriber_uri": "http://bmrcl-bpp-network:6102",
+        "callback_url": "http://bmrcl-bpp-client:6101/on_search",
+        "webhook_url": "http://transit-bpp:7001/bmrcl/search"
+      }
+    }
+  },
+  "bap": {
+    "subscriber_id": "bap.transit.localhost",
+    "subscriber_uri": "http://bap-network:5002",
+    "client_url": "http://127.0.0.1:5001/search",
+    "synchronous_search_ttl": "PT4S"
+  },
+  "protocol_server": {
+    "image": "fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23",
+    "platform": "linux/amd64",
+    "trv11_version": "2.0.1",
+    "core_schema_compatibility_source": "core_1.1.0.yaml"
+  }
+}

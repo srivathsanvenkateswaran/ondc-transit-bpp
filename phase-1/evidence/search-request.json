@@ -1,0 +1,33 @@
+{
+  "context": {
+    "domain": "ONDC:TRV11",
+    "location": {
+      "country": { "code": "IND" },
+      "city": { "code": "std:080" }
+    },
+    "action": "search",
+    "version": "2.0.1",
+    "bap_id": "bap.transit.localhost",
+    "bap_uri": "http://bap-network:5002",
+    "transaction_id": "7cfed067-cf23-4a2f-a7ba-86c219434bb3",
+    "message_id": "d5433a57-d8a5-4ae9-9dc1-d8389249ad37",
+    "timestamp": "2026-08-20T05:59:08.000Z",
+    "ttl": "PT4S"
+  },
+  "message": {
+    "intent": {
+      "fulfillment": {
+        "stops": [
+          {
+            "type": "START",
+            "location": { "gps": "12.9784, 77.6408" }
+          },
+          {
+            "type": "END",
+            "location": { "gps": "12.9774, 77.5726" }
+          }
+        ]
+      }
+    }
+  }
+}

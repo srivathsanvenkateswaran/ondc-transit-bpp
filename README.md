@@ -73,9 +73,9 @@ buy the bus half. That gap is the reason this exists.
   specification.
 - **Anyone with a journey planner.** The provider platform gets its journeys
   through a small documented `JourneySource` interface. Fixtures are the
-  default, so it runs standalone; an HTTP source lets any planner that can
-  satisfy one JSON contract supply real routes and fares. Nothing here depends
-  on any particular transit app.
+  current default, so it runs standalone. A real source can be added later
+  behind the same interface. Nothing here depends on any particular transit
+  app.
 
 ## Honesty
 
@@ -89,9 +89,9 @@ This governs everything in the repository.
 - **No real network participant is contacted or impersonated.** Subscriber IDs
   are local `.localhost` names. Nothing here is registered with ONDC's staging
   or production registry.
-- **The transit data is real; the transaction is not.** Routes, stops, fare
-  rules and journey times come from published open data. The order, the payment
-  and the ticket are fabricated locally.
+- **The transit fixture is plausible; the transaction is not.** The fixture
+  uses real Bengaluru place and station names with illustrative routes and
+  fares. No output is live operator data.
 - **BMTC is not on ONDC**, and no output of this software should be presented as
   showing that it is. The claim is "here is what it would look like", and that
   claim is worth making honestly.
@@ -102,7 +102,95 @@ this, and it is published rather than buried.
 
 ## Status
 
-Specification complete, implementation not started. See [`SPEC.md`](SPEC.md).
+Phase 1 discovery is complete. A single fixture-backed service answers
+`search` for BMTC and BMRCL, validates every incoming `search` and generated
+`on_search`, and returns the callback through each BPP protocol server. One
+synchronous BAP request aggregates both catalogues without an application-side
+callback endpoint. See [`phase-1/RESULTS.md`](phase-1/RESULTS.md) for the raw
+evidence.
+
+Phase 2, including `select`, `init`, `confirm`, `status`, and QR ticket
+issuance, has not started. This is the required stop point after Phase 1.
+
+## Run Phase 1
+
+The registry and gateway from beckn-onix option 4 must already be on the
+external `beckn_network` Docker network. Stage 0 records the exact installation
+and registration topology in
+[`stage-0/onix-sync/RESULTS.md`](stage-0/onix-sync/RESULTS.md).
+
+```console
+cp .env.example .env
+./stage-0/onix-sync/prepare-runtime.sh
+docker compose up -d --build
+curl http://127.0.0.1:7001/healthz
+```
+
+`prepare-runtime.sh` generates fresh protocol-server key pairs. If the local
+registry already contains subscriber records, either keep the matching ignored
+runtime files or update the registry records with the newly generated public
+keys in `stage-0/onix-sync/runtime/public-keys.tsv`.
+
+Run the automated checks with:
+
+```console
+npm ci
+npm test
+npm run build
+docker compose config --quiet
+```
+
+The reproducible request through the synchronous BAP client is
+[`phase-1/evidence/search-request.json`](phase-1/evidence/search-request.json).
+The command is:
+
+```console
+curl -sS -H 'Content-Type: application/json' \
+  --data-binary @phase-1/evidence/search-request.json \
+  http://127.0.0.1:5001/search
+```
+
+## Configuration
+
+Docker Compose reads `.env` and supplies local defaults when it is absent.
+Copy [`.env.example`](.env.example) to change any deployment value. The
+provider application itself does not embed subscriber IDs, callback addresses,
+public URLs, or ports.
+
+| Variable | Local default | Purpose |
+| --- | --- | --- |
+| `PROVIDER_HOST` | `0.0.0.0` | Provider HTTP bind address |
+| `PROVIDER_PORT` | `7001` | Provider container and host port |
+| `PROVIDER_PUBLIC_BASE_URL` | `http://transit-bpp:7001` | Public base used in protocol URLs such as static terms |
+| `JOURNEY_SOURCE` | `fixture` | Journey source selector; Phase 1 accepts only `fixture` |
+| `FIXTURE_ROOT` | `/app/fixtures` | Fixture data directory |
+| `TRV11_SCHEMA_ROOT` | `/app/schemas/ondc_trv11/2.0.1` | Input and output schema directory |
+| `CALLBACK_TIMEOUT_MS` | `3000` | Provider-to-BPP-client HTTP timeout |
+| `CONTEXT_TTL` | `PT30S` | TTL put on generated provider callbacks before ONIX normalization |
+| `BAP_ID` | `bap.transit.localhost` | Local BAP subscriber ID |
+| `BAP_URI` | `http://bap-network:5002` | BAP network subscriber URI |
+| `BAP_CLIENT_PORT` | `5001` | Synchronous BAP client port |
+| `BAP_NETWORK_PORT` | `5002` | BAP network port |
+| `BMTC_BPP_ID` | `bmtc.bpp.transit.localhost` | BMTC BPP subscriber ID |
+| `BMTC_BPP_URI` | `http://bmtc-bpp-network:6002` | BMTC BPP network subscriber URI |
+| `BMTC_BPP_CLIENT_PORT` | `6001` | BMTC BPP client port |
+| `BMTC_BPP_NETWORK_PORT` | `6002` | BMTC BPP network port |
+| `BMTC_CALLBACK_URL` | `http://bmtc-bpp-client:6001/on_search` | Provider callback destination |
+| `BMTC_WEBHOOK_URL` | `http://transit-bpp:7001/bmtc/search` | BPP client webhook seam into the provider |
+| `BMTC_CALLBACK_DELAY_MS` | `0` | Test-only artificial callback delay |
+| `BMRCL_BPP_ID` | `bmrcl.bpp.transit.localhost` | BMRCL BPP subscriber ID |
+| `BMRCL_BPP_URI` | `http://bmrcl-bpp-network:6102` | BMRCL BPP network subscriber URI |
+| `BMRCL_BPP_CLIENT_PORT` | `6101` | BMRCL BPP client port |
+| `BMRCL_BPP_NETWORK_PORT` | `6102` | BMRCL BPP network port |
+| `BMRCL_CALLBACK_URL` | `http://bmrcl-bpp-client:6101/on_search` | Provider callback destination |
+| `BMRCL_WEBHOOK_URL` | `http://transit-bpp:7001/bmrcl/search` | BPP client webhook seam into the provider |
+| `BMRCL_CALLBACK_DELAY_MS` | `0` | Test-only artificial callback delay |
+| `SEARCH_TTL` | `PT4S` | ONIX synchronous discovery collection window |
+
+The published ONIX image does not bundle a file named for Beckn core `2.0.1`.
+Compose exposes its bundled core `1.1.0` schema under that filename so the
+protocol server can transport `version: 2.0.1`; the provider performs the
+TRV11-specific 2.0.1 validation at its own boundary.
 
 ## Licence
 

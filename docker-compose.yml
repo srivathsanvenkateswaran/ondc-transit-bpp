@@ -1,2 +1,4 @@
+name: onix-sync-spike
+
 include:
   - path: stage-0/onix-sync/docker-compose.yml

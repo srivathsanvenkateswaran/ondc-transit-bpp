@@ -1,5 +1,10 @@
 # beckn-onix two-BPP synchronous search spike
 
+This file records the Stage 0 experiment as run with `PT15S`. Phase 1 later
+changed the tracked templates to `PT4S`; see
+[`../../phase-1/RESULTS.md`](../../phase-1/RESULTS.md) for that measurement and
+its dropped-response cost.
+
 ## Result
 
 The BAP protocol server's synchronous client mode **aggregates callbacks from
