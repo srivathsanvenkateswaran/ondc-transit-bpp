@@ -115,7 +115,7 @@ published schemas can be vendored instead, prefer that and say which revision.
 ## 6. Fulfillment IDs collide
 
 `src/trv11/catalog.ts:85` and `:141` both build the id as
-``` `F${offer.offerId.replace(/\D/g, "") || "1"}` ```. Two offers with ids like
+`` `F${offer.offerId.replace(/\D/g, "") || "1"}` ``. Two offers with ids like
 `I1A` and `I1B` both become `F1`, producing two fulfillments sharing one id
 inside one provider and an ambiguous `fulfillment_ids` reference. Harmless with
 one offer per operator. It breaks the moment item 3 adds a second.
