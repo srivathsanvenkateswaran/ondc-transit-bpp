@@ -5,6 +5,7 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     host: "127.0.0.1",
     port: 0,
     publicBaseUrl: "https://provider.example.test",
+    journeySource: "fixture",
     fixtureRoot: new URL("../fixtures", import.meta.url).pathname,
     schemaRoot: new URL("../schemas/ondc_trv11/2.0.1", import.meta.url).pathname,
     callbackTimeoutMs: 1000,

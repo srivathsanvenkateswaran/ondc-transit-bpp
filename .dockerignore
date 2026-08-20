@@ -1,0 +1,6 @@
+.git
+.env
+dist
+node_modules
+phase-1/evidence
+stage-0/onix-sync/runtime

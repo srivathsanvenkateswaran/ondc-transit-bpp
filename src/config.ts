@@ -14,6 +14,7 @@ export interface AppConfig {
   host: string;
   port: number;
   publicBaseUrl: string;
+  journeySource: "fixture";
   fixtureRoot: string;
   schemaRoot: string;
   callbackTimeoutMs: number;
@@ -39,10 +40,15 @@ function positiveInteger(env: NodeJS.ProcessEnv, name: string): number {
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
+  const journeySource = env.JOURNEY_SOURCE?.trim() || "fixture";
+  if (journeySource !== "fixture") {
+    throw new Error(`Unsupported JOURNEY_SOURCE ${journeySource}`);
+  }
   return {
     host: required(env, "PROVIDER_HOST"),
     port: positiveInteger(env, "PROVIDER_PORT"),
     publicBaseUrl: required(env, "PROVIDER_PUBLIC_BASE_URL"),
+    journeySource,
     fixtureRoot: env.FIXTURE_ROOT ?? join(process.cwd(), "fixtures"),
     schemaRoot:
       env.TRV11_SCHEMA_ROOT ??

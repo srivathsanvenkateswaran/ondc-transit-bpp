@@ -95,7 +95,7 @@ export async function createApp(
     if (request.method === "GET" && url.pathname === "/healthz") {
       json(response, 200, {
         status: "up",
-        journeySource: "fixture",
+        journeySource: config.journeySource,
         operators: Object.keys(sources),
       });
       return;

@@ -18,10 +18,10 @@ app:
   actions:
     requests:
       search:
-        ttl: PT15S
+        ttl: PT4S
     responses:
       on_search:
-        ttl: PT15S
+        ttl: PT4S
   privateKey: RUNTIME_PRIVATE_KEY
   publicKey: RUNTIME_PUBLIC_KEY
   subscriberId: bmtc.bpp.transit.localhost
