@@ -45,13 +45,52 @@ test("fixture source matches a bus offer by nearest GPS stops", async () => {
   assert.equal(offers[0].route.at(-1)?.name, "Kempegowda Bus Station");
 });
 
-test("fixture source does not sell a route in reverse", async () => {
+test("metro fixture sells exactly one offer in each direction", async () => {
   const source = await FixtureJourneySource.load(fixtureRoot, "bmrcl");
-  const offers = await source.search({
+  const eastbound = await source.search({
     cityCode: "std:080",
-    fromCode: "CUBBON_PARK",
-    toCode: "TRINITY",
+    fromCode: "INDIRANAGAR",
+    toCode: "NADAPRABHU_KEMPEGOWDA_STATION_MAJESTIC",
+  });
+  const westbound = await source.search({
+    cityCode: "std:080",
+    fromCode: "NADAPRABHU_KEMPEGOWDA_STATION_MAJESTIC",
+    toCode: "INDIRANAGAR",
   });
 
-  assert.deepEqual(offers, []);
+  assert.equal(eastbound.length, 1);
+  assert.deepEqual(
+    [eastbound[0].route[0].code, eastbound[0].route.at(-1)?.code],
+    ["INDIRANAGAR", "NADAPRABHU_KEMPEGOWDA_STATION_MAJESTIC"],
+  );
+  assert.equal(westbound.length, 1);
+  assert.deepEqual(
+    [westbound[0].route[0].code, westbound[0].route.at(-1)?.code],
+    ["NADAPRABHU_KEMPEGOWDA_STATION_MAJESTIC", "INDIRANAGAR"],
+  );
+});
+
+test("bus fixture sells exactly one offer in each direction", async () => {
+  const source = await FixtureJourneySource.load(fixtureRoot, "bmtc");
+  const outbound = await source.search({
+    cityCode: "std:080",
+    fromCode: "BMTC_INDIRANAGAR_6TH_MAIN",
+    toCode: "BMTC_KEMPEGOWDA_BUS_STATION",
+  });
+  const inbound = await source.search({
+    cityCode: "std:080",
+    fromCode: "BMTC_KEMPEGOWDA_BUS_STATION",
+    toCode: "BMTC_INDIRANAGAR_6TH_MAIN",
+  });
+
+  assert.equal(outbound.length, 1);
+  assert.deepEqual(
+    [outbound[0].route[0].code, outbound[0].route.at(-1)?.code],
+    ["BMTC_INDIRANAGAR_6TH_MAIN", "BMTC_KEMPEGOWDA_BUS_STATION"],
+  );
+  assert.equal(inbound.length, 1);
+  assert.deepEqual(
+    [inbound[0].route[0].code, inbound[0].route.at(-1)?.code],
+    ["BMTC_KEMPEGOWDA_BUS_STATION", "BMTC_INDIRANAGAR_6TH_MAIN"],
+  );
 });

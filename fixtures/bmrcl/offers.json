@@ -77,6 +77,75 @@
           "isInterchange": true
         }
       ]
+    },
+    {
+      "offerId": "I2",
+      "productCode": "SJT",
+      "productName": "Single Journey Ticket",
+      "wholeRouteFarePaise": 3000,
+      "validity": "PT2H",
+      "routeId": "PURPLE_LINE_WESTBOUND",
+      "routeName": "Purple Line westbound",
+      "routeColor": "#800080",
+      "route": [
+        {
+          "code": "NADAPRABHU_KEMPEGOWDA_STATION_MAJESTIC",
+          "name": "Nadaprabhu Kempegowda Station, Majestic",
+          "nameLocal": "ನಾಡಪ್ರಭು ಕೆಂಪೇಗೌಡ ನಿಲ್ದಾಣ, ಮೆಜೆಸ್ಟಿಕ್",
+          "lat": 12.97569,
+          "lon": 77.57289,
+          "isInterchange": true
+        },
+        {
+          "code": "SIR_M_VISVESVARAYA_STATION_CENTRAL_COLLEGE",
+          "name": "Sir M. Visvesvaraya Station, Central College",
+          "nameLocal": "ಸರ್ ಎಂ. ವಿಶ್ವೇಶ್ವರಯ್ಯ ನಿಲ್ದಾಣ, ಸೆಂಟ್ರಲ್ ಕಾಲೇಜು",
+          "lat": 12.97496,
+          "lon": 77.58454
+        },
+        {
+          "code": "DR_B_R_AMBEDKAR_STATION_VIDHANA_SOUDHA",
+          "name": "Dr. B.R. Ambedkar Station, Vidhana Soudha",
+          "nameLocal": "ಡಾ. ಬಿ.ಆರ್. ಅಂಬೇಡ್ಕರ್ ನಿಲ್ದಾಣ, ವಿಧಾನಸೌಧ",
+          "lat": 12.97974,
+          "lon": 77.59078
+        },
+        {
+          "code": "CUBBON_PARK",
+          "name": "Cubbon Park",
+          "nameLocal": "ಕಬ್ಬನ್ ಪಾರ್ಕ್",
+          "lat": 12.98092,
+          "lon": 77.59731
+        },
+        {
+          "code": "MAHATMA_GANDHI_ROAD",
+          "name": "Mahatma Gandhi Road",
+          "nameLocal": "ಮಹಾತ್ಮ ಗಾಂಧಿ ರಸ್ತೆ",
+          "lat": 12.97556,
+          "lon": 77.60669
+        },
+        {
+          "code": "TRINITY",
+          "name": "Trinity",
+          "nameLocal": "ಟ್ರಿನಿಟಿ",
+          "lat": 12.97296,
+          "lon": 77.61702
+        },
+        {
+          "code": "HALASURU",
+          "name": "Halasuru",
+          "nameLocal": "ಹಲಸೂರು",
+          "lat": 12.97568,
+          "lon": 77.62662
+        },
+        {
+          "code": "INDIRANAGAR",
+          "name": "Indiranagar",
+          "nameLocal": "ಇಂದಿರಾನಗರ",
+          "lat": 12.97839,
+          "lon": 77.63879
+        }
+      ]
     }
   ]
 }
