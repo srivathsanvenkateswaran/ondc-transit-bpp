@@ -60,6 +60,14 @@ test("catalogue preserves offer identity in distinct fulfillment IDs", async () 
     routeName: `Route ${offerId}`,
     route: [
       { code: "START", name: "Start", lat: 12.97, lon: 77.64 },
+      {
+        code: "CHANGE",
+        name: "Central interchange",
+        lat: 12.975,
+        lon: 77.6,
+        isInterchange: true,
+        changeHint: "Change here for Purple Line",
+      },
       { code: "END", name: "End", lat: 12.98, lon: 77.57 },
     ],
   }));
@@ -99,4 +107,9 @@ test("catalogue preserves offer identity in distinct fulfillment IDs", async () 
       1,
     );
   });
+  assert.deepEqual(provider.fulfillments[0].stops[1].instructions, {
+    name: "Central interchange",
+    short_desc: "Change here for Purple Line",
+  });
+  assert.equal(provider.fulfillments[0].stops[2].instructions, undefined);
 });

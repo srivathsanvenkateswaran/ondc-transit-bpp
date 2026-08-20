@@ -53,14 +53,14 @@ function mapStop(stop: RouteStop, index: number, count: number) {
     id,
     ...(index === 0 ? {} : { parent_stop_id: String(index) }),
     type: stopType(stop, index, count),
-    ...(index === 0
-      ? {}
-      : {
+    ...(stop.changeHint
+      ? {
           instructions: {
-            name: `Stop ${index}`,
-            ...(stop.changeHint ? { short_desc: stop.changeHint } : {}),
+            name: stop.name,
+            short_desc: stop.changeHint,
           },
-        }),
+        }
+      : {}),
     location: {
       descriptor: {
         name: stop.name,
