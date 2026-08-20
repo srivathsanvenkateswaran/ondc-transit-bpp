@@ -1,0 +1,44 @@
+server:
+  port: 6102
+cache:
+  host: sync-redis
+  port: 6379
+  ttl: PT10M
+  db: 1
+client:
+  webhook:
+    url: http://bmrcl-sandbox:3000/mobility/search
+app:
+  mode: bpp
+  gateway:
+    mode: network
+    inboxQueue: bmrcl-inbox
+    outboxQueue: bmrcl-outbox
+    amqpURL: amqp://beckn:beckn123@sync-rabbitmq:5672
+  actions:
+    requests:
+      search:
+        ttl: PT15S
+    responses:
+      on_search:
+        ttl: PT15S
+  privateKey: RUNTIME_PRIVATE_KEY
+  publicKey: RUNTIME_PUBLIC_KEY
+  subscriberId: bmrcl.bpp.transit.localhost
+  subscriberUri: http://bmrcl-bpp-network:6102
+  registryUrl: http://registry:3030/subscribers
+  auth: false
+  uniqueKey: bmrcl-bpp-key
+  city: std:080
+  country: IND
+  ttl: PT10M
+  httpTimeout: PT3S
+  httpRetryCount: 2
+  telemetry:
+    enabled: false
+    url: ""
+    batchSize: 100
+    syncInterval: 30
+    redis_db: 3
+  useLayer2Config: false
+  mandateLayer2Config: false

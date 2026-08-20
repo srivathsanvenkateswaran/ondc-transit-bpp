@@ -1,0 +1,107 @@
+name: onix-sync-spike
+
+services:
+  sync-mongo:
+    image: mongo:4.4
+    platform: linux/amd64
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: beckn
+      MONGO_INITDB_ROOT_PASSWORD: beckn123
+    networks: [beckn]
+    volumes:
+      - sync_mongo_data:/data/db
+
+  sync-rabbitmq:
+    # The installer's 3.8/amd64 image segfaults under Apple Silicon emulation.
+    # AMQP 0-9-1 is unchanged; a native multi-arch release avoids that host issue.
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: beckn
+      RABBITMQ_DEFAULT_PASS: beckn123
+    networks: [beckn]
+
+  sync-redis:
+    image: redis:6.2.5-alpine
+    networks: [beckn]
+
+  bap-client:
+    image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
+    platform: linux/amd64
+    depends_on: [sync-mongo, sync-rabbitmq, sync-redis]
+    ports: ["5001:5001"]
+    networks: [beckn]
+    volumes:
+      - ./runtime/config/bap-client.yml:/usr/src/app/config/default.yml:ro
+
+  bap-network:
+    image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
+    platform: linux/amd64
+    depends_on: [sync-mongo, sync-rabbitmq, sync-redis]
+    ports: ["5002:5002"]
+    networks: [beckn]
+    volumes:
+      - ./runtime/config/bap-network.yml:/usr/src/app/config/default.yml:ro
+
+  bmtc-bpp-client:
+    image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
+    platform: linux/amd64
+    depends_on: [sync-rabbitmq, sync-redis]
+    ports: ["6001:6001"]
+    networks: [beckn]
+    volumes:
+      - ./runtime/config/bmtc-bpp-client.yml:/usr/src/app/config/default.yml:ro
+
+  bmtc-bpp-network:
+    image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
+    platform: linux/amd64
+    depends_on: [sync-rabbitmq, sync-redis]
+    ports: ["6002:6002"]
+    networks: [beckn]
+    volumes:
+      - ./runtime/config/bmtc-bpp-network.yml:/usr/src/app/config/default.yml:ro
+
+  bmrcl-bpp-client:
+    image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
+    platform: linux/amd64
+    depends_on: [sync-rabbitmq, sync-redis]
+    ports: ["6101:6101"]
+    networks: [beckn]
+    volumes:
+      - ./runtime/config/bmrcl-bpp-client.yml:/usr/src/app/config/default.yml:ro
+
+  bmrcl-bpp-network:
+    image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
+    platform: linux/amd64
+    depends_on: [sync-rabbitmq, sync-redis]
+    ports: ["6102:6102"]
+    networks: [beckn]
+    volumes:
+      - ./runtime/config/bmrcl-bpp-network.yml:/usr/src/app/config/default.yml:ro
+
+  bmtc-sandbox:
+    image: fidedocker/sandbox-api@sha256:0a73d928caa2fa92b2d4c31c7deb8ed014adae2455dbaa86fcca6964398fbb7f
+    platform: linux/amd64
+    depends_on: [bmtc-bpp-client]
+    environment:
+      BPPCLIENTURL: http://bmtc-bpp-client:6001
+      BASE_URL: http://bmtc-sandbox:3000
+    ports: ["4020:3000"]
+    networks: [beckn]
+
+  bmrcl-sandbox:
+    image: fidedocker/sandbox-api@sha256:0a73d928caa2fa92b2d4c31c7deb8ed014adae2455dbaa86fcca6964398fbb7f
+    platform: linux/amd64
+    depends_on: [bmrcl-bpp-client]
+    environment:
+      BPPCLIENTURL: http://bmrcl-bpp-client:6101
+      BASE_URL: http://bmrcl-sandbox:3000
+    ports: ["4021:3000"]
+    networks: [beckn]
+
+networks:
+  beckn:
+    external: true
+    name: beckn_network
+
+volumes:
+  sync_mongo_data:

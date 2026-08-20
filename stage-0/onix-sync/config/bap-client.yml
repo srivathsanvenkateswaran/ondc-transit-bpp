@@ -1,0 +1,47 @@
+server:
+  port: 5001
+cache: &cache
+  host: sync-redis
+  port: 6379
+  ttl: PT10M
+  db: 1
+responseCache: &response_cache
+  mongoURL: mongodb://beckn:beckn123@sync-mongo:27017/protocol_server?authSource=admin
+  ttl: PT10M
+client:
+  synchronous:
+    mongoURL: mongodb://beckn:beckn123@sync-mongo:27017/protocol_server?authSource=admin
+app:
+  mode: bap
+  gateway:
+    mode: client
+    inboxQueue: bap-inbox
+    outboxQueue: bap-outbox
+    amqpURL: amqp://beckn:beckn123@sync-rabbitmq:5672
+  actions: &actions
+    requests:
+      search:
+        ttl: PT15S
+    responses:
+      on_search:
+        ttl: PT15S
+  privateKey: RUNTIME_PRIVATE_KEY
+  publicKey: RUNTIME_PUBLIC_KEY
+  subscriberId: bap.transit.localhost
+  subscriberUri: http://bap-network:5002
+  registryUrl: http://registry:3030/subscribers
+  auth: false
+  uniqueKey: bap-transit-key
+  city: std:080
+  country: IND
+  ttl: PT10M
+  httpTimeout: PT3S
+  httpRetryCount: 2
+  telemetry: &telemetry
+    enabled: false
+    url: ""
+    batchSize: 100
+    syncInterval: 30
+    redis_db: 3
+  useLayer2Config: false
+  mandateLayer2Config: false

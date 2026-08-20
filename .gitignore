@@ -4,3 +4,6 @@ dist/
 .env.local
 .DS_Store
 *.log
+
+# Generated keys, rendered beckn-onix configs, and local Stage-0 captures.
+stage-0/onix-sync/runtime/
