@@ -7,3 +7,6 @@ dist/
 
 # Generated keys, rendered beckn-onix configs, and local Stage-0 captures.
 stage-0/onix-sync/runtime/
+
+# Rendered deployment config, cached beckn-onix checkout, verification runs.
+deploy/runtime/
