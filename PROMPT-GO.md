@@ -201,3 +201,101 @@ no hardcoded host, port or credential anywhere.
 - Report: the measurements above, the two-replica and restart test results, what
   you could not reproduce, and your own recommendation on whether this should
   replace `beckn-onix` or be abandoned.
+
+---
+
+# Round two: the three things that close it
+
+Paste everything below into Codex, on the same `go-network` branch.
+
+---
+
+The foundation is good. Reviewed at `5257c7c`: builds clean, `go vet` clean,
+**every package passes under `-race`**. One production dependency plus pgx and
+nats. `pending`, `transport` and `registry` each have two implementations behind
+one interface, and `TestMemoryStoreSuite` / `TestPostgresStoreSuite` run one
+suite against both, which is exactly right. Signing is verified against the real
+`phase-1/evidence/auth-replay-request.json` and its tampered twin rather than a
+hand-written fixture, and `TestNATSSurvivesConsumerRestart` proves restart
+durability.
+
+What exists is a well-tested set of components. What is not yet demonstrated is
+a **network**. Three things close that gap, and they are the three the first
+brief named as acceptance rather than nice-to-have.
+
+## 1. The two-replica test
+
+This is the one that matters and it is not written.
+
+> Two instances sharing one `PendingStore`. `POST /search` to instance **A**.
+> Deliver both `on_search` callbacks to instance **B**. A's blocked request must
+> return with both of them.
+
+Everything needed is already there - the interface, the Postgres implementation,
+the shared suite. Nobody has yet proved that a callback arriving at a *different
+process* completes the request.
+
+Write it so **the memory store fails it and Postgres passes**. That contrast is
+the whole value: it is the executable statement of why the shared store exists,
+and it is what stops someone deleting it later as an unnecessary dependency.
+
+Do the same for `Transport` if the design allows a handoff to cross processes.
+
+## 2. Lifecycle replay against the committed evidence
+
+Today the only evidence any test reads is the signing header. So we know the
+implementation signs correctly; we do not know it can carry a real `confirm`.
+
+For **`select`, `init`, `confirm` and `status`, both operators**, take the
+request files in `phase-2/evidence/` and assert your network produces callbacks
+matching the recorded ones **in every field that is not a timestamp, a fresh id
+or a signature.** A table-driven test over the files, running in CI, not a script
+someone remembers.
+
+While you are there, assert the property the current stack has and the log
+proves: **the gateway appears exactly once**, during `search`.
+`phase-2/evidence/gateway-phase2.raw.txt` contains no `/select`, `/init`,
+`/confirm` or `/status` URL. Make that an assertion rather than an observation.
+
+## 3. The measurements, which do not exist yet
+
+There is not a single `Benchmark` function on the branch and no numbers in any
+commit message. Every capacity claim anyone has made about this rests on figures
+nobody has taken - including for the current stack.
+
+**The number that matters most: requests per second per instance at a fixed
+p99**, for both collapsed and distributed. Nobody has it for beckn-onix either,
+so measure the current stack the same way and report both.
+
+Then, side by side on one host, against the recorded baseline:
+
+```
+registry (JVM)         619.8 MB      gateway (JVM)   613.1 MB
+6 x protocol-server    92 MB each    Mongo 109 · Rabbit ~120 · Redis 12
+12 containers          ~2.1 GB
+search round trip      4.68 s        of which ~4 s is the collection TTL
+```
+
+resident memory per process and total, container count in both modes, image size
+on disk and as a `docker save` file, cold start to a working `search`, and the
+`search` round trip.
+
+## And the result worth having most
+
+`deploy/verify.sh` **has never printed a pass**, on any stack, because RabbitMQ
+dies under ARM emulation and the gateway's last hop is unresolved. Your
+implementation has neither dependency.
+
+Run it against the Go network. If it goes green, that is the strongest single
+sentence available about this work, and it should be the headline of your report.
+
+## Unchanged
+
+Do not touch `main`. Do not touch `src/` - the TypeScript provider stays.
+Keep the `AI-Assisted-By: OpenAI Codex` trailer. No em-dashes. Commit at every
+working state.
+
+Report: the two-replica result, how many of the eight lifecycle replays match,
+the measurements, whether `verify.sh` passed, and your own recommendation on
+whether this should replace `beckn-onix`.
+
