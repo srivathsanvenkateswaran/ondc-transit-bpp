@@ -60,9 +60,11 @@ services:
       BMTC_BPP_ID: bmtc.bpp.transit.localhost
       BMTC_BPP_URI: http://ondc-network:6002
       BMTC_CALLBACK_URL: http://ondc-network:6001/on_search
+      BMTC_CALLBACK_DELAY_MS: ${BMTC_CALLBACK_DELAY_MS:-0}
       BMRCL_BPP_ID: bmrcl.bpp.transit.localhost
       BMRCL_BPP_URI: http://ondc-network:6102
       BMRCL_CALLBACK_URL: http://ondc-network:6101/on_search
+      BMRCL_CALLBACK_DELAY_MS: ${BMRCL_CALLBACK_DELAY_MS:-0}
     ports:
       - "${HOST_BIND_ADDRESS:-127.0.0.1}:7001:7001"
     restart: unless-stopped
