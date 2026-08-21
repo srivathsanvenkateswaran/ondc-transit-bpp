@@ -87,6 +87,19 @@ func (s *MemoryStore) Await(ctx context.Context, id string, count int) ([][]byte
 				<-timer.C
 			}
 		case <-timer.C:
+			s.mu.Lock()
+			e, ok := s.entries[id]
+			if ok {
+				out := cloneCallbacks(e.callbacks)
+				delete(s.entries, id)
+				close(e.changed)
+				s.mu.Unlock()
+				if len(out) > 0 {
+					return out, nil
+				}
+			} else {
+				s.mu.Unlock()
+			}
 			return nil, ErrExpired
 		}
 	}

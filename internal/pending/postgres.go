@@ -100,9 +100,6 @@ func (s *PostgresStore) Await(ctx context.Context, id string, count int) ([][]by
 		if err != nil {
 			return nil, err
 		}
-		if !time.Now().Before(expires) {
-			return nil, ErrExpired
-		}
 		rows, err := s.pool.Query(ctx, `SELECT payload FROM network_callbacks WHERE correlation_id=$1 ORDER BY sequence`, id)
 		if err != nil {
 			return nil, err
@@ -123,6 +120,12 @@ func (s *PostgresStore) Await(ctx context.Context, id string, count int) ([][]by
 		}
 		if len(out) >= count {
 			return out, nil
+		}
+		if !time.Now().Before(expires) {
+			if len(out) > 0 {
+				return out, nil
+			}
+			return nil, ErrExpired
 		}
 		wait := time.Until(expires)
 		if wait > s.poll {
