@@ -41,9 +41,9 @@ type Config struct {
 	MaxBodyBytes  int64
 }
 type envelope struct {
-	Authorization        string          `json:"authorization"`
-	GatewayAuthorization string          `json:"gateway_authorization,omitempty"`
-	Body                 json.RawMessage `json:"body"`
+	Authorization        string `json:"authorization"`
+	GatewayAuthorization string `json:"gateway_authorization,omitempty"`
+	Body                 []byte `json:"body"`
 }
 type contextFields struct {
 	Action        string `json:"action"`
@@ -229,11 +229,13 @@ func (a *App) gatewayHandler(ctx context.Context, msg transport.Message) {
 func (a *App) bppNetworkHandler(ctx context.Context, op Operator, msg transport.Message) {
 	var env envelope
 	if json.Unmarshal(msg.Data(), &env) != nil {
+		a.log.Warn("BPP network rejected envelope", "operator", op.Name, "error", "invalid envelope")
 		_ = msg.Nack(errors.New("invalid envelope"))
 		return
 	}
 	p, err := a.verify(env.Body, env.Authorization)
 	if err != nil {
+		a.log.Warn("BPP network rejected signature", "operator", op.Name, "error", err)
 		_ = msg.Nack(err)
 		return
 	}
@@ -244,6 +246,7 @@ func (a *App) bppNetworkHandler(ctx context.Context, op Operator, msg transport.
 		}
 	}
 	if p.Context.Action != "search" && p.Context.BPPID != op.Identity.ID {
+		a.log.Warn("BPP network rejected address", "operator", op.Name, "bpp_id", p.Context.BPPID)
 		_ = msg.Nack(errors.New("request addressed to another BPP"))
 		return
 	}
@@ -255,12 +258,14 @@ func (a *App) bppNetworkHandler(ctx context.Context, op Operator, msg transport.
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := a.client.Do(req)
 	if err != nil {
+		a.log.Warn("provider request failed", "operator", op.Name, "action", p.Context.Action, "error", err)
 		_ = msg.Nack(err)
 		return
 	}
 	responseBody, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
 	resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		a.log.Warn("provider rejected request", "operator", op.Name, "action", p.Context.Action, "status", resp.StatusCode)
 		_ = msg.Nack(fmt.Errorf("provider HTTP %d: %s", resp.StatusCode, responseBody))
 		return
 	}
