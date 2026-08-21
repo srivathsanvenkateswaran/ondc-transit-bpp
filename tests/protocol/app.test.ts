@@ -69,6 +69,25 @@ test("malformed search returns NACK and sends no callback", async (t) => {
   assert.equal(result.error.type, "JSON-SCHEMA-ERROR");
 });
 
+test("semantically invalid GPS returns NACK before asynchronous processing", async (t) => {
+  const config = testConfig();
+  const app = await createApp(config);
+  t.after(() => app.close());
+  const appPort = await listen(app);
+  const body = structuredClone(searchRequest("BUS")) as any;
+  body.message.intent.fulfillment.stops[0].location.gps = "12.97, 77.64, 0";
+
+  const response = await fetch(`http://127.0.0.1:${appPort}/bmtc/search`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  assert.equal(response.status, 400);
+  const result = (await response.json()) as any;
+  assert.equal(result.message.ack.status, "NACK");
+  assert.match(result.error.message, /exactly one latitude\/longitude pair/);
+});
+
 test("category mismatch logs SKIPPED and dispatches no callback", async (t) => {
   let callbackCount = 0;
   const callbackServer = createServer((_request, response) => {
@@ -272,10 +291,27 @@ test("provider serves the complete order lifecycle and stable status", async (t)
   assert.equal(onStatus.path, "/on_status");
   assert.deepEqual(onStatus.body.message.order, confirmed);
 
-  const inspection = await fetch(
+  callbackPromise = expectCallback();
+  await post("/bmtc/status", {
+    context: addressedContext("status", "unknown-status-message"),
+    message: { order_id: "SPECIMEN-ORD-BMTC-UNKNOWN" },
+  });
+  const unknownStatus = await callbackPromise;
+  assert.equal(unknownStatus.path, "/on_status");
+  assert.deepEqual(unknownStatus.body.message, {});
+  assert.equal(unknownStatus.body.error.code, "ORDER-NOT-FOUND");
+
+  const unauthorizedInspection = await fetch(
     `http://127.0.0.1:${appPort}/orders/${encodeURIComponent(confirmed.id)}`,
   );
+  assert.equal(unauthorizedInspection.status, 401);
+
+  const inspection = await fetch(
+    `http://127.0.0.1:${appPort}/orders/${encodeURIComponent(confirmed.id)}`,
+    { headers: { authorization: "Bearer test-inspection-token" } },
+  );
   assert.equal(inspection.status, 200);
+  assert.equal(inspection.headers.get("cache-control"), "no-store");
   assert.deepEqual(await inspection.json(), confirmed);
   assert.ok(
     events.every(
@@ -287,6 +323,30 @@ test("provider serves the complete order lifecycle and stable status", async (t)
         typeof event.outcome === "string",
     ),
   );
+});
+
+test("order inspection is disabled unless a token is configured", async (t) => {
+  const app = await createApp(testConfig({ orderInspectionToken: undefined }));
+  t.after(() => app.close());
+  const appPort = await listen(app);
+
+  const response = await fetch(
+    `http://127.0.0.1:${appPort}/orders/SPECIMEN-ORD-BMTC-UNKNOWN`,
+  );
+  assert.equal(response.status, 404);
+  assert.deepEqual(await response.json(), { error: "Not found" });
+});
+
+test("malformed inspection order ids return 400 instead of escaping the handler", async (t) => {
+  const app = await createApp(testConfig());
+  t.after(() => app.close());
+  const appPort = await listen(app);
+
+  const response = await fetch(`http://127.0.0.1:${appPort}/orders/%ZZ`, {
+    headers: { authorization: "Bearer test-inspection-token" },
+  });
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), { error: "Invalid order id encoding" });
 });
 
 const ackBody = { message: { ack: { status: "ACK" } } };

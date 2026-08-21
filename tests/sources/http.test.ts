@@ -146,6 +146,83 @@ test("http source rejects non-integer planner fares before fallback", async () =
   assert.match(String(events[0].reason), /must be integer/);
 });
 
+test("http source rejects planner fares outside safe integer paise", async () => {
+  const fallback = fallbackSource();
+  const events: Record<string, unknown>[] = [];
+  const invalidOffer = {
+    ...plannerOffer,
+    farePaise: Number.MAX_SAFE_INTEGER + 1,
+  };
+  const fetchImpl = (async () =>
+    new Response(JSON.stringify({ offers: [invalidOffer] }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })) as typeof fetch;
+  const source = new HttpJourneySource({
+    operatorKey: "bmtc",
+    url: "https://planner.example.test/api/ondc/offers",
+    fallback: fallback.source,
+    responseSchemaPath,
+    fetchImpl,
+    eventLogger: (event) => events.push(event),
+  });
+
+  const offers = await source.search(query);
+
+  assert.equal(offers[0].offerId, fallback.fallbackOffer.offerId);
+  assert.match(
+    String(events[0].reason),
+    /(non-negative safe integer|must be <=)/,
+  );
+});
+
+test("http source rejects ticket validity that confirm cannot issue", async () => {
+  const fallback = fallbackSource();
+  const events: Record<string, unknown>[] = [];
+  const invalidOffer = { ...plannerOffer, validity: "P" };
+  const fetchImpl = (async () =>
+    new Response(JSON.stringify({ offers: [invalidOffer] }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })) as typeof fetch;
+  const source = new HttpJourneySource({
+    operatorKey: "bmtc",
+    url: "https://planner.example.test/api/ondc/offers",
+    fallback: fallback.source,
+    responseSchemaPath,
+    fetchImpl,
+    eventLogger: (event) => events.push(event),
+  });
+
+  const offers = await source.search(query);
+
+  assert.equal(offers[0].offerId, fallback.fallbackOffer.offerId);
+  assert.match(String(events[0].reason), /positive duration/);
+});
+
+test("http source rejects duplicate offer identities before caching", async () => {
+  const fallback = fallbackSource();
+  const events: Record<string, unknown>[] = [];
+  const fetchImpl = (async () =>
+    new Response(JSON.stringify({ offers: [plannerOffer, plannerOffer] }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })) as typeof fetch;
+  const source = new HttpJourneySource({
+    operatorKey: "bmtc",
+    url: "https://planner.example.test/api/ondc/offers",
+    fallback: fallback.source,
+    responseSchemaPath,
+    fetchImpl,
+    eventLogger: (event) => events.push(event),
+  });
+
+  const offers = await source.search(query);
+
+  assert.equal(offers[0].offerId, fallback.fallbackOffer.offerId);
+  assert.match(String(events[0].reason), /duplicate offerId planner-500d/);
+});
+
 test("http source times out after its deadline and falls back", async () => {
   const fallback = fallbackSource();
   const fetchImpl = ((_input: unknown, init?: RequestInit) =>

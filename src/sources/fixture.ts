@@ -9,6 +9,7 @@ import type {
   SearchQuery,
   TransitOffer,
 } from "./types.js";
+import { validateOfferSet } from "./validate.js";
 
 const EARTH_RADIUS_KM = 6371;
 
@@ -90,6 +91,7 @@ export class FixtureJourneySource implements JourneySource {
       ...offer,
       farePaise: wholeRouteFarePaise,
     }));
+    validateOfferSet(offers, `Fixture file ${path}`);
     return new FixtureJourneySource(
       offers,
       fixture.operator,
@@ -98,32 +100,29 @@ export class FixtureJourneySource implements JourneySource {
   }
 
   async search(query: SearchQuery): Promise<TransitOffer[]> {
-    if (query.fromCode && query.toCode) {
+    const hasFrom = Boolean(query.fromCode || query.fromGps);
+    const hasTo = Boolean(query.toCode || query.toGps);
+    if (hasFrom && hasTo) {
       return this.offers.flatMap((offer) => {
-        const match = sliceOffer(
-          offer,
-          codeIndex(offer.route, query.fromCode),
-          codeIndex(offer.route, query.toCode),
-        );
-        return match ? [match] : [];
-      });
-    }
-
-    if (query.fromGps && query.toGps) {
-      return this.offers.flatMap((offer) => {
-        const from = nearestIndex(offer.route, query.fromGps!);
-        const to = nearestIndex(offer.route, query.toGps!);
-        if (
-          from.distanceKm > this.nearestStopRadiusKm ||
-          to.distanceKm > this.nearestStopRadiusKm
-        ) {
-          return [];
-        }
-        const match = sliceOffer(offer, from.index, to.index);
+        const fromIndex = query.fromCode
+          ? codeIndex(offer.route, query.fromCode)
+          : this.nearestStopIndex(offer.route, query.fromGps!);
+        const toIndex = query.toCode
+          ? codeIndex(offer.route, query.toCode)
+          : this.nearestStopIndex(offer.route, query.toGps!);
+        const match = sliceOffer(offer, fromIndex, toIndex);
         return match ? [match] : [];
       });
     }
 
     return structuredClone(this.offers);
+  }
+
+  private nearestStopIndex(
+    route: RouteStop[],
+    point: { lat: number; lon: number },
+  ): number {
+    const nearest = nearestIndex(route, point);
+    return nearest.distanceKm <= this.nearestStopRadiusKm ? nearest.index : -1;
   }
 }

@@ -45,6 +45,19 @@ test("fixture source matches a bus offer by nearest GPS stops", async () => {
   assert.equal(offers[0].route.at(-1)?.name, "Kempegowda Bus Station");
 });
 
+test("fixture source handles mixed stop-code and GPS endpoints", async () => {
+  const source = await FixtureJourneySource.load(fixtureRoot, "bmtc");
+  const offers = await source.search({
+    cityCode: "std:080",
+    fromCode: "BMTC_INDIRANAGAR_6TH_MAIN",
+    toGps: { lat: 12.9774, lon: 77.5726 },
+  });
+
+  assert.equal(offers.length, 1);
+  assert.equal(offers[0].route[0].code, "BMTC_INDIRANAGAR_6TH_MAIN");
+  assert.equal(offers[0].route.at(-1)?.code, "BMTC_KEMPEGOWDA_BUS_STATION");
+});
+
 test("metro fixture sells exactly one offer in each direction", async () => {
   const source = await FixtureJourneySource.load(fixtureRoot, "bmrcl");
   const eastbound = await source.search({

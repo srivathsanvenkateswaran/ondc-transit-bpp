@@ -1,38 +1,57 @@
 import type { ProtocolOrder } from "../protocol/types.js";
 import type { OperatorKey, TransitOffer } from "../sources/types.js";
 
-function transactionKey(operator: OperatorKey, transactionId: string): string {
-  return `${operator}:${transactionId}`;
+export interface TransactionIdentity {
+  transactionId: string;
+  bapId: string;
+  bapUri: string;
+}
+
+function transactionKey(
+  operator: OperatorKey,
+  identity: TransactionIdentity,
+): string {
+  return JSON.stringify([
+    operator,
+    identity.bapId,
+    identity.bapUri,
+    identity.transactionId,
+  ]);
 }
 
 export class InMemoryOrderStore {
   private readonly catalogues = new Map<string, Map<string, TransitOffer>>();
   private readonly orders = new Map<
     string,
-    { operator: OperatorKey; transactionId: string; order: ProtocolOrder }
+    {
+      operator: OperatorKey;
+      identity: TransactionIdentity;
+      order: ProtocolOrder;
+    }
   >();
+  private readonly ordersByTransaction = new Map<string, string>();
 
   cacheCatalogue(
     operator: OperatorKey,
-    transactionId: string,
+    identity: TransactionIdentity,
     offers: TransitOffer[],
   ): void {
     this.catalogues.set(
-      transactionKey(operator, transactionId),
+      transactionKey(operator, identity),
       new Map(offers.map((offer) => [offer.offerId, structuredClone(offer)])),
     );
   }
 
   selectedOffers(
     operator: OperatorKey,
-    transactionId: string,
+    identity: TransactionIdentity,
     itemIds: string[],
   ): TransitOffer[] {
-    const catalogue = this.catalogues.get(transactionKey(operator, transactionId));
+    const catalogue = this.catalogues.get(transactionKey(operator, identity));
     if (!catalogue) {
       throw new OrderLifecycleError(
         "CATALOGUE-NOT-FOUND",
-        `No search catalogue exists for transaction ${transactionId}`,
+        `No search catalogue exists for transaction ${identity.transactionId}`,
       );
     }
     return itemIds.map((itemId) => {
@@ -40,7 +59,7 @@ export class InMemoryOrderStore {
       if (!offer) {
         throw new OrderLifecycleError(
           "ITEM-NOT-FOUND",
-          `Unknown item.id ${itemId} for transaction ${transactionId}`,
+          `Unknown item.id ${itemId} for transaction ${identity.transactionId}`,
         );
       }
       return structuredClone(offer);
@@ -49,19 +68,54 @@ export class InMemoryOrderStore {
 
   save(
     operator: OperatorKey,
-    transactionId: string,
+    identity: TransactionIdentity,
     order: ProtocolOrder & { id: string },
   ): void {
+    const existing = this.orders.get(order.id);
+    if (existing) {
+      throw new OrderLifecycleError(
+        "ORDER-ID-COLLISION",
+        `Generated order.id ${order.id} already exists`,
+      );
+    }
+    const key = transactionKey(operator, identity);
+    if (this.ordersByTransaction.has(key)) {
+      throw new OrderLifecycleError(
+        "ORDER-ALREADY-CONFIRMED",
+        `Transaction ${identity.transactionId} already has a confirmed order`,
+      );
+    }
     this.orders.set(order.id, {
       operator,
-      transactionId,
+      identity: { ...identity },
       order: structuredClone(order),
     });
+    this.ordersByTransaction.set(key, order.id);
   }
 
-  get(operator: OperatorKey, orderId: string): ProtocolOrder {
+  findByTransaction(
+    operator: OperatorKey,
+    identity: TransactionIdentity,
+  ): ProtocolOrder | undefined {
+    const orderId = this.ordersByTransaction.get(
+      transactionKey(operator, identity),
+    );
+    if (!orderId) return undefined;
+    return structuredClone(this.orders.get(orderId)!.order);
+  }
+
+  get(
+    operator: OperatorKey,
+    identity: TransactionIdentity,
+    orderId: string,
+  ): ProtocolOrder {
     const stored = this.orders.get(orderId);
-    if (!stored || stored.operator !== operator) {
+    if (
+      !stored ||
+      stored.operator !== operator ||
+      transactionKey(operator, stored.identity) !==
+        transactionKey(operator, identity)
+    ) {
       throw new OrderLifecycleError(
         "ORDER-NOT-FOUND",
         `Unknown order.id ${orderId} for operator ${operator}`,

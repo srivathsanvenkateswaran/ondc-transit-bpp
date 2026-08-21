@@ -6,12 +6,20 @@ import type { SearchRequest } from "../../src/protocol/types.js";
 import { FixtureJourneySource } from "../../src/sources/fixture.js";
 import type { JourneySource, TransitOffer } from "../../src/sources/types.js";
 import { buildOnSearch, paiseToRupees } from "../../src/trv11/catalog.js";
+import { serviceInstant } from "../../src/trv11/time.js";
 import { searchRequest, testConfig } from "../helpers.js";
 
 test("paise converts to a stable rupee string without floating point", () => {
   assert.equal(paiseToRupees(2700), "27");
   assert.equal(paiseToRupees(2750), "27.50");
   assert.equal(paiseToRupees(5), "0.05");
+});
+
+test("service windows use the Bengaluru calendar date", () => {
+  assert.equal(
+    serviceInstant("2026-08-20T20:00:00.000Z", "05:00"),
+    "2026-08-21T05:00:00.000+05:30",
+  );
 });
 
 for (const [operatorKey, category, expectedFare] of [

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 
 import type { AppConfig, OperatorRuntimeConfig } from "./config.js";
@@ -38,6 +39,21 @@ function json(response: ServerResponse, status: number, body: unknown): void {
     "content-length": Buffer.byteLength(encoded),
   });
   response.end(encoded);
+}
+
+function bearerTokenMatches(
+  request: IncomingMessage,
+  expectedToken: string,
+): boolean {
+  const actual = request.headers.authorization;
+  if (!actual) return false;
+  const expected = `Bearer ${expectedToken}`;
+  const actualBuffer = Buffer.from(actual);
+  const expectedBuffer = Buffer.from(expected);
+  return (
+    actualBuffer.length === expectedBuffer.length &&
+    timingSafeEqual(actualBuffer, expectedBuffer)
+  );
 }
 
 async function readJson(request: IncomingMessage): Promise<unknown> {
@@ -177,7 +193,7 @@ export async function createApp(
           const offers = await sources[operatorKey].search(
             searchQueryFromRequest(search),
           );
-          orders[operatorKey].cacheCatalogue(search.context.transaction_id, offers);
+          orders[operatorKey].cacheCatalogue(search.context, offers);
           return buildOnSearch(search, sources[operatorKey], operator, {
             publicBaseUrl: config.publicBaseUrl,
             contextTtl: config.contextTtl,
@@ -200,6 +216,17 @@ export async function createApp(
       return { context, message: { order } };
     } catch (error) {
       if (action === "search") throw error;
+      if (!(error instanceof OrderLifecycleError)) {
+        eventLogger({
+          transaction_id: request.context.transaction_id,
+          message_id: request.context.message_id,
+          action: onAction,
+          subscriber_id: operator.subscriberId,
+          operator: operatorKey,
+          outcome: "BUILD_ERROR",
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
       return {
         context,
         message: {},
@@ -208,7 +235,7 @@ export async function createApp(
             ? { code: error.code, message: error.message }
             : {
                 code: "INTERNAL-ERROR",
-                message: error instanceof Error ? error.message : String(error),
+                message: "Provider could not process the request",
               },
       };
     }
@@ -281,7 +308,24 @@ export async function createApp(
     }
     const orderMatch = url.pathname.match(/^\/orders\/([^/]+)$/);
     if (request.method === "GET" && orderMatch) {
-      const order = store.inspect(decodeURIComponent(orderMatch[1]));
+      response.setHeader("cache-control", "no-store");
+      if (!config.orderInspectionToken) {
+        json(response, 404, { error: "Not found" });
+        return;
+      }
+      if (!bearerTokenMatches(request, config.orderInspectionToken)) {
+        response.setHeader("www-authenticate", "Bearer");
+        json(response, 401, { error: "Unauthorized" });
+        return;
+      }
+      let orderId: string;
+      try {
+        orderId = decodeURIComponent(orderMatch[1]);
+      } catch {
+        json(response, 400, { error: "Invalid order id encoding" });
+        return;
+      }
+      const order = store.inspect(orderId);
       json(response, order ? 200 : 404, order ?? { error: "Order not found" });
       return;
     }
@@ -330,6 +374,16 @@ export async function createApp(
     const protocolRequest = body as ActionRequest;
     if (action === "search") {
       const search = protocolRequest as SearchRequest;
+      try {
+        searchQueryFromRequest(search);
+      } catch (error) {
+        json(
+          response,
+          400,
+          nack(error instanceof Error ? error.message : "Invalid search query"),
+        );
+        return;
+      }
       const expectedCategory = sources[operatorKey].operator.vehicleCategory;
       const requestedCategory = search.message.intent.fulfillment.vehicle?.category;
       if (requestedCategory && requestedCategory !== expectedCategory) {

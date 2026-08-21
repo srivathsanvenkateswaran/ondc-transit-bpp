@@ -789,7 +789,7 @@ Endpoints, one set per operator prefix:
 | POST | `/{operator}/confirm` | TRV11 `confirm` | `/on_confirm` |
 | POST | `/{operator}/status` | TRV11 `status` | `/on_status` |
 | GET | `/healthz` | - | - |
-| GET | `/orders/{order_id}` | - | - (debug/inspection only, not protocol) |
+| GET | `/orders/{order_id}` | Bearer token | - (optional debug/inspection only, not protocol) |
 
 `{operator}` is `bmtc` or `bmrcl`. Two BPP protocol-server pairs, two webhook
 URLs, one process.

@@ -8,6 +8,7 @@ import type {
   SearchQuery,
   TransitOffer,
 } from "./types.js";
+import { validateOfferSet } from "./validate.js";
 
 export const HTTP_JOURNEY_SOURCE_TIMEOUT_MS = 5_000;
 
@@ -98,7 +99,9 @@ export class HttpJourneySource implements JourneySource {
           )}`,
         );
       }
-      return structuredClone((body as JourneySourceResponse).offers);
+      const offers = (body as JourneySourceResponse).offers;
+      validateOfferSet(offers, "HTTP journey source response");
+      return structuredClone(offers);
     } catch (error) {
       this.eventLogger({
         action: "journey_source",

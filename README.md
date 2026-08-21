@@ -534,6 +534,7 @@ public URLs, or ports.
 | Variable | Local default | Purpose |
 | --- | --- | --- |
 | `PROVIDER_HOST` | `0.0.0.0` | Provider HTTP bind address |
+| `HOST_BIND_ADDRESS` | `127.0.0.1` | Host interface used for all published Compose ports |
 | `PROVIDER_PORT` | `7001` | Provider container and host port |
 | `PROVIDER_PUBLIC_BASE_URL` | `http://transit-bpp:7001` | Public base used in protocol URLs such as static terms |
 | `JOURNEY_SOURCE` | `fixture` | Journey source selector: `fixture` or `http` |
@@ -543,6 +544,7 @@ public URLs, or ports.
 | `TRV11_SCHEMA_ROOT` | `/app/schemas/ondc_trv11/2.0.1` | Input and output schema directory |
 | `CALLBACK_TIMEOUT_MS` | `3000` | Provider-to-BPP-client HTTP timeout |
 | `CONTEXT_TTL` | `PT30S` | TTL put on generated provider callbacks before ONIX normalization |
+| `ORDER_INSPECTION_TOKEN` | empty | Enables `GET /orders/{order_id}` with a matching bearer token; disabled when empty |
 | `BAP_ID` | `bap.transit.localhost` | Local BAP subscriber ID |
 | `BAP_URI` | `http://bap-network:5002` | BAP network subscriber URI |
 | `BAP_CLIENT_PORT` | `5001` | Synchronous BAP client port |

@@ -3,7 +3,15 @@
   "$id": "https://ondc.local/schemas/ondc-trv11/2.0.1/on_status.json",
   "type": "object",
   "required": ["context"],
-  "oneOf": [{ "required": ["message"] }, { "required": ["error"] }],
+  "anyOf": [
+    {
+      "required": ["message"],
+      "properties": {
+        "message": { "type": "object", "required": ["order"] }
+      }
+    },
+    { "required": ["error"] }
+  ],
   "properties": {
     "context": {
       "allOf": [
@@ -13,7 +21,6 @@
     },
     "message": {
       "type": "object",
-      "required": ["order"],
       "properties": {
         "order": {
           "$ref": "https://ondc.local/schemas/ondc-trv11/2.0.1/common.json#/$defs/confirmedOrder"

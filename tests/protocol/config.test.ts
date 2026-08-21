@@ -59,3 +59,31 @@ test("invalid port fails at startup", () => {
   environment.PROVIDER_PORT = "not-a-port";
   assert.throws(() => loadConfig(environment), /PROVIDER_PORT must be/);
 });
+
+test("invalid callback configuration fails at startup", () => {
+  const invalidUrl = validEnvironment();
+  invalidUrl.BMTC_CALLBACK_URL = "not-a-url";
+  assert.throws(
+    () => loadConfig(invalidUrl),
+    /BMTC_CALLBACK_URL must be a valid absolute URL/,
+  );
+
+  const zeroTimeout = validEnvironment();
+  zeroTimeout.CALLBACK_TIMEOUT_MS = "0";
+  assert.throws(
+    () => loadConfig(zeroTimeout),
+    /CALLBACK_TIMEOUT_MS must be an integer from 1/,
+  );
+});
+
+test("order inspection remains disabled when its token is empty", () => {
+  const environment = validEnvironment();
+  environment.ORDER_INSPECTION_TOKEN = "  ";
+  assert.equal(loadConfig(environment).orderInspectionToken, undefined);
+
+  environment.ORDER_INSPECTION_TOKEN = "inspection-secret";
+  assert.equal(
+    loadConfig(environment).orderInspectionToken,
+    "inspection-secret",
+  );
+});

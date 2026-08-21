@@ -79,6 +79,10 @@ Important constraints include:
   float or applies floating-point rounding.
 - `productCode` is `SJT`, so the item remains a fare product rather than a
   route or vehicle.
+- `offerId` values must be unique within a response; duplicate identities are
+  rejected before the catalogue is cached.
+- `validity` must be a positive day/hour/minute/second ISO 8601 duration that
+  the ticket issuer supports (for example, `PT2H`).
 - `route` contains at least two called stops in travel order. Road-shape
   vertices do not belong here.
 - Optional `nameLocal`, `isInterchange`, `changeHint`, and `routeColor` values

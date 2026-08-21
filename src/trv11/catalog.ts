@@ -6,25 +6,61 @@ import type {
   SearchQuery,
   TransitOffer,
 } from "../sources/types.js";
+import { serviceInstant } from "./time.js";
+
+const DECIMAL_COORDINATE = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
 
 function parseGps(value: string | undefined) {
   if (!value) return undefined;
-  const [lat, lon] = value.split(",").map((part) => Number(part.trim()));
-  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : undefined;
+  const parts = value.split(",");
+  if (parts.length !== 2) {
+    throw new Error(
+      `GPS must contain exactly one latitude/longitude pair: ${value}`,
+    );
+  }
+  const coordinates = parts.map((part) => part.trim());
+  if (coordinates.some((part) => !DECIMAL_COORDINATE.test(part))) {
+    throw new Error(`GPS coordinates must be decimal numbers: ${value}`);
+  }
+  const [lat, lon] = coordinates.map(Number);
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lon) ||
+    lat < -90 ||
+    lat > 90 ||
+    lon < -180 ||
+    lon > 180
+  ) {
+    throw new Error(`GPS coordinates are outside valid ranges: ${value}`);
+  }
+  return { lat, lon };
 }
 
 export function searchQueryFromRequest(request: SearchRequest): SearchQuery {
   const fulfillment = request.message.intent.fulfillment;
-  const start = fulfillment.stops.find((stop) => stop.type === "START");
-  const end = fulfillment.stops.find((stop) => stop.type === "END");
-  if (!start || !end) {
-    throw new Error("Search fulfillment must contain START and END stops");
+  const starts = fulfillment.stops.filter((stop) => stop.type === "START");
+  const ends = fulfillment.stops.filter((stop) => stop.type === "END");
+  if (starts.length !== 1 || ends.length !== 1) {
+    throw new Error(
+      "Search fulfillment must contain exactly one START and one END stop",
+    );
+  }
+  const [start] = starts;
+  const [end] = ends;
+  const fromCode = start.location.descriptor?.code?.trim();
+  const toCode = end.location.descriptor?.code?.trim();
+  const fromGps = parseGps(start.location.gps);
+  const toGps = parseGps(end.location.gps);
+  if ((!fromCode && !fromGps) || (!toCode && !toGps)) {
+    throw new Error(
+      "Each search endpoint must contain a stop code or valid GPS",
+    );
   }
   return {
-    fromCode: start.location.descriptor?.code,
-    toCode: end.location.descriptor?.code,
-    fromGps: parseGps(start.location.gps),
-    toGps: parseGps(end.location.gps),
+    ...(fromCode ? { fromCode } : {}),
+    ...(toCode ? { toCode } : {}),
+    ...(fromGps ? { fromGps } : {}),
+    ...(toGps ? { toGps } : {}),
     departAt: start.time?.timestamp ?? request.context.timestamp,
     cityCode: request.context.location.city.code,
   };
@@ -108,11 +144,6 @@ export function tripFulfillmentForOffer(
       },
     ],
   };
-}
-
-function serviceInstant(timestamp: string, hhmm: string): string {
-  const date = timestamp.slice(0, 10);
-  return `${date}T${hhmm}:00.000+05:30`;
 }
 
 export async function buildOnSearch(

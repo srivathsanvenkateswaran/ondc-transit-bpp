@@ -43,8 +43,15 @@
         "offerId": { "type": "string", "minLength": 1 },
         "productCode": { "const": "SJT" },
         "productName": { "type": "string", "minLength": 1 },
-        "farePaise": { "type": "integer", "minimum": 0 },
-        "validity": { "type": "string", "pattern": "^P" },
+        "farePaise": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "validity": {
+          "type": "string",
+          "pattern": "^P(?:(\\d+)D)?(?:T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?)?$"
+        },
         "route": {
           "type": "array",
           "minItems": 2,

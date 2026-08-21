@@ -42,7 +42,7 @@
         "bap_uri": { "type": "string", "minLength": 1 },
         "transaction_id": { "type": "string", "minLength": 1 },
         "message_id": { "type": "string", "minLength": 1 },
-        "timestamp": { "type": "string", "minLength": 1 },
+        "timestamp": { "type": "string", "format": "date-time" },
         "ttl": { "type": "string", "pattern": "^P" }
       }
     },
@@ -81,6 +81,12 @@
                               "code": { "type": "string", "minLength": 1 }
                             }
                           }
+                        }
+                      },
+                      "time": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": { "type": "string", "format": "date-time" }
                         }
                       }
                     }

@@ -14,6 +14,7 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     schemaRoot: new URL("../schemas/ondc_trv11/2.0.1", import.meta.url).pathname,
     callbackTimeoutMs: 1000,
     contextTtl: "PT30S",
+    orderInspectionToken: "test-inspection-token",
     operators: {
       bmtc: {
         key: "bmtc",

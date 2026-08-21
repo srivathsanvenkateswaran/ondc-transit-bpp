@@ -23,6 +23,7 @@ import {
   durationMilliseconds,
   specimenTicketPayload,
   ticketAuthorization,
+  type QrEncoder,
 } from "../../src/trv11/ticket.js";
 import { testConfig } from "../helpers.js";
 
@@ -151,6 +152,7 @@ function service(
   operator: OperatorKey,
   store: InMemoryOrderStore,
   idFactory = () => `${operator}12345678`,
+  qrEncoder: QrEncoder = async (payload) => Buffer.from(`PNG:${payload}`),
 ) {
   const config = testConfig();
   const category = operator === "bmtc" ? "BUS" : "METRO";
@@ -163,7 +165,7 @@ function service(
       publicBaseUrl: config.publicBaseUrl,
       now: () => new Date("2026-08-20T05:00:00.000Z"),
       idFactory,
-      qrEncoder: async (payload) => Buffer.from(`PNG:${payload}`),
+      qrEncoder,
     },
   );
 }
@@ -176,7 +178,10 @@ function rupeesToPaise(value: string): number {
 test("on_select quote equals BASE_FARE breakup with integer-paise pricing", () => {
   const store = new InMemoryOrderStore();
   const orders = service("bmtc", store);
-  orders.cacheCatalogue(transactionId, [offer("I1", 2700), offer("I2", 1005)]);
+  orders.cacheCatalogue(context("bmtc", "select"), [
+    offer("I1", 2700),
+    offer("I2", 1005),
+  ]);
 
   const request = selectRequest("bmtc", [
       ["I1", 2],
@@ -211,7 +216,7 @@ test("on_select quote equals BASE_FARE breakup with integer-paise pricing", () =
 test("unknown selected item returns a domain error instead of a quote", () => {
   const store = new InMemoryOrderStore();
   const orders = service("bmtc", store);
-  orders.cacheCatalogue(transactionId, [offer("I1", 2700)]);
+  orders.cacheCatalogue(context("bmtc", "select"), [offer("I1", 2700)]);
 
   assert.throws(
     () => orders.select(selectRequest("bmtc", [["UNKNOWN", 1]])),
@@ -223,7 +228,7 @@ test("unknown selected item returns a domain error instead of a quote", () => {
 test("init carries the quote, billing and NOT_PAID payment forward", () => {
   const store = new InMemoryOrderStore();
   const orders = service("bmtc", store);
-  orders.cacheCatalogue(transactionId, [offer("I1", 2700)]);
+  orders.cacheCatalogue(context("bmtc", "select"), [offer("I1", 2700)]);
 
   const request = initRequest("bmtc", [["I1", 2]]);
   const order = orders.init(request) as any;
@@ -245,7 +250,7 @@ test("init carries the quote, billing and NOT_PAID payment forward", () => {
 test("confirm mints one clearly marked QR ticket per selected unit", async () => {
   const store = new InMemoryOrderStore();
   const orders = service("bmtc", store);
-  orders.cacheCatalogue(transactionId, [offer("I1", 2700)]);
+  orders.cacheCatalogue(context("bmtc", "select"), [offer("I1", 2700)]);
 
   const request = confirmRequest("bmtc", [["I1", 2]]);
   const order = (await orders.confirm(request)) as any;
@@ -289,10 +294,63 @@ test("confirm mints one clearly marked QR ticket per selected unit", async () =>
   );
 });
 
+test("confirm retries return the original order without minting another ticket", async () => {
+  const store = new InMemoryOrderStore();
+  let generatedIds = 0;
+  const orders = service("bmtc", store, () => `generated-${++generatedIds}`);
+  orders.cacheCatalogue(context("bmtc", "select"), [offer("I1", 2700)]);
+  const request = confirmRequest("bmtc", [["I1", 1]]);
+
+  const first = await orders.confirm(request);
+  const retried = await orders.confirm({
+    ...request,
+    context: { ...request.context, message_id: "confirm-retry-message-id" },
+  });
+
+  assert.deepEqual(retried, first);
+  assert.equal(generatedIds, 1);
+});
+
+test("concurrent confirm retries share one in-flight confirmation", async () => {
+  const store = new InMemoryOrderStore();
+  let generatedIds = 0;
+  let releaseEncoder!: () => void;
+  let encoderStarted!: () => void;
+  const started = new Promise<void>((resolve) => {
+    encoderStarted = resolve;
+  });
+  const release = new Promise<void>((resolve) => {
+    releaseEncoder = resolve;
+  });
+  const orders = service(
+    "bmtc",
+    store,
+    () => `generated-${++generatedIds}`,
+    async (payload) => {
+      encoderStarted();
+      await release;
+      return Buffer.from(`PNG:${payload}`);
+    },
+  );
+  orders.cacheCatalogue(context("bmtc", "select"), [offer("I1", 2700)]);
+  const request = confirmRequest("bmtc", [["I1", 1]]);
+
+  const first = orders.confirm(request);
+  await started;
+  const concurrentRetry = orders.confirm({
+    ...request,
+    context: { ...request.context, message_id: "concurrent-retry-message-id" },
+  });
+  releaseEncoder();
+
+  assert.deepEqual(await concurrentRetry, await first);
+  assert.equal(generatedIds, 1);
+});
+
 test("status returns the exact stored order", async () => {
   const store = new InMemoryOrderStore();
   const orders = service("bmtc", store);
-  orders.cacheCatalogue(transactionId, [offer("I1", 2700)]);
+  orders.cacheCatalogue(context("bmtc", "select"), [offer("I1", 2700)]);
   const confirmed = await orders.confirm(confirmRequest("bmtc", [["I1", 1]]));
   const orderId = confirmed.id as string;
   const request: StatusRequest = {
@@ -313,14 +371,49 @@ test("status returns the exact stored order", async () => {
   );
 });
 
+test("catalogues and status lookups are scoped to the BAP transaction", async () => {
+  const store = new InMemoryOrderStore();
+  const orders = service("bmtc", store);
+  orders.cacheCatalogue(context("bmtc", "select"), [offer("I1", 2700)]);
+
+  const otherBapSelect = selectRequest("bmtc", [["I1", 1]]);
+  otherBapSelect.context.bap_id = "other-bap.example.test";
+  otherBapSelect.context.bap_uri = "https://other-bap.example.test";
+  assert.throws(
+    () => orders.select(otherBapSelect),
+    (error: unknown) =>
+      error instanceof OrderLifecycleError &&
+      error.code === "CATALOGUE-NOT-FOUND",
+  );
+
+  const confirmed = await orders.confirm(confirmRequest("bmtc", [["I1", 1]]));
+  const wrongTransaction: StatusRequest = {
+    context: context(
+      "bmtc",
+      "status",
+      "99999999-2222-3333-4444-555555555555",
+    ) as StatusRequest["context"],
+    message: { order_id: confirmed.id as string },
+  };
+  assert.throws(
+    () => orders.status(wrongTransaction),
+    (error: unknown) =>
+      error instanceof OrderLifecycleError && error.code === "ORDER-NOT-FOUND",
+  );
+});
+
 test("shared store keeps bus and metro orders independent", async () => {
   const store = new InMemoryOrderStore();
   const busTransaction = "aaaaaaaa-2222-3333-4444-555555555555";
   const metroTransaction = "bbbbbbbb-2222-3333-4444-555555555555";
   const bus = service("bmtc", store, () => "bus12345678");
   const metro = service("bmrcl", store, () => "metro12345678");
-  bus.cacheCatalogue(busTransaction, [offer("I1", 2700, "BUS-ROUTE")]);
-  metro.cacheCatalogue(metroTransaction, [offer("I1", 3000, "METRO-LINE")]);
+  bus.cacheCatalogue(context("bmtc", "select", busTransaction), [
+    offer("I1", 2700, "BUS-ROUTE"),
+  ]);
+  metro.cacheCatalogue(context("bmrcl", "select", metroTransaction), [
+    offer("I1", 3000, "METRO-LINE"),
+  ]);
 
   const busOrder = await bus.confirm(
     confirmRequest("bmtc", [["I1", 1]], busTransaction),

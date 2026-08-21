@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016 # Single-quoted $names are yq variables.
 set -euo pipefail
+umask 077
 
-readonly ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly ROOT_DIR
 readonly IMAGE="fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23"
 
 # Every substitution below is `yq -yi --arg`, which only the python (kislyuk)
@@ -23,6 +26,7 @@ fi
 
 if [[ -f "${ROOT_DIR}/../../.env" ]]; then
   set -a
+  # shellcheck source=/dev/null
   source "${ROOT_DIR}/../../.env"
   set +a
 fi
@@ -42,12 +46,17 @@ readonly BMRCL_WEBHOOK_URL_VALUE="${BMRCL_WEBHOOK_URL:-http://transit-bpp:${PROV
 readonly SEARCH_TTL_VALUE="${SEARCH_TTL:-PT4S}"
 
 mkdir -p "${ROOT_DIR}/runtime/config"
+chmod 700 "${ROOT_DIR}/runtime" "${ROOT_DIR}/runtime/config"
 
 generate_pair() {
   local output public_key private_key
   output="$(docker run --rm --platform linux/amd64 --entrypoint node "${IMAGE}" scripts/generate-keys.js)"
   public_key="$(awk '/Your Public Key/{getline; gsub(/^ +| +$/, ""); print}' <<<"${output}")"
   private_key="$(awk '/Your Private Key/{getline; gsub(/^ +| +$/, ""); print}' <<<"${output}")"
+  if [[ -z "${public_key}" || -z "${private_key}" ]]; then
+    printf 'Could not extract a complete protocol-server key pair.\n' >&2
+    return 1
+  fi
   printf '%s\t%s\n' "${public_key}" "${private_key}"
 }
 
@@ -61,6 +70,7 @@ render_pair() {
   for source in "$@"; do
     destination="${ROOT_DIR}/runtime/config/$(basename "${source}")"
     cp "${ROOT_DIR}/config/${source}" "${destination}"
+    chmod 600 "${destination}"
     yq -yi --arg public_key "${public_key}" --arg private_key "${private_key}" \
       '.app.publicKey = $public_key | .app.privateKey = $private_key' "${destination}"
 

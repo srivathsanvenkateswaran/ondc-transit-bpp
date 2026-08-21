@@ -26,7 +26,12 @@ import {
   ticketAuthorization,
   type QrEncoder,
 } from "../trv11/ticket.js";
-import { InMemoryOrderStore, OrderLifecycleError } from "./store.js";
+import { serviceInstant } from "../trv11/time.js";
+import {
+  InMemoryOrderStore,
+  OrderLifecycleError,
+  type TransactionIdentity,
+} from "./store.js";
 
 interface ServiceOptions {
   now?: () => Date;
@@ -45,10 +50,6 @@ interface TicketSpec {
 interface BaseOrder {
   order: ProtocolOrder;
   tickets: TicketSpec[];
-}
-
-function serviceInstant(timestamp: string, hhmm: string): string {
-  return `${timestamp.slice(0, 10)}T${hhmm}:00.000+05:30`;
 }
 
 function ticketTags(parentId: string) {
@@ -104,6 +105,7 @@ export class TransitOrderService {
   private readonly now: () => Date;
   private readonly idFactory: () => string;
   private readonly qrEncoder: QrEncoder;
+  private readonly confirmations = new Map<string, Promise<ProtocolOrder>>();
 
   constructor(
     private readonly operatorKey: OperatorKey,
@@ -117,8 +119,11 @@ export class TransitOrderService {
     this.qrEncoder = options.qrEncoder ?? encodeQrPng;
   }
 
-  cacheCatalogue(transactionId: string, offers: TransitOffer[]): void {
-    this.store.cacheCatalogue(this.operatorKey, transactionId, offers);
+  cacheCatalogue(
+    context: Pick<Trv11Context, "transaction_id" | "bap_id" | "bap_uri">,
+    offers: TransitOffer[],
+  ): void {
+    this.store.cacheCatalogue(this.operatorKey, this.identity(context), offers);
   }
 
   select(request: SelectRequest): ProtocolOrder {
@@ -144,15 +149,45 @@ export class TransitOrderService {
 
   async confirm(request: ConfirmRequest): Promise<ProtocolOrder> {
     this.assertPaymentStatus(request.message.order.payments, "PAID");
+    this.assertBppAddress(request.context);
+    const identity = this.identity(request.context);
+    const confirmed = this.store.findByTransaction(this.operatorKey, identity);
+    if (confirmed) return confirmed;
+
+    const confirmationKey = JSON.stringify(identity);
+    const pending = this.confirmations.get(confirmationKey);
+    if (pending) return structuredClone(await pending);
+
+    const confirmation = this.confirmNew(request, identity);
+    this.confirmations.set(confirmationKey, confirmation);
+    try {
+      return structuredClone(await confirmation);
+    } finally {
+      if (this.confirmations.get(confirmationKey) === confirmation) {
+        this.confirmations.delete(confirmationKey);
+      }
+    }
+  }
+
+  private async confirmNew(
+    request: ConfirmRequest,
+    identity: TransactionIdentity,
+  ): Promise<ProtocolOrder> {
     const { order, tickets } = this.baseOrder(
       request.context,
       request.message.order,
     );
     const issuedAt = this.now();
-    const orderId = `SPECIMEN-ORD-${this.operatorKey.toUpperCase()}-${this.idFactory()
-      .replace(/[^A-Za-z0-9]/g, "")
-      .slice(0, 8)
-      .toUpperCase()}`;
+    const idComponent = this.idFactory().replace(/[^A-Za-z0-9]/g, "");
+    if (!idComponent) {
+      throw new OrderLifecycleError(
+        "INVALID-ORDER-ID",
+        "Order id generator returned no usable characters",
+      );
+    }
+    const orderId =
+      `SPECIMEN-ORD-${this.operatorKey.toUpperCase()}-` +
+      idComponent.toUpperCase();
     const ticketById = new Map(tickets.map((ticket) => [ticket.id, ticket]));
     const fulfillments = await Promise.all(
       order.fulfillments.map(async (fulfillment) => {
@@ -201,7 +236,7 @@ export class TransitOrderService {
       created_at: issuedAt.toISOString(),
       updated_at: issuedAt.toISOString(),
     } satisfies ProtocolOrder & { id: string };
-    this.store.save(this.operatorKey, request.context.transaction_id, confirmed);
+    this.store.save(this.operatorKey, identity, confirmed);
     return structuredClone(confirmed);
   }
 
@@ -214,7 +249,11 @@ export class TransitOrderService {
         "status requires order_id or ref_id",
       );
     }
-    return this.store.get(this.operatorKey, orderId);
+    return this.store.get(
+      this.operatorKey,
+      this.identity(request.context),
+      orderId,
+    );
   }
 
   private baseOrder(
@@ -246,7 +285,7 @@ export class TransitOrderService {
     });
     const offers = this.store.selectedOffers(
       this.operatorKey,
-      context.transaction_id,
+      this.identity(context),
       itemIds,
     );
     const tickets: TicketSpec[] = [];
@@ -376,5 +415,15 @@ export class TransitOrderService {
         `Request must address ${this.runtime.subscriberId} at ${this.runtime.subscriberUri}`,
       );
     }
+  }
+
+  private identity(
+    context: Pick<Trv11Context, "transaction_id" | "bap_id" | "bap_uri">,
+  ): TransactionIdentity {
+    return {
+      transactionId: context.transaction_id,
+      bapId: context.bap_id,
+      bapUri: context.bap_uri,
+    };
   }
 }
