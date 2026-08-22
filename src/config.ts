@@ -23,6 +23,7 @@ export interface AppConfig {
   contextTtl: string;
   orderInspectionToken?: string;
   operators: Record<OperatorKey, OperatorRuntimeConfig>;
+  fleetSimulatorUrl?: string;
 }
 
 function required(env: NodeJS.ProcessEnv, name: string): string {
@@ -99,6 +100,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       2_147_483_647,
     ),
     contextTtl: required(env, "CONTEXT_TTL"),
+    ...(env.FLEET_SIMULATOR_URL?.trim() ? { fleetSimulatorUrl: parseHttpUrl(env.FLEET_SIMULATOR_URL.trim(), "FLEET_SIMULATOR_URL") } : {}),
     ...(orderInspectionToken ? { orderInspectionToken } : {}),
     operators: {
       bmtc: {

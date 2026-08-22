@@ -166,14 +166,14 @@ export async function createApp(
       sources.bmtc.operator,
       config.operators.bmtc,
       store,
-      { publicBaseUrl: config.publicBaseUrl },
+      { publicBaseUrl: config.publicBaseUrl, fleetSimulatorUrl: config.fleetSimulatorUrl },
     ),
     bmrcl: new TransitOrderService(
       "bmrcl",
       sources.bmrcl.operator,
       config.operators.bmrcl,
       store,
-      { publicBaseUrl: config.publicBaseUrl },
+      { publicBaseUrl: config.publicBaseUrl, fleetSimulatorUrl: config.fleetSimulatorUrl },
     ),
   };
 
