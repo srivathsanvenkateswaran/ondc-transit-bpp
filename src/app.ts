@@ -291,6 +291,22 @@ export async function createApp(
 
   return createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", "http://provider.invalid");
+    if (request.method === "GET" && url.pathname === "/") {
+      json(response, 200, {
+        service: "ondc-transit-bpp",
+        description: "ONDC TRV11 BPP for Bengaluru transit (BMTC bus + BMRCL metro)",
+        journeySource: config.journeySource,
+        operators: Object.keys(sources),
+        endpoints: {
+          health: "GET /healthz",
+          terms: "GET /terms",
+          orders: "GET /orders/:orderId  (requires Bearer token)",
+          bmtc: ["POST /bmtc/search", "POST /bmtc/select", "POST /bmtc/init", "POST /bmtc/confirm", "POST /bmtc/status", "POST /bmtc/inbound"],
+          bmrcl: ["POST /bmrcl/search", "POST /bmrcl/select", "POST /bmrcl/init", "POST /bmrcl/confirm", "POST /bmrcl/status", "POST /bmrcl/inbound"],
+        },
+      });
+      return;
+    }
     if (request.method === "GET" && url.pathname === "/healthz") {
       json(response, 200, {
         status: "up",
