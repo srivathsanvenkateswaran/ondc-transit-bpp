@@ -49,6 +49,14 @@ function integerInRange(
   return value;
 }
 
+/** Heroku sets `PORT`; local compose and the Dockerfile use `PROVIDER_PORT`. */
+function resolveProviderPort(env: NodeJS.ProcessEnv): number {
+  const merged: NodeJS.ProcessEnv = env.PORT?.trim()
+    ? { ...env, PROVIDER_PORT: env.PORT }
+    : env;
+  return integerInRange(merged, "PROVIDER_PORT", 0, 65_535);
+}
+
 function parseHttpUrl(value: string, name: string): string {
   let url: URL;
   try {
@@ -81,7 +89,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
   return {
     host: required(env, "PROVIDER_HOST"),
-    port: integerInRange(env, "PROVIDER_PORT", 0, 65_535),
+    port: resolveProviderPort(env),
     publicBaseUrl: httpUrl(env, "PROVIDER_PUBLIC_BASE_URL"),
     journeySource,
     ...(journeySourceUrl ? { journeySourceUrl } : {}),

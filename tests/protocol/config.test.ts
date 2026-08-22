@@ -60,6 +60,18 @@ test("invalid port fails at startup", () => {
   assert.throws(() => loadConfig(environment), /PROVIDER_PORT must be/);
 });
 
+test("PORT is used when Heroku sets it alongside the image default", () => {
+  const environment = validEnvironment();
+  environment.PORT = "45678";
+  assert.equal(loadConfig(environment).port, 45678);
+});
+
+test("PROVIDER_PORT is used when PORT is unset", () => {
+  const environment = validEnvironment();
+  delete environment.PORT;
+  assert.equal(loadConfig(environment).port, 7001);
+});
+
 test("invalid callback configuration fails at startup", () => {
   const invalidUrl = validEnvironment();
   invalidUrl.BMTC_CALLBACK_URL = "not-a-url";
