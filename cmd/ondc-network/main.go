@@ -124,6 +124,10 @@ func runSinglePort(ctx context.Context, logger *slog.Logger, app *network.App, r
 	mux.Handle("/bmtc/network/", http.StripPrefix("/bmtc/network", app.BPPNetworkHandler("bmtc")))
 	mux.Handle("/bmrcl/client/", http.StripPrefix("/bmrcl/client", app.BPPClientHandler("bmrcl")))
 	mux.Handle("/bmrcl/network/", http.StripPrefix("/bmrcl/network", app.BPPNetworkHandler("bmrcl")))
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"service":"ondc-network","status":"up"}`))
+	})
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"status":"up"}`))
