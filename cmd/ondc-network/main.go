@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -84,6 +85,9 @@ func run(logger *slog.Logger) error {
 	if err = app.Start(ctx); err != nil {
 		return err
 	}
+	if port := os.Getenv("PORT"); port != "" {
+		return runSinglePort(ctx, logger, app, reg, port, cfg.CollectionTTL)
+	}
 	servers := []serverSpec{{"registry", env("REGISTRY_LISTEN_ADDR", ":3030"), network.RegistryHandler(reg)}, {"gateway", env("GATEWAY_LISTEN_ADDR", ":4030"), app.GatewayHTTPHandler()}, {"bap-client", env("BAP_CLIENT_LISTEN_ADDR", ":5001"), app.ClientHandler()}, {"bap-network", env("BAP_NETWORK_LISTEN_ADDR", ":5002"), app.BAPNetworkHandler()}, {"bmtc-client", env("BMTC_CLIENT_LISTEN_ADDR", ":6001"), app.BPPClientHandler("bmtc")}, {"bmtc-network", env("BMTC_NETWORK_LISTEN_ADDR", ":6002"), app.BPPNetworkHandler("bmtc")}, {"bmrcl-client", env("BMRCL_CLIENT_LISTEN_ADDR", ":6101"), app.BPPClientHandler("bmrcl")}, {"bmrcl-network", env("BMRCL_NETWORK_LISTEN_ADDR", ":6102"), app.BPPNetworkHandler("bmrcl")}}
 	errCh := make(chan error, len(servers))
 	httpServers := make([]*http.Server, 0, len(servers))
@@ -109,6 +113,59 @@ func run(logger *slog.Logger) error {
 	}
 	return nil
 }
+
+func runSinglePort(ctx context.Context, logger *slog.Logger, app *network.App, reg registry.Store, port string, collectionTTL time.Duration) error {
+	mux := http.NewServeMux()
+	mux.Handle("/registry/", http.StripPrefix("/registry", network.RegistryHandler(reg)))
+	mux.Handle("/bg/", preservePathMount("/bg", app.GatewayHTTPHandler()))
+	mux.Handle("/bap/client/", http.StripPrefix("/bap/client", app.ClientHandler()))
+	mux.Handle("/bap/network/", http.StripPrefix("/bap/network", app.BAPNetworkHandler()))
+	mux.Handle("/bmtc/client/", http.StripPrefix("/bmtc/client", app.BPPClientHandler("bmtc")))
+	mux.Handle("/bmtc/network/", http.StripPrefix("/bmtc/network", app.BPPNetworkHandler("bmtc")))
+	mux.Handle("/bmrcl/client/", http.StripPrefix("/bmrcl/client", app.BPPClientHandler("bmrcl")))
+	mux.Handle("/bmrcl/network/", http.StripPrefix("/bmrcl/network", app.BPPNetworkHandler("bmrcl")))
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"status":"up"}`))
+	})
+
+	addr := ":" + port
+	server := &http.Server{
+		Addr:              addr,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      collectionTTL + 15*time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    32 << 10,
+	}
+	logger.Info("single-port listener started", "address", addr)
+	errCh := make(chan error, 1)
+	go func() {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errCh <- err
+		}
+	}()
+	select {
+	case <-ctx.Done():
+	case err := <-errCh:
+		return err
+	}
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	return server.Shutdown(shutdownCtx)
+}
+
+func preservePathMount(prefix string, handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != prefix && !strings.HasPrefix(r.URL.Path, prefix+"/") {
+			http.NotFound(w, r)
+			return
+		}
+		handler.ServeHTTP(w, r)
+	})
+}
+
 func identity(dir, name, id, uri, keyID string) (network.Identity, error) {
 	privateKey, err := keys.LoadOrCreate(dir, name)
 	return network.Identity{ID: id, URI: uri, KeyID: keyID, PrivateKey: privateKey}, err
