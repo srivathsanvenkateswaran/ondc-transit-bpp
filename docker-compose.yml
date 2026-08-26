@@ -1,4 +1,73 @@
-name: onix-sync-spike
+name: ondc-transit-go
 
-include:
-  - path: stage-0/onix-sync/docker-compose.yml
+services:
+  ondc-network:
+    build:
+      context: .
+      dockerfile: Dockerfile.network
+    image: ondc-transit-network:local
+    environment:
+      NETWORK_MODE: collapsed
+      NETWORK_KEY_DIR: /var/lib/ondc-network/keys
+      REGISTRY_FILE: /var/lib/ondc-network/registry.json
+      COLLECTION_TTL: ${COLLECTION_TTL:-4s}
+      BMTC_WEBHOOK_URL: http://transit-bpp:7001/bmtc/inbound
+      BMRCL_WEBHOOK_URL: http://transit-bpp:7001/bmrcl/inbound
+      BAP_URI: http://ondc-network:5002
+      GATEWAY_URI: http://ondc-network:4030/bg
+      BMTC_BPP_URI: http://ondc-network:6002
+      BMRCL_BPP_URI: http://ondc-network:6102
+    ports:
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:3030:3030"
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:4030:4030"
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:5001:5001"
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:5002:5002"
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:6001:6001"
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:6002:6002"
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:6101:6101"
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:6102:6102"
+    networks:
+      default:
+        aliases:
+          - registry
+          - gateway
+          - bap-client
+          - bap-network
+          - bmtc-bpp-client
+          - bmtc-bpp-network
+          - bmrcl-bpp-client
+          - bmrcl-bpp-network
+    volumes:
+      - go_network_state:/var/lib/ondc-network
+    restart: unless-stopped
+
+  transit-bpp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ondc-transit-bpp:local
+    depends_on:
+      - ondc-network
+    environment:
+      PROVIDER_HOST: 0.0.0.0
+      PROVIDER_PORT: 7001
+      PROVIDER_PUBLIC_BASE_URL: http://transit-bpp:7001
+      JOURNEY_SOURCE: ${JOURNEY_SOURCE:-fixture}
+      FIXTURE_ROOT: /app/fixtures
+      TRV11_SCHEMA_ROOT: /app/schemas/ondc_trv11/2.0.1
+      CALLBACK_TIMEOUT_MS: ${CALLBACK_TIMEOUT_MS:-3000}
+      CONTEXT_TTL: ${CONTEXT_TTL:-PT30S}
+      BMTC_BPP_ID: bmtc.bpp.transit.localhost
+      BMTC_BPP_URI: http://ondc-network:6002
+      BMTC_CALLBACK_URL: http://ondc-network:6001/on_search
+      BMTC_CALLBACK_DELAY_MS: ${BMTC_CALLBACK_DELAY_MS:-0}
+      BMRCL_BPP_ID: bmrcl.bpp.transit.localhost
+      BMRCL_BPP_URI: http://ondc-network:6102
+      BMRCL_CALLBACK_URL: http://ondc-network:6101/on_search
+      BMRCL_CALLBACK_DELAY_MS: ${BMRCL_CALLBACK_DELAY_MS:-0}
+    ports:
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:7001:7001"
+    restart: unless-stopped
+
+volumes:
+  go_network_state:

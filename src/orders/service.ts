@@ -38,6 +38,7 @@ interface ServiceOptions {
   idFactory?: () => string;
   qrEncoder?: QrEncoder;
   publicBaseUrl: string;
+  fleetSimulatorUrl?: string;
 }
 
 interface TicketSpec {
@@ -237,6 +238,9 @@ export class TransitOrderService {
       updated_at: issuedAt.toISOString(),
     } satisfies ProtocolOrder & { id: string };
     this.store.save(this.operatorKey, identity, confirmed);
+    if (this.options.fleetSimulatorUrl) {
+      void fetch(this.options.fleetSimulatorUrl + '/fleet/report-sale', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ timestamp: issuedAt.toISOString() }), signal: AbortSignal.timeout(1000) }).catch(() => undefined)
+    }
     return structuredClone(confirmed);
   }
 
