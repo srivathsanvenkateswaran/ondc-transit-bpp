@@ -54,6 +54,54 @@
     }
   },
   "$defs": {
+    "tripFulfillment": {
+      "type": "object",
+      "required": ["id", "type", "stops", "vehicle", "tags"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "TRIP" },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "location"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "parent_stop_id": { "type": "string", "minLength": 1 },
+              "type": {
+                "enum": ["START", "INTERMEDIATE_STOP", "TRANSIT_STOP", "END"]
+              },
+              "location": {
+                "type": "object",
+                "required": ["descriptor", "gps"],
+                "properties": {
+                  "descriptor": { "$ref": "#/$defs/descriptor" },
+                  "gps": { "type": "string", "minLength": 3 }
+                }
+              }
+            }
+          }
+        },
+        "vehicle": {
+          "type": "object",
+          "required": ["category"],
+          "properties": {
+            "category": { "enum": ["BUS", "METRO"] }
+          }
+        },
+        "tags": { "type": "array", "minItems": 1 }
+      }
+    },
+    "passFulfillment": {
+      "type": "object",
+      "required": ["id", "type", "tags"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "PASS" },
+        "tags": { "type": "array", "minItems": 1 }
+      }
+    },
     "descriptor": {
       "type": "object",
       "required": ["name"],
@@ -153,43 +201,10 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "object",
-            "required": ["id", "type", "stops", "vehicle", "tags"],
-            "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "type": { "const": "TRIP" },
-              "stops": {
-                "type": "array",
-                "minItems": 2,
-                "items": {
-                  "type": "object",
-                  "required": ["id", "type", "location"],
-                  "properties": {
-                    "id": { "type": "string", "minLength": 1 },
-                    "parent_stop_id": { "type": "string", "minLength": 1 },
-                    "type": {
-                      "enum": ["START", "INTERMEDIATE_STOP", "TRANSIT_STOP", "END"]
-                    },
-                    "location": {
-                      "type": "object",
-                      "required": ["descriptor", "gps"],
-                      "properties": {
-                        "descriptor": { "$ref": "#/$defs/descriptor" },
-                        "gps": { "type": "string", "minLength": 3 }
-                      }
-                    }
-                  }
-                }
-              },
-              "vehicle": {
-                "type": "object",
-                "required": ["category"],
-                "properties": {
-                  "category": { "enum": ["BUS", "METRO"] }
-                }
-              },
-              "tags": { "type": "array", "minItems": 1 }
-            }
+            "oneOf": [
+              { "$ref": "#/$defs/tripFulfillment" },
+              { "$ref": "#/$defs/passFulfillment" }
+            ]
           }
         },
         "payments": {

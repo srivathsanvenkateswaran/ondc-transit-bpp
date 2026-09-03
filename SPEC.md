@@ -77,6 +77,26 @@ This governs the entire feature and every artefact it produces.
 - **No ticket issued through this stack is valid for travel.** Every ticket
   rendered by a consuming app must carry a visible SPECIMEN mark, in every
   surface, at every size.
+- **No pass issued through this stack is valid for travel either, and its
+  credential rotating does not change that.** A pass carries a rotating TOTP
+  secret rather than a static QR (section 2.2, `docs/passes.md`), which makes
+  the artefact more convincing and therefore makes the SPECIMEN mark matter
+  more, not less. **Neither BMTC nor BMRCL will ever scan a code this stack
+  mints**, and the metro case additionally needs gate hardware that does not
+  exist anywhere in Bengaluru. Nothing here may imply one is coming.
+- **Every pass price and every concession rate is synthetic, and unevenly
+  sourced at that.** Prices are derived from named multiples of a synthetic
+  fare ceiling, never from an operator tariff, and each rendered price carries
+  a `SYNTHETIC_PASS_INFO` mark on the wire. The senior concession rate is a
+  real 2014 figure that may no longer be current and has no metro-specific
+  source; the student rate has no source of any kind. `docs/passes.md` states
+  each one's standing in the terms it actually deserves, and no output of this
+  stack may print any of them as though an operator had stated it.
+- **This stack verifies no rider's eligibility for anything.** It trusts a
+  concession `CLASS` tag a buyer app asserts and checks nothing behind it,
+  because the verification is a human, face-to-face, buyer-side attestation
+  performed outside this repository. It never accepts, stores or logs a
+  rider's identity, a document, or any identifier from one.
 - **No money moves.** `payment.status` is set to `PAID` in payloads because the
   protocol requires a value there; nothing is charged, no gateway is contacted,
   no settlement occurs. The fidelity table (section 9) states this in the terms
@@ -118,6 +138,18 @@ search → on_search → select → on_select → init → on_init → confirm �
   why this matters and how the consuming app stitches them into one itinerary.
 - **One specimen ticket per order**, carrying the QR authorization token the
   BPP returns.
+- **Passes, on a second category axis.** Nine `PASS`-category items - BMTC's
+  six bus passes and BMRCL's three metro ones, across day, weekly and monthly
+  windows - answered from a `search` whose intent names
+  `category.descriptor.code: "PASS"` and carries no `fulfillment.stops` at
+  all, because a pass is a fare for a period and a scope rather than for a
+  stop pair. Concession classes (`SENIOR`, `STUDENT`) are a modifier on the
+  order and never a separate item; the credential is a rotating TOTP secret
+  rather than a static QR; and a ride paid for with a pass is the ordinary
+  on-board sale order plus one payment tag, not a second order path. There is
+  deliberately **no combined bus-and-metro item**, for the same reason a
+  bus-plus-metro journey is two orders (section 6.4). The full design and its
+  fabrication disclosure are in [`docs/passes.md`](docs/passes.md).
 
 ### 2.2 Out, explicitly
 
@@ -126,7 +158,8 @@ search → on_search → select → on_select → init → on_init → confirm �
 | `cancel` / `on_cancel`, soft and confirmed cancellation | TRV11 models these richly (nine distinct cancellation flows). Real work, no marginal demonstration value. |
 | Refunds and settlement | Requires the whole payment and settlement-terms apparatus to mean anything. |
 | `update` / `on_update`, `track`, `rating`, `support` | Not on the critical path. |
-| Catalogue browsing, passes, round-trip tickets | TRV11 has `SJT`, `RJT` and `PASS` item codes. We issue `SJT` only. |
+| Round-trip tickets | TRV11 has `SJT`, `RJT` and `PASS` item codes. We issue `SJT` and `PASS`; `RJT` remains out. |
+| General catalogue browsing | A `PASS`-category `search` browses one category by name (section 2.1), which is the only browsing case built. There is no free-text or unfiltered catalogue query, and no pagination of either category. |
 | Real payment, UPI, payment links | The honesty contract forbids it. |
 | Live ONDC onboarding, staging registry subscription | Requires a legal entity, a domain, and ONDC's participant onboarding. Out of reach and out of scope. |
 | Pagination of `on_search` | TRV11 defines a pagination flow for bus catalogues. One journey does not need it. |
@@ -1165,6 +1198,8 @@ an asset. It is also the table to put on screen in the demo.
 | TTLs | `PT30S` in payloads; `PT15S` for `search` and `PT10S` for other actions in the BAP protocol server's config, and enforced | §3.3 |
 | Two independent providers | Two subscriber IDs, two protocol-server pairs, two registry entries. Not one BPP pretending to be two. | §5.2 |
 | Fares and routes | Real BMTC and Namma Metro routes, stops, Kannada names, line colours and published fare rules | §7.3 |
+| Passes: the protocol shape | `PASS` is a real published TRV11 item code, and `categories: (TICKET / PASS)` on `Provider` is observed in TRV11's own metro `on_search`. Nine items answer a category-only intent; the concession arithmetic reconciles against rates published on each item | §3.5, [`docs/passes.md`](docs/passes.md) |
+| Passes: the rotating credential | A real RFC 6238 TOTP secret - 160 cryptographically random bits, RFC 4648 base32, SHA1/6 digits/30 seconds, RFC 6238's own defaults - minted per credential and verified against RFC 6238 appendix B's published test vectors | [`docs/passes.md`](docs/passes.md) §4 |
 
 **Stubbed, simulated, or absent:**
 
@@ -1178,6 +1213,12 @@ an asset. It is also the table to put on screen in the demo.
 | Settlement terms | `BUYER_FINDER_FEES`, `SETTLEMENT_WINDOW`, `SETTLEMENT_BASIS`, `COURT_JURISDICTION` are carried with plausible values so the payloads validate. They bind nobody. | Structurally present, commercially meaningless. |
 | The ticket | A specimen. Not accepted at any gate, by any operator, ever. | §8.3 |
 | The QR token | Generated locally, encoding a specimen disclaimer. Not an operator ticket format. | §8.1 |
+| Passes: prices and concession rates | Every price is derived from named multiples (`PASS_CEILING_MULTIPLE` 2.5, weekly 5x, monthly **18x - an open constant**) of a synthetic fare ceiling. No operator quotes a pass price to this stack. The senior rate traces to a 2014 report of BMTC's charter that predates a ~15% fare rise, conflicts with itself on the qualifying age, and has no metro-specific source; **the 33% student rate has no source of any kind.** | Marked `SYNTHETIC_PASS_INFO` on every item and order. [`docs/passes.md`](docs/passes.md) §1, §3 |
+| Passes: the category intent | `PASS` is a real item code and the category axis is real, but **no worked TRV11 example of a `PASS`-category search exists in the vendored evidence.** The stopless intent shape, `type: "PASS"` on a fulfillment, and `authorization.type: "TOTP"` / `status: "ISSUED"` are this feature's own extension of the domain's vocabulary. | A domain extension, named as one. [`docs/passes.md`](docs/passes.md) §2 |
+| Passes: concession verification | Entirely staged. This stack trusts a `CLASS` tag with no way to check it; the verification is a human, face-to-face, buyer-side attestation outside this repository. No identity, document or identifier is ever accepted, stored or logged. | This stack verifies nobody's eligibility and must never be described as doing so. |
+| Passes: what rotation does not solve | A screenshot of a currently-valid code, shared to another phone, passes for the rest of its thirty-second window. Nothing here distinguishes a device holding the secret from a photograph of one. | Rotation shortens a shared code's useful life from the whole pass period to thirty seconds. It does not prevent sharing, and this stack must not claim it does. |
+| The metro gate | Does not exist. A conductor looking at a phone is plausible today; gate hardware that accepts this code is not, anywhere in Bengaluru. | A metro pass here is a specimen exactly as much as a single-journey ticket. No gate is being built and none is coming. |
+| Passes: the service tier a scope is checked against | `TransitOffer.serviceTier` is optional. With no tier from the journey source, a bus ride reads as Ordinary, so an AC bus ride cannot be told apart from an ordinary one. | The scope check is only as good as the tier the source states. The fixtures do not distinguish them. |
 | Real-time data | `SCHEDULED_INFO`/`GTFS` tags point at nothing live. No vehicle positions, no live occupancy. | Journey times are computed estimates. |
 | Cancellation, refunds, updates | Not implemented. `cancellation_terms` is present in payloads and honoured by nothing. | §2.2 |
 | Catalogue scale | Two providers, a handful of offers. The real network paginates thousands. | §2.2 |

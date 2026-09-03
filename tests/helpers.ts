@@ -62,3 +62,28 @@ export function searchRequest(category: "BUS" | "METRO") {
     },
   } as const;
 }
+
+/**
+ * A pass search: a category and no `fulfillment` block at all. A pass has
+ * neither an origin nor a destination, so a stop pair cannot express the
+ * question.
+ */
+export function passSearchRequest() {
+  return {
+    context: {
+      domain: "ONDC:TRV11",
+      location: { country: { code: "IND" }, city: { code: "std:080" } },
+      action: "search",
+      version: "2.0.1",
+      bap_id: "bap.example.test",
+      bap_uri: "https://bap.example.test",
+      transaction_id: "6c0a9d5e-0f4f-4f9b-9c3a-7d1b5f8e2a44",
+      message_id: "2f6b1a0c-8d4e-4a1b-9f77-3c2d5e6a8b90",
+      timestamp: "2026-09-03T04:05:35.000Z",
+      ttl: "PT4S",
+    },
+    message: {
+      intent: { category: { descriptor: { code: "PASS" } } },
+    },
+  } as const;
+}

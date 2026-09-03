@@ -28,6 +28,9 @@ This repository holds two things:
    Bengaluru bus and metro journeys, priced, routed, and returning a QR ticket
    in the field the specification says a QR ticket goes in. `ONDC:TRV11` is
    ONDC's published domain for unreserved metro and intracity-bus ticketing.
+   It also sells **transit passes** - a fare for a period and a scope rather
+   than for a stop pair - on a second catalogue category, with a rotating
+   credential instead of a static QR. See [`docs/passes.md`](docs/passes.md).
 
 2. **The configuration to run a whole Beckn network locally** - a registry, a
    gateway and both protocol servers - so that the provider platform can be
@@ -101,6 +104,22 @@ This governs everything in the repository.
 - **BMTC is not on ONDC**, and no output of this software should be presented as
   showing that it is. The claim is "here is what it would look like", and that
   claim is worth making honestly.
+- **No pass sold here is valid for travel, and its rotating code does not
+  change that.** A pass carries a real RFC 6238 TOTP secret instead of a static
+  QR, which makes it a more convincing artefact and so makes the SPECIMEN mark
+  matter more, not less. Neither BMTC nor BMRCL will ever scan a code this
+  software mints, and **the metro case needs gate hardware that does not
+  exist**. Nothing here implies one is coming.
+- **Every pass price and concession rate is invented, and unevenly sourced.**
+  Prices are named multiples of a synthetic fare ceiling. The senior
+  concession rate is a real 2014 figure that may no longer be current and has
+  no metro-specific source; **the 33% student rate has no source of any
+  kind.** Each is marked on the wire and disclosed for what it is in
+  [`docs/passes.md`](docs/passes.md).
+- **This software verifies nobody's eligibility for anything.** It trusts a
+  concession class a buyer app asserts, because verifying it is a human,
+  face-to-face job outside this repository. It never accepts, stores or logs a
+  rider's identity or any document.
 
 `SPEC.md` section 9 is a full table of what is faithful to the real protocol and
 what is stubbed, field by field. It is meant to be read by anyone assessing
@@ -115,6 +134,15 @@ contain clearly marked specimen QR tickets, and status returns the stored order
 unchanged. See [`phase-1/RESULTS.md`](phase-1/RESULTS.md) for discovery evidence
 and [`phase-2/RESULTS.md`](phase-2/RESULTS.md) for the lifecycle evidence and
 the audit of acceptance criteria 1 through 17.
+
+Nine pass items ship alongside the single-journey catalogue: BMTC's six bus
+passes and BMRCL's three metro ones, across day, weekly and monthly windows,
+answered from a category-only `search` that carries no stops at all. They
+carry senior and student concession rates published on each item, and a
+confirmed pass mints a rotating RFC 6238 TOTP secret rather than a static QR.
+Paying for a ride with a pass is the ordinary on-board sale plus one payment
+tag, not a second order path. [`docs/passes.md`](docs/passes.md) is the full
+design and the fabrication disclosure for all of it.
 
 The optional HTTP journey source is documented in
 [`docs/journey-source-http.md`](docs/journey-source-http.md). The consuming BAP

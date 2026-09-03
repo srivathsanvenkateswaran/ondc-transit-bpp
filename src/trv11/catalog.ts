@@ -38,6 +38,11 @@ function parseGps(value: string | undefined) {
 
 export function searchQueryFromRequest(request: SearchRequest): SearchQuery {
   const fulfillment = request.message.intent.fulfillment;
+  if (!fulfillment) {
+    throw new Error(
+      "Search intent carries no fulfillment; a stop-pair search needs one and a PASS-category search is answered from the pass catalogue instead",
+    );
+  }
   const starts = fulfillment.stops.filter((stop) => stop.type === "START");
   const ends = fulfillment.stops.filter((stop) => stop.type === "END");
   if (starts.length !== 1 || ends.length !== 1) {
@@ -121,6 +126,54 @@ export function fulfillmentIdForOffer(offerId: string): string {
   return `F-${offerId}`;
 }
 
+/**
+ * The provider-level payment terms. Identical for both categories: the
+ * settlement apparatus is structurally present and commercially meaningless
+ * whether the item is a single journey or a pass (SPEC section 9).
+ */
+export function providerPayments(publicBaseUrl: string) {
+  return [
+    {
+      collected_by: "BPP",
+      tags: [
+        {
+          descriptor: { code: "BUYER_FINDER_FEES" },
+          display: false,
+          list: [
+            {
+              descriptor: { code: "BUYER_FINDER_FEES_PERCENTAGE" },
+              value: "1",
+            },
+          ],
+        },
+        {
+          descriptor: { code: "SETTLEMENT_TERMS" },
+          display: false,
+          list: [
+            { descriptor: { code: "SETTLEMENT_WINDOW" }, value: "P30D" },
+            {
+              descriptor: { code: "SETTLEMENT_BASIS" },
+              value: "INVOICE_RECEIPT",
+            },
+            {
+              descriptor: { code: "MANDATORY_ARBITRATION" },
+              value: "TRUE",
+            },
+            {
+              descriptor: { code: "COURT_JURISDICTION" },
+              value: "Bengaluru",
+            },
+            {
+              descriptor: { code: "STATIC_TERMS" },
+              value: `${publicBaseUrl}/terms`,
+            },
+          ],
+        },
+      ],
+    },
+  ];
+}
+
 export function tripFulfillmentForOffer(
   offer: TransitOffer,
   category: "BUS" | "METRO",
@@ -200,46 +253,7 @@ export async function buildOnSearch(
         fulfillmentId,
       ),
     ),
-    payments: [
-      {
-        collected_by: "BPP",
-        tags: [
-          {
-            descriptor: { code: "BUYER_FINDER_FEES" },
-            display: false,
-            list: [
-              {
-                descriptor: { code: "BUYER_FINDER_FEES_PERCENTAGE" },
-                value: "1",
-              },
-            ],
-          },
-          {
-            descriptor: { code: "SETTLEMENT_TERMS" },
-            display: false,
-            list: [
-              { descriptor: { code: "SETTLEMENT_WINDOW" }, value: "P30D" },
-              {
-                descriptor: { code: "SETTLEMENT_BASIS" },
-                value: "INVOICE_RECEIPT",
-              },
-              {
-                descriptor: { code: "MANDATORY_ARBITRATION" },
-                value: "TRUE",
-              },
-              {
-                descriptor: { code: "COURT_JURISDICTION" },
-                value: "Bengaluru",
-              },
-              {
-                descriptor: { code: "STATIC_TERMS" },
-                value: `${options.publicBaseUrl}/terms`,
-              },
-            ],
-          },
-        ],
-      },
-    ],
+    payments: providerPayments(options.publicBaseUrl),
   };
 
   return {

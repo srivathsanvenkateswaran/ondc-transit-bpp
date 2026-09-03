@@ -87,6 +87,12 @@ Important constraints include:
   vertices do not belong here.
 - Optional `nameLocal`, `isInterchange`, `changeHint`, and `routeColor` values
   pass into the TRV11 fulfillment.
+- Optional `serviceTier` is `ORDINARY_BUS`, `AC_BUS` or `METRO`. Only a pass
+  settlement claim reads it, to check the ride's class of service against the
+  pass's scope. **Omitting it means the operator's vehicle category decides**,
+  so a bus ride reads as Ordinary and an AC bus ride cannot be told apart from
+  an ordinary one - see [`docs/passes.md`](passes.md). A planner that knows
+  the tier should state it; the local fixtures do not.
 
 The deadline is five seconds. A network error, timeout, non-2xx response,
 invalid JSON, or schema-invalid response produces a structured `FALLBACK` log

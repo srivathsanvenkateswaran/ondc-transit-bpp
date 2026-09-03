@@ -1,10 +1,32 @@
 import type { ProtocolOrder } from "../protocol/types.js";
-import type { OperatorKey, TransitOffer } from "../sources/types.js";
+import type {
+  OperatorKey,
+  ServiceTier,
+  TransitOffer,
+} from "../sources/types.js";
 
 export interface TransactionIdentity {
   transactionId: string;
   bapId: string;
   bapUri: string;
+}
+
+/**
+ * One minted pass credential, held so that a later ride order claiming to be
+ * settled by this pass can be checked against it. This provider mints the
+ * secret, so this provider is the party that can check a presented code.
+ */
+export interface PassCredentialRecord {
+  fulfillmentId: string;
+  itemId: string;
+  scope: ServiceTier;
+  /** The pass's own window, in epoch milliseconds. `validToMs` is exclusive. */
+  validFromMs: number;
+  validToMs: number;
+  secretBase32: string;
+  algorithm: "SHA1";
+  digits: number;
+  periodSeconds: number;
 }
 
 function transactionKey(
@@ -19,6 +41,22 @@ function transactionKey(
   ]);
 }
 
+/**
+ * A pass is bought in one transaction and presented in another, so its
+ * credentials are keyed by order id rather than by transaction. The buyer app
+ * is still part of the key: one BAP must not be able to settle a ride against
+ * a pass another BAP bought. So is the operator, because an operator can only
+ * check a pass it issued itself - a BMTC BPP holds no BMRCL secret, exactly
+ * as it sells no BMRCL ticket.
+ */
+function passKey(
+  operator: OperatorKey,
+  identity: TransactionIdentity,
+  orderId: string,
+): string {
+  return JSON.stringify([operator, identity.bapId, identity.bapUri, orderId]);
+}
+
 export class InMemoryOrderStore {
   private readonly catalogues = new Map<string, Map<string, TransitOffer>>();
   private readonly orders = new Map<
@@ -30,6 +68,7 @@ export class InMemoryOrderStore {
     }
   >();
   private readonly ordersByTransaction = new Map<string, string>();
+  private readonly passCredentials = new Map<string, PassCredentialRecord[]>();
 
   cacheCatalogue(
     operator: OperatorKey,
@@ -91,6 +130,31 @@ export class InMemoryOrderStore {
       order: structuredClone(order),
     });
     this.ordersByTransaction.set(key, order.id);
+  }
+
+  savePassCredentials(
+    operator: OperatorKey,
+    identity: TransactionIdentity,
+    orderId: string,
+    credentials: PassCredentialRecord[],
+  ): void {
+    if (credentials.length === 0) return;
+    this.passCredentials.set(
+      passKey(operator, identity, orderId),
+      credentials.map((credential) => ({ ...credential })),
+    );
+  }
+
+  /** Empty when this operator holds no pass under that order id for this BAP. */
+  findPassCredentials(
+    operator: OperatorKey,
+    identity: TransactionIdentity,
+    orderId: string,
+  ): PassCredentialRecord[] {
+    const stored = this.passCredentials.get(
+      passKey(operator, identity, orderId),
+    );
+    return stored ? stored.map((credential) => ({ ...credential })) : [];
   }
 
   findByTransaction(

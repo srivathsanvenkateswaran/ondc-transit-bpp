@@ -62,6 +62,10 @@
         "routeColor": {
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "serviceTier": {
+          "description": "Optional class of service. Only a pass settlement claim reads it, to check the ride's tier against the pass's scope. Omitted means the operator's vehicle category decides, which for a bus means Ordinary.",
+          "enum": ["ORDINARY_BUS", "AC_BUS", "METRO"]
         }
       }
     }
