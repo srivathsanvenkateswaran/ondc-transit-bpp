@@ -20,7 +20,11 @@ export interface SearchRequest {
   context: Trv11Context & { action: "search" };
   message: {
     intent: {
-      fulfillment: {
+      /**
+       * Absent on a pass search. A pass has neither an origin nor a
+       * destination, so a stop pair cannot express the question at all.
+       */
+      fulfillment?: {
         stops: Array<{
           type: "START" | "END";
           location: {
@@ -31,6 +35,8 @@ export interface SearchRequest {
         }>;
         vehicle?: { category: "BUS" | "METRO" };
       };
+      /** `PASS` asks about a category of products rather than a journey. */
+      category?: { descriptor?: { code?: string } };
     };
   };
 }
@@ -65,6 +71,7 @@ export interface SelectRequest {
     order: {
       items: SelectedItem[];
       provider: { id: string };
+      tags?: Array<Record<string, unknown>>;
     };
   };
 }
@@ -81,6 +88,7 @@ export interface InitRequest {
       provider: { id: string };
       billing: Billing;
       payments: Payment[];
+      tags?: Array<Record<string, unknown>>;
     };
   };
 }
@@ -97,6 +105,7 @@ export interface ConfirmRequest {
       provider: { id: string };
       billing: Billing;
       payments: Payment[];
+      tags?: Array<Record<string, unknown>>;
     };
   };
 }

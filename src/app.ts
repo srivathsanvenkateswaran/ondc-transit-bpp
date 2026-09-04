@@ -26,6 +26,7 @@ import { FixtureJourneySource } from "./sources/fixture.js";
 import { HttpJourneySource } from "./sources/http.js";
 import type { JourneySource, OperatorKey } from "./sources/types.js";
 import { buildOnSearch, searchQueryFromRequest } from "./trv11/catalog.js";
+import { buildPassOnSearch, isPassSearch } from "./trv11/pass.js";
 
 const MAX_BODY_BYTES = 1_048_576;
 const requestActions = ["search", "select", "init", "confirm", "status"] as const;
@@ -190,6 +191,21 @@ export async function createApp(
       switch (action) {
         case "search": {
           const search = request as SearchRequest;
+          if (isPassSearch(search)) {
+            // A pass catalogue is nine static items. It asks the journey
+            // source nothing, because a pass has no route to plan and no stop
+            // pair to price.
+            return buildPassOnSearch(
+              search,
+              sources[operatorKey].operator,
+              operatorKey,
+              operator,
+              {
+                publicBaseUrl: config.publicBaseUrl,
+                contextTtl: config.contextTtl,
+              },
+            );
+          }
           const offers = await sources[operatorKey].search(
             searchQueryFromRequest(search),
           );
@@ -388,7 +404,7 @@ export async function createApp(
     }
 
     const protocolRequest = body as ActionRequest;
-    if (action === "search") {
+    if (action === "search" && !isPassSearch(protocolRequest as SearchRequest)) {
       const search = protocolRequest as SearchRequest;
       try {
         searchQueryFromRequest(search);
@@ -401,7 +417,7 @@ export async function createApp(
         return;
       }
       const expectedCategory = sources[operatorKey].operator.vehicleCategory;
-      const requestedCategory = search.message.intent.fulfillment.vehicle?.category;
+      const requestedCategory = search.message.intent.fulfillment?.vehicle?.category;
       if (requestedCategory && requestedCategory !== expectedCategory) {
         eventLogger({
           transaction_id: search.context.transaction_id,

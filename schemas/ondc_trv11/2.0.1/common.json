@@ -64,6 +64,14 @@
         "value": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]{1,2})?$" }
       }
     },
+    "signedPrice": {
+      "type": "object",
+      "required": ["currency", "value"],
+      "properties": {
+        "currency": { "const": "INR" },
+        "value": { "type": "string", "pattern": "^-?[0-9]+(?:\\.[0-9]{1,2})?$" }
+      }
+    },
     "selectedItem": {
       "type": "object",
       "required": ["id", "quantity"],
@@ -97,6 +105,10 @@
           "type": "object",
           "required": ["id"],
           "properties": { "id": { "type": "string", "minLength": 1 } }
+        },
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tag" }
         }
       }
     },
@@ -178,6 +190,19 @@
         }
       }
     },
+    "passFulfillment": {
+      "type": "object",
+      "required": ["id", "type", "tags"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "PASS" },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/tag" }
+        }
+      }
+    },
     "ticketFulfillment": {
       "type": "object",
       "required": ["id", "type", "tags"],
@@ -228,6 +253,62 @@
               "descriptor": {
                 "type": "object",
                 "properties": { "code": { "const": "TICKET_INFO" } },
+                "required": ["code"]
+              }
+            },
+            "required": ["descriptor"]
+          }
+        }
+      }
+    },
+    "passCredentialFulfillment": {
+      "type": "object",
+      "required": ["id", "type", "stops", "tags"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "TICKET" },
+        "stops": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["type", "authorization"],
+            "properties": {
+              "type": { "const": "START" },
+              "authorization": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "token",
+                  "valid_from",
+                  "valid_to",
+                  "status"
+                ],
+                "properties": {
+                  "type": { "const": "TOTP" },
+                  "token": {
+                    "type": "string",
+                    "description": "RFC 4648 base32 shared secret, at least 160 bits. Not a PNG.",
+                    "pattern": "^[A-Z2-7]{32,}$"
+                  },
+                  "valid_from": { "type": "string", "format": "date-time" },
+                  "valid_to": { "type": "string", "format": "date-time" },
+                  "status": { "const": "ISSUED" }
+                }
+              }
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/tag" },
+          "contains": {
+            "type": "object",
+            "properties": {
+              "descriptor": {
+                "type": "object",
+                "properties": { "code": { "const": "TOTP_INFO" } },
                 "required": ["code"]
               }
             },
@@ -311,26 +392,40 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "object",
-            "required": ["title", "item", "price"],
-            "properties": {
-              "title": { "const": "BASE_FARE" },
-              "item": {
-                "type": "object",
-                "required": ["id", "price", "quantity"],
-                "properties": {
-                  "id": { "type": "string", "minLength": 1 },
-                  "price": { "$ref": "#/$defs/price" },
-                  "quantity": {
-                    "type": "object",
-                    "required": ["selected"]
-                  }
-                }
-              },
-              "price": { "$ref": "#/$defs/price" }
-            }
+            "oneOf": [
+              { "$ref": "#/$defs/baseFareBreakup" },
+              { "$ref": "#/$defs/concessionBreakup" }
+            ]
           }
         }
+      }
+    },
+    "baseFareBreakup": {
+      "type": "object",
+      "required": ["title", "item", "price"],
+      "properties": {
+        "title": { "const": "BASE_FARE" },
+        "item": {
+          "type": "object",
+          "required": ["id", "price", "quantity"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "price": { "$ref": "#/$defs/price" },
+            "quantity": {
+              "type": "object",
+              "required": ["selected"]
+            }
+          }
+        },
+        "price": { "$ref": "#/$defs/price" }
+      }
+    },
+    "concessionBreakup": {
+      "type": "object",
+      "required": ["title", "price"],
+      "properties": {
+        "title": { "enum": ["SENIOR_CONCESSION", "STUDENT_CONCESSION"] },
+        "price": { "$ref": "#/$defs/signedPrice" }
       }
     },
     "baseOrder": {
@@ -356,6 +451,7 @@
           "items": {
             "oneOf": [
               { "$ref": "#/$defs/tripFulfillment" },
+              { "$ref": "#/$defs/passFulfillment" },
               { "$ref": "#/$defs/ticketFulfillment" }
             ]
           }
@@ -397,10 +493,17 @@
               "items": {
                 "oneOf": [
                   { "$ref": "#/$defs/tripFulfillment" },
-                  { "$ref": "#/$defs/confirmedTicketFulfillment" }
+                  { "$ref": "#/$defs/passFulfillment" },
+                  { "$ref": "#/$defs/confirmedTicketFulfillment" },
+                  { "$ref": "#/$defs/passCredentialFulfillment" }
                 ]
               },
-              "contains": { "$ref": "#/$defs/confirmedTicketFulfillment" }
+              "contains": {
+                "anyOf": [
+                  { "$ref": "#/$defs/confirmedTicketFulfillment" },
+                  { "$ref": "#/$defs/passCredentialFulfillment" }
+                ]
+              }
             },
             "created_at": { "type": "string", "format": "date-time" },
             "updated_at": { "type": "string", "format": "date-time" }
