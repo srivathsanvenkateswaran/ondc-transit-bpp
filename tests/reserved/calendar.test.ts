@@ -4,6 +4,7 @@ import { test } from "node:test";
 import {
   bookingWindowStatus,
   istCalendarDate,
+  istIsoInstant,
   runsOn,
   stopInstant,
 } from "../../src/reserved/calendar.js";
@@ -82,7 +83,7 @@ test("a departure inside the closing window names which edge and the instant", (
   const now = departure - 44 * 60_000;
   const verdict = bookingWindowStatus(departure, now, window);
   assert.equal(verdict.status, "TOO_LATE");
-  assert.equal(verdict.boundaryAt, new Date(departure - 45 * 60_000).toISOString());
+  assert.equal(verdict.boundaryAt, istIsoInstant(departure - 45 * 60_000));
 });
 
 test("the closing boundary is inclusive of the last sellable instant", () => {
@@ -102,10 +103,7 @@ test("a departure past the horizon names the far edge and its instant", () => {
   const departure = Date.parse("2026-10-20T22:59:00.000+05:30");
   const verdict = bookingWindowStatus(departure, now, window);
   assert.equal(verdict.status, "TOO_FAR");
-  assert.equal(
-    verdict.boundaryAt,
-    new Date(now + 30 * 24 * 60 * 60_000).toISOString(),
-  );
+  assert.equal(verdict.boundaryAt, istIsoInstant(now + 30 * 24 * 60 * 60_000));
 });
 
 test("a departure that has already gone is too late, not too far", () => {

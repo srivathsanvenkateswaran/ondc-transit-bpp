@@ -132,13 +132,19 @@ test("a soft cancel returns the exact figure and changes nothing", async () => {
   // Ten days out, so a tenth of the base fare is deducted. Two berths at 550,
   // less 10%, plus two tolls of 20. The reservation fee never enters the sum.
   assert.equal((message.refund as any).price.value, "1030");
+  // `code` is what a client keys off and `title` is what a rider reads. They
+  // were one field carrying the code, so a refund screen printed BASE_FARE.
   assert.deepEqual(
-    (message.refund as any).breakup.map((line: any) => [line.title, line.price.value]),
+    (message.refund as any).breakup.map((line: any) => [
+      line.code,
+      line.title,
+      line.price.value,
+    ]),
     [
-      ["BASE_FARE", "1100"],
-      ["SLAB_DEDUCTION", "-110"],
-      ["RESERVATION_FEE", "0"],
-      ["TOLL_REFUND", "40"],
+      ["BASE_FARE", "Base fare", "1100"],
+      ["SLAB_DEDUCTION", "Cancellation deduction", "-110"],
+      ["RESERVATION_FEE", "Reservation fee", "0"],
+      ["TOLL_REFUND", "Toll refund", "40"],
     ],
   );
   assert.equal(entryOf(message.tags, "REFUND_SLAB", "SLAB_CODE"), "OVER_72H");

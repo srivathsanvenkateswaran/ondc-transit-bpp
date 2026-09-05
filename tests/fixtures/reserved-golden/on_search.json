@@ -222,7 +222,23 @@
                   },
                   "time": {
                     "timestamp": "2026-09-30T22:59:00.000+05:30"
-                  }
+                  },
+                  "tags": [
+                    {
+                      "descriptor": {
+                        "code": "STOP_ROLE"
+                      },
+                      "display": true,
+                      "list": [
+                        {
+                          "descriptor": {
+                            "code": "ROLE"
+                          },
+                          "value": "BOARDING"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "id": "2",
@@ -237,7 +253,23 @@
                   },
                   "time": {
                     "timestamp": "2026-09-30T23:31:00.000+05:30"
-                  }
+                  },
+                  "tags": [
+                    {
+                      "descriptor": {
+                        "code": "STOP_ROLE"
+                      },
+                      "display": true,
+                      "list": [
+                        {
+                          "descriptor": {
+                            "code": "ROLE"
+                          },
+                          "value": "BOARDING"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "id": "3",
@@ -252,7 +284,23 @@
                   },
                   "time": {
                     "timestamp": "2026-09-30T23:51:00.000+05:30"
-                  }
+                  },
+                  "tags": [
+                    {
+                      "descriptor": {
+                        "code": "STOP_ROLE"
+                      },
+                      "display": true,
+                      "list": [
+                        {
+                          "descriptor": {
+                            "code": "ROLE"
+                          },
+                          "value": "BOARDING"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "id": "4",
@@ -267,7 +315,23 @@
                   },
                   "time": {
                     "timestamp": "2026-10-01T06:00:00.000+05:30"
-                  }
+                  },
+                  "tags": [
+                    {
+                      "descriptor": {
+                        "code": "STOP_ROLE"
+                      },
+                      "display": true,
+                      "list": [
+                        {
+                          "descriptor": {
+                            "code": "ROLE"
+                          },
+                          "value": "DROPPING"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "id": "5",
@@ -282,7 +346,23 @@
                   },
                   "time": {
                     "timestamp": "2026-10-01T06:30:00.000+05:30"
-                  }
+                  },
+                  "tags": [
+                    {
+                      "descriptor": {
+                        "code": "STOP_ROLE"
+                      },
+                      "display": true,
+                      "list": [
+                        {
+                          "descriptor": {
+                            "code": "ROLE"
+                          },
+                          "value": "DROPPING"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ],
               "tags": [

@@ -38,6 +38,27 @@ const SENIOR_PERCENT_BY_CLASS: Partial<Record<ServiceClass, number>> = {
   RAJAHAMSA: 25,
 };
 
+/**
+ * What a rider reads on the line a concession puts on a quote.
+ *
+ * The quote's `code` stays the claim, because that is what a client keys off.
+ * This is the other half: a screen that printed `SENIOR_CONCESSION` would be
+ * showing the rider a wire constant. Only `SENIOR` is currently reachable -
+ * every other claim is refused before a line is ever built - and the other
+ * three are named anyway so that publishing a rate for one of them is a rate
+ * change rather than a rate change plus a forgotten label.
+ */
+const CONCESSION_LABELS: Record<ConcessionClaim, string> = {
+  SENIOR: "Senior citizen",
+  CHILD: "Child",
+  STUDENT: "Student",
+  SHAKTI: "Free-travel scheme",
+};
+
+export function concessionLabel(claim: string): string {
+  return CONCESSION_LABELS[claim as ConcessionClaim] ?? claim;
+}
+
 /** The `CONCESSION` group on an order, where a buyer app sent one. */
 export function concessionFromOrderTags(
   tags: Array<Record<string, unknown>> | undefined,

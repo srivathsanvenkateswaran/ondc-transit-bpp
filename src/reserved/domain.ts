@@ -91,7 +91,32 @@ export const RESERVED_TAG_CODES = [
   "SPECIMEN_INFO",
   "SEAT_MAP_REF",
   "SEAT_MAP",
+  /**
+   * The geometry the states are states of. Published beside `SEAT_MAP` rather
+   * than left to a client to reconstruct from this document's prose: a layout
+   * a second client draws from a paragraph is a layout nobody can check, and
+   * it drifts silently the day a fixture changes. Section 5.4.
+   */
+  "SEAT_MAP_LAYOUT",
   "SEATS",
+  /**
+   * The seats a cancellation released. `SEATS` shrinks to what the booking
+   * still holds, so without this a whole-booking cancellation would carry no
+   * seat list at all and a partial one would silently drop the seats it took.
+   */
+  "CANCELLED_SEATS",
+  /**
+   * The seats a `SEAT-UNAVAILABLE` refusal is about. The error object names
+   * codes rather than values, so the seats travel as data beside it rather
+   * than only inside an English sentence.
+   */
+  "UNAVAILABLE_SEATS",
+  /**
+   * Whether a stop on the published run can be boarded at, alighted at, or
+   * both. `stop.type` is the positional axis - first, intermediate, last - and
+   * it cannot carry this: the two are different facts and the wire needs both.
+   */
+  "STOP_ROLE",
   "HOLD_INFO",
   "MANIFEST",
   "BOOKING_REF",
@@ -144,9 +169,30 @@ export const RESERVED_ERROR_CODES = [
   "BPP-ADDRESS-MISMATCH",
   /** Likewise: init is sent unpaid and confirm is sent paid, as next door. */
   "INVALID-PAYMENT-STATUS",
+  /**
+   * Not a domain refusal at all, and declared for exactly that reason. It is
+   * the answer of last resort: this provider could not build an answer, or
+   * built one it could not express within its own published shapes, and it
+   * says so rather than going quiet. A client that never received this code in
+   * its error table would classify it as unknown, and an unknown code renders
+   * as reassurance - "nothing happened" - which this code cannot promise. What
+   * it means is precisely that the outcome is not known from this message, and
+   * the client's next move is a `status` read rather than an assumption in
+   * either direction.
+   */
+  "INTERNAL-ERROR",
 ] as const;
 
 export type ReservedErrorCode = (typeof RESERVED_ERROR_CODES)[number];
+
+/**
+ * The code the handler falls back to, held here rather than written into a
+ * string at the point of use so that the compiler checks it against the table
+ * above. It was a bare literal in `handler.ts` and therefore absent from the
+ * table, which is how a client ended up able to receive a code no document
+ * declared.
+ */
+export const RESERVED_INTERNAL_ERROR: ReservedErrorCode = "INTERNAL-ERROR";
 
 const IST_CALENDAR_DATE = /^\d{4}-\d{2}-\d{2}$/;
 

@@ -129,6 +129,11 @@ export type BookingWindowVerdict =
  * The two constants are not the same kind of fact. The closing window is close
  * to a hard operational reality; the horizon is a fidelity choice about how far
  * ahead simulated inventory bothers to exist.
+ *
+ * The boundary is `+05:30`, like every other instant this category publishes.
+ * A rider on the wrong side of a booking window is being told about a calendar
+ * evening in India, and printing it in UTC hands the client an off-by-five-and-
+ * a-half-hours reading of its own error message.
  */
 export function bookingWindowStatus(
   departureAtMilliseconds: number,
@@ -137,11 +142,11 @@ export function bookingWindowStatus(
 ): BookingWindowVerdict {
   const closesAt = departureAtMilliseconds - window.closeMinutes * MINUTE_MILLISECONDS;
   if (nowMilliseconds > closesAt) {
-    return { status: "TOO_LATE", boundaryAt: new Date(closesAt).toISOString() };
+    return { status: "TOO_LATE", boundaryAt: istIsoInstant(closesAt) };
   }
   const horizonAt = nowMilliseconds + window.horizonDays * DAY_MILLISECONDS;
   if (departureAtMilliseconds > horizonAt) {
-    return { status: "TOO_FAR", boundaryAt: new Date(horizonAt).toISOString() };
+    return { status: "TOO_FAR", boundaryAt: istIsoInstant(horizonAt) };
   }
   return { status: "OPEN" };
 }

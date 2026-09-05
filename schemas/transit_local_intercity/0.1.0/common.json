@@ -699,15 +699,22 @@
           "$ref": "#/$defs/price"
         },
         "breakup": {
+          "$comment": "Two fields, because they answer two different questions. `code` is what a client keys a line off and is stable; `title` is what the rider reads. They were one field carrying the code, which put BASE_FARE on a fare screen - a client cannot invent a label for a code it was never given one for, and every client shipping its own private code-to-English map is a translation table that rots the day a line is added.",
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
             "required": [
+              "code",
               "title",
               "price"
             ],
             "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^[A-Z][A-Z0-9_]*$"
+              },
               "title": {
                 "type": "string",
                 "minLength": 1
@@ -731,22 +738,28 @@
           "$ref": "#/$defs/signedPrice"
         },
         "breakup": {
+          "$comment": "The four lines of a refund, and they are always all four: a zero reservation fee is published rather than omitted, so that a rider who paid one can see that none of it is coming back rather than wondering where it went. The enumeration moved from `title` to `code` when the two were separated; `title` is prose and enumerating prose would freeze the wording.",
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
             "required": [
+              "code",
               "title",
               "price"
             ],
             "properties": {
-              "title": {
+              "code": {
                 "enum": [
                   "BASE_FARE",
                   "SLAB_DEDUCTION",
                   "RESERVATION_FEE",
                   "TOLL_REFUND"
                 ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
               },
               "price": {
                 "$ref": "#/$defs/signedPrice"
@@ -963,7 +976,7 @@
       ]
     },
     "error": {
-      "$comment": "A domain error arrives as an error on the callback with no message.order. An error message names codes, never values: an unexpected value is exactly where an identity document number would arrive, and error messages reach the event log.",
+      "$comment": "A domain error arrives as an error on the callback with no message.order. An error message names codes, never values: an unexpected value is exactly where an identity document number would arrive, and error messages reach the event log. `paths` was declared here and never set by anything, which made it a field a client could wait for forever; it is removed rather than shipped permanently absent, on the same reasoning section 9.1 uses to decline the bay. What a refusal has to say about particular seats it says in message.tags, as data, which is where the seat ids of a SEAT-UNAVAILABLE now travel.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -972,10 +985,6 @@
       ],
       "properties": {
         "code": {
-          "type": "string",
-          "minLength": 1
-        },
-        "paths": {
           "type": "string",
           "minLength": 1
         },

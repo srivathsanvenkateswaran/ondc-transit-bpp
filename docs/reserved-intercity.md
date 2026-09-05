@@ -560,6 +560,36 @@ online path, so there is no boarding-point amendment action and no
 slab and rebooks. Section 12 makes that a real, priced consequence rather than a
 shrug.
 
+### 4.1 A pickup and a dropping point are different things, and the wire says so
+
+A service carries `boardingPoints` and `droppingPoints` as two lists, and
+`boardingPairFromStops` enforces the difference: a selection that boards where
+the coach does not pick up, or alights where it does not set down, is refused
+with `FARE-NOT-PUBLISHED`. That rule has always been enforced. **It was not
+published**, which meant a client could only discover it by being refused.
+
+The published run flattened both lists into one sequence typed `START` /
+`INTERMEDIATE_STOP` / `END`. That type is the positional axis - first, somewhere
+in the middle, last - and it cannot carry the role: on `2259BNGHMP` the three
+Bengaluru pickups and the Hosapete dropping point all came out as
+`INTERMEDIATE_STOP`, indistinguishable from each other. The only role a client
+could recover was the last stop's, by position. The observed consequence was a
+buyer app offering `BP-HPT-HOSAPETE` as a **pickup**, six hundred kilometres
+from the rider, and never being able to offer it as the dropping point it
+actually is - which is exactly the Hampi corridor's own case, where a rider
+alights at Hosapete and takes a local bus the last few kilometres.
+
+Nothing on the client side could recover it, because the only route would have
+been parsing a boarding-point id, and section 17 declares those opaque.
+
+So every stop on the published run carries a `STOP_ROLE` tag: `BOARDING`,
+`DROPPING`, or both, where a point appears in both lists. Both facts travel,
+neither is inferred from the other, and a point that is both is one stop with
+two roles rather than two stops. The order's own two stops carry it as well,
+where `START` and `END` already say which is which, so that one stop shape is
+read one way everywhere rather than two ways depending on which message it
+arrived on.
+
 ---
 
 ## 5. Seat maps
@@ -604,22 +634,28 @@ export interface Seat {
 ### 5.1 A 2+2 seater: `AIRAVAT`, `AIRAVAT_CLUB`, `RAJAHAMSA`
 
 Two seats, aisle, two seats, repeated down the coach. `AIRAVAT_CLUB` on
-Bengaluru-Chennai is reported at 53 seats [S], which is 13 full rows of four plus
+Bengaluru-Chennai is reported at 53 seats [S], which is 12 full rows of four plus
 a rear row of five - the last row of an Indian coach is conventionally
-aisle-free. The fixture authors 13 rows of 4 and one rear row of 5.
+aisle-free. The fixture authors 12 rows of 4 and one rear row of 5.
+
+This paragraph said 13 full rows for some time, which is 57 seats and not 53.
+The fixture was authored to the sourced capacity rather than to the sentence and
+has always been 12 plus 5; the sentence was simply never corrected, and its own
+`sourcing` note in `fixtures/ksrtc/seatmaps/AIRAVAT_CLUB-2P2-53.json` records the
+discrepancy. The number that carries the source is 53.
 
 ```
         front
   row 1  [ 1A 1B ]   |   [ 1C 1D ]
   row 2  [ 2A 2B ]   |   [ 2C 2D ]
   ...
-  row 13 [13A 13B]   |   [13C 13D]
-  row 14 [14A 14B 14C 14D 14E]        <- rear bench, no aisle
+  row 12 [12A 12B]   |   [12C 12D]
+  row 13 [13A 13B 13C 13D 13E]        <- rear bench, no aisle
         rear
 ```
 
-`seatId` is `<row><columnLetter>`: `1A`, `13D`, `14E`. `window` is true for the
-`A` and `D` columns and for `14A`/`14E`. `adjacentSeatIds` for `1A` is `["1B"]`
+`seatId` is `<row><columnLetter>`: `1A`, `12D`, `13E`. `window` is true for the
+`A` and `D` columns and for `13A`/`13E`. `adjacentSeatIds` for `1A` is `["1B"]`
 and for `1B` is `["1A"]` - **the aisle breaks adjacency**, so `1B` and `1C` are
 not adjacent for the purposes of section 7's gender rule. This matters: a woman
 in `1B` does not lock `1C`, because nobody sits shoulder to shoulder across an
@@ -691,6 +727,59 @@ It carries no vehicle. The seat map is the class's layout, and which physical
 coach turns up is `transit-fleet-sim`'s question (section 18). A seat map that
 named a chassis would be claiming a vehicle assignment this provider does not
 make.
+
+### 5.4 Ruled: the layout is published beside the states
+
+**The wire used to carry a seat map id and a state per seat, and nothing about
+where any seat is.** Everything above - the rows, the columns, which side the
+aisle is on, which berths are doubles, which places are against a window - lived
+only in this section's prose. A second client's options were to reconstruct the
+coach from these paragraphs or to draw a grid that is not this coach.
+
+Tatak took the first, reproduced both layouts from the descriptions above, and
+got them exactly right: all 30 berths and all 53 seats, matching seat for seat.
+Its own author flagged it as the piece most likely to be wrong and said it should
+not survive. That judgement is correct, and being right this time is the reason
+rather than a counter-argument. A layout reconstructed from prose is a contract
+nobody can check: no schema constrains it, no test compares it, and the day a
+fixture changes a row it goes wrong silently, on a screen where wrong means a
+rider selecting a berth that is somewhere else on the coach. It is also a
+contract that only exists for a client that read this document, which is a class
+containing exactly one member.
+
+**So the layout is published, in the `SEAT_MAP_LAYOUT` tag, wherever the states
+are published.** Per seat: deck, row, column, whether it is against a window,
+its paired berth where it has one, and its authored adjacency where it has any.
+That is the whole of the `Seat` interface at the top of this section, minus the
+seat kind, which is a property of the map and travels once at its head.
+
+Three alternatives were considered and are worth recording, because each has an
+argument and each loses to a different objection.
+
+*A URL and a digest, fetched once and cached.* Cheapest on the wire, and this
+repository already publishes reference data that way - `cancellation_terms`
+carries an `external_ref` to `/terms`. It loses because it introduces a second
+protocol and a cache-coherence question into a flow that has neither, for a
+payload that already carries one entry per seat. The saving is real and it buys
+a class of bug - a client rendering a stale layout against fresh states - that
+does not currently exist.
+
+*Publishing it on `on_search`, once per fulfillment.* The catalogue is where the
+layout is invariant and where it would be sent fewest times. It loses because a
+client that arrives at `select` through a link never saw a catalogue, and
+because `on_search` is the one message in this flow where no seat map is drawn
+at all: the search results screen shows departures, not berths.
+
+*Declining, and telling a second client to read section 5.* That is the status
+quo, and it is the thing being ruled against.
+
+**What this costs.** The layout is roughly six entries per seat against the one
+entry per seat the states already cost, so a `PALLAKKI` payload grows by about
+185 tag entries and an `AIRAVAT_CLUB` one by about 325. It is a constant
+multiple of something already sent rather than a new order of magnitude, and it
+is not on the catalogue, which is the message a rider waits on. The rule is one
+line and has no exceptions: **wherever `SEAT_MAP` goes, `SEAT_MAP_LAYOUT` goes**,
+and a test asserts that the seat ids in the two agree exactly.
 
 ---
 
@@ -1681,10 +1770,10 @@ already does:
 "refund": {
   "price": { "currency": "INR", "value": "412.50" },
   "breakup": [
-    { "title": "BASE_FARE",        "price": { "currency": "INR", "value": "550" } },
-    { "title": "SLAB_DEDUCTION",   "price": { "currency": "INR", "value": "-137.50" } },
-    { "title": "RESERVATION_FEE",  "price": { "currency": "INR", "value": "-20" } },
-    { "title": "TOLL_REFUND",      "price": { "currency": "INR", "value": "20" } }
+    { "code": "BASE_FARE",       "title": "Base fare",              "price": { "currency": "INR", "value": "550" } },
+    { "code": "SLAB_DEDUCTION",  "title": "Cancellation deduction", "price": { "currency": "INR", "value": "-137.50" } },
+    { "code": "RESERVATION_FEE", "title": "Reservation fee",        "price": { "currency": "INR", "value": "-20" } },
+    { "code": "TOLL_REFUND",     "title": "Toll refund",            "price": { "currency": "INR", "value": "20" } }
   ]
 }
 ```
@@ -1740,6 +1829,11 @@ exercise.
 
 Cancelling every remaining seat cancels the booking. A booking with no
 `CONFIRMED` seats left is `CANCELLED`, not an empty `CONFIRMED` booking.
+
+The order that comes back names both halves: `SEATS` for the seats still held
+and `CANCELLED_SEATS` for the seats released, with `SEATS` absent rather than
+empty when nothing is left. Section 14.7 has the shape and the defect it
+corrects.
 
 ### After departure
 
@@ -1949,7 +2043,8 @@ One provider, whose `categories` gain a third entry alongside `TICKET` and
             { "descriptor": { "code": "RUNNING_MINUTES" }, "value": "451" } ] },
           { "descriptor": { "code": "PRICED_FOR" }, "display": false, "list": [
             { "descriptor": { "code": "FROM_BOARDING_POINT_ID" }, "value": "BP-BLR-MAJESTIC" },
-            { "descriptor": { "code": "TO_BOARDING_POINT_ID" },   "value": "BP-HMP-HAMPI" } ] },
+            { "descriptor": { "code": "TO_BOARDING_POINT_ID" },   "value": "BP-HMP-HAMPI" },
+            { "descriptor": { "code": "FARE_SOURCING" },          "value": "S" } ] },
           { "descriptor": { "code": "OPERATOR_DISCLOSURE" }, "display": true, "list": [
             { "descriptor": { "code": "BRAND" }, "value": "KSRTC" } ] },
           { "descriptor": { "code": "SERVICE_PROVENANCE" }, "display": false, "list": [
@@ -1967,13 +2062,24 @@ One provider, whose `categories` gain a third entry alongside `TICKET` and
         "vehicle": { "category": "COACH" },
         "stops": [
           { "id": "1", "type": "START", "location": { "descriptor": { "name": "Majestic (Kempegowda Bus Station)", "code": "BP-BLR-MAJESTIC" } },
-            "time": { "timestamp": "2026-09-25T22:59:00.000+05:30" } },
+            "time": { "timestamp": "2026-09-25T22:59:00.000+05:30" },
+            "tags": [ { "descriptor": { "code": "STOP_ROLE" }, "display": true, "list": [
+              { "descriptor": { "code": "ROLE" }, "value": "BOARDING" } ] } ] },
           { "id": "2", "parent_stop_id": "1", "type": "INTERMEDIATE_STOP",
             "location": { "descriptor": { "name": "Madiwala", "code": "BP-BLR-MADIWALA" } },
-            "time": { "timestamp": "2026-09-25T23:31:00.000+05:30" } },
-          { "id": "3", "parent_stop_id": "2", "type": "END",
+            "time": { "timestamp": "2026-09-25T23:31:00.000+05:30" },
+            "tags": [ { "descriptor": { "code": "STOP_ROLE" }, "display": true, "list": [
+              { "descriptor": { "code": "ROLE" }, "value": "BOARDING" } ] } ] },
+          { "id": "3", "parent_stop_id": "2", "type": "INTERMEDIATE_STOP",
+            "location": { "descriptor": { "name": "Hosapete Bus Stand", "code": "BP-HPT-HOSAPETE" } },
+            "time": { "timestamp": "2026-09-26T06:00:00.000+05:30" },
+            "tags": [ { "descriptor": { "code": "STOP_ROLE" }, "display": true, "list": [
+              { "descriptor": { "code": "ROLE" }, "value": "DROPPING" } ] } ] },
+          { "id": "4", "parent_stop_id": "3", "type": "END",
             "location": { "descriptor": { "name": "Hampi", "code": "BP-HMP-HAMPI" } },
-            "time": { "timestamp": "2026-09-26T06:30:00.000+05:30" } }
+            "time": { "timestamp": "2026-09-26T06:30:00.000+05:30" },
+            "tags": [ { "descriptor": { "code": "STOP_ROLE" }, "display": true, "list": [
+              { "descriptor": { "code": "ROLE" }, "value": "DROPPING" } ] } ] }
         ],
         "tags": [ { "descriptor": { "code": "SEAT_MAP_REF" }, "list": [
           { "descriptor": { "code": "SEAT_MAP_ID" }, "value": "PALLAKKI-2P1-30" } ] } ]
@@ -1995,6 +2101,20 @@ threshold, no percentage.
 2026-09-26, one calendar day after the travel date. This is the case the
 existing paths have never produced, and it is why `travel_date` and the
 departure instant are separate fields rather than one.
+
+**Every instant inside `message` carries `+05:30`.** India has one fixed offset
+and observes no daylight saving, so the offset is correct rather than a
+simplification, and a payload carrying two of them makes a client decide whether
+the difference means anything. `HOLD_INFO.EXPIRES_AT` and
+`REFUND_SLAB.QUOTE_EXPIRES_AT` used to say `Z` on the same payloads as the stop
+times above; they no longer do, and a test walks every generated payload rather
+than the two fields that were wrong. The envelope's own `context.timestamp` is
+out of scope and stays `Z`: it belongs to the protocol and is shared with the two
+categories next door.
+
+**`STOP_ROLE` says which stops are pickups and which are dropping points**, per
+section 4.1. `stop.type` says where a stop falls in the sequence, and the two are
+different facts.
 
 ### 14.3 `select`
 
@@ -2042,6 +2162,40 @@ Five states, and the brief's sheet 04 asks for four plus the rider's own
 selection, drawn with no red and no green. `SOLD:simulated` and `SOLD:booked`
 render identically to a rider and differ on the wire, so a client that wants to
 say "sold in this demonstration" about one and nothing about the other can.
+
+**`SEAT_MAP_LAYOUT` travels beside it, always** (section 5.4). It is where the
+seats are, as against what they are doing, read as records delimited by
+`SEAT_ID` in the same convention `MANIFEST` uses:
+
+```json
+{ "descriptor": { "code": "SEAT_MAP_LAYOUT" }, "display": false, "list": [
+  { "descriptor": { "code": "SEAT_MAP_ID" },         "value": "PALLAKKI-2P1-30" },
+  { "descriptor": { "code": "KIND" },                "value": "SLEEPER" },
+  { "descriptor": { "code": "DECKS" },               "value": "2" },
+  { "descriptor": { "code": "DOCUMENTED_CAPACITY" }, "value": "30" },
+
+  { "descriptor": { "code": "SEAT_ID" },            "value": "L1A" },
+  { "descriptor": { "code": "DECK" },               "value": "1" },
+  { "descriptor": { "code": "ROW" },                "value": "1" },
+  { "descriptor": { "code": "COLUMN" },             "value": "1" },
+  { "descriptor": { "code": "WINDOW" },             "value": "true" },
+  { "descriptor": { "code": "PAIRED_SEAT_ID" },     "value": "L1B" },
+  { "descriptor": { "code": "ADJACENT_SEAT_IDS" },  "value": "L1B" },
+
+  { "descriptor": { "code": "SEAT_ID" },            "value": "L1C" },
+  { "descriptor": { "code": "DECK" },               "value": "1" },
+  { "descriptor": { "code": "ROW" },                "value": "1" },
+  { "descriptor": { "code": "COLUMN" },             "value": "3" },
+  { "descriptor": { "code": "WINDOW" },             "value": "true" }
+] }
+```
+
+`PAIRED_SEAT_ID` and `ADJACENT_SEAT_IDS` are omitted where there is nothing to
+say rather than sent empty, which is why `L1C` - the single berth - carries
+neither. `ADJACENT_SEAT_IDS` is comma-separated and is what tells a client where
+the aisle is: two seats with consecutive columns and no adjacency between them
+have the aisle between them, and that is not recoverable from the column numbers
+alone.
 
 ### 14.4 `init`
 
@@ -2134,6 +2288,41 @@ the order unchanged. For `CONFIRM_CANCEL` it returns the order at
 `status: CANCELLED` (or still `ACTIVE` with the cancelled seats removed, on a
 partial) carrying the stored refund.
 
+**What a cancelled booking's tags are.** `SEATS` is what the booking still
+holds and `CANCELLED_SEATS` is what it released. On a partial cancellation both
+are present. On a whole-booking cancellation `SEATS` is absent, because the
+booking holds none, and `CANCELLED_SEATS` names every seat. The fulfillment's
+`MANIFEST` follows the same rule: it lists the passengers still travelling, and
+a booking with nobody left on it carries no manifest rather than an empty one.
+Nothing is ambiguous: a settled order publishes `SEATS` whenever it holds seats,
+so its absence means none, and `status: CANCELLED` says the same thing about the
+booking as a whole.
+
+This is a correction of a real defect rather than a preference. The rewrite
+mapped `SEATS` and `MANIFEST` in place, so cancelling every seat left both with
+an empty `list`; `tag.list` is `minItems: 1` in this domain's own schema, so the
+generated `on_cancel` failed validation, **was never sent at all**, and the
+client waited out its own timeout against silence. Partial cancellation always
+left a seat behind, which is why it worked and why this went unseen. Of the
+three available answers - relax the schema to admit an empty list, omit the tag,
+or give a cancelled order a different shape - the schema is right: a tag with no
+entries carries no information, and this implementation already knew it, because
+a browse with no seats has always published no `SEATS` tag rather than an empty
+one. The rewrite simply did not follow its own precedent.
+
+`CANCELLED_SEATS` is the part that is more than a bug fix. Omission alone would
+have been correct and would have lost something: a partial cancellation used to
+subtract the seats it took and say nothing about them, so the order was no
+longer a record of what happened to it. Both halves are now published.
+
+**A callback that fails this provider's own schema is answered rather than
+swallowed.** Whatever the cause, the client receives `INTERNAL-ERROR` (section
+14.9) instead of nothing, and the schema failure is logged beside that answer
+rather than instead of it. `on_search` gained the error branch the other five
+callbacks already had for the same reason: it required `message.catalog`
+unconditionally, so a refused search - two stops of the same type, which the
+request schema admits - was equally unanswerable.
+
 ### 14.8 The vocabulary this document introduces
 
 Every code here is **this document's own naming**, not a transcription of a
@@ -2149,17 +2338,29 @@ a table-to-table exercise.
 | `travel_date` | `intent.fulfillment` | ISO calendar date, IST |
 | `quantity.available.count` | `Item.quantity` | Seats remaining |
 | `SERVICE_INFO` | Item tag | `SERVICE_ID`, `SERVICE_NUMBER`, `TRAVEL_DATE`, `SERVICE_CLASS`, `RUNNING_MINUTES` |
-| `PRICED_FOR` | Item tag | `FROM_BOARDING_POINT_ID`, `TO_BOARDING_POINT_ID` - the pair the headline price is for (§17.1) |
+| `PRICED_FOR` | Item tag | `FROM_BOARDING_POINT_ID`, `TO_BOARDING_POINT_ID` - the pair the headline price is for (§17.1) - and `FARE_SOURCING`, the `V`/`S`/`I` label of the fare cell the price came from. Per cell rather than per table, so that an interpolated fare cannot be laundered into a sourced one by a label further up (§0) |
 | `SERVICE_PROVENANCE` | Item tag | `BASIS`, `SOURCE_COUNT` |
 | `OPERATOR_DISCLOSURE` | Item tag | `BRAND` only. `CORPORATION` and `CORPORATION_BASIS` are retired by section 10.2's ruling; the corporation is a settlement fact (§10.3), never a wire field |
 | `SIMULATED_INVENTORY` | Item tag | `NOTICE` |
 | `SEAT_MAP_REF` / `SEAT_MAP` | Fulfillment tag / order tag | `SEAT_MAP_ID`, then one entry per seat |
-| `SEATS` | Order tag, cancel message tag | One `SEAT_ID` per seat |
+| `SEAT_MAP_LAYOUT` | Order tag, refusal message tag | `SEAT_MAP_ID`, `KIND`, `DECKS`, `DOCUMENTED_CAPACITY`, then a record per seat delimited by `SEAT_ID`: `DECK`, `ROW`, `COLUMN`, `WINDOW`, and `PAIRED_SEAT_ID` / `ADJACENT_SEAT_IDS` where they exist. Published wherever `SEAT_MAP` is (§5.4) |
+| `STOP_ROLE` | Stop tag | One `ROLE` per role the stop has: `BOARDING`, `DROPPING`, or both (§4.1) |
+| `SEATS` | Order tag, cancel message tag | One `SEAT_ID` per seat. On an order it is the seats the booking still holds, and it is absent rather than empty when it holds none |
+| `CANCELLED_SEATS` | Order tag | One `SEAT_ID` per seat a cancellation released (§14.7) |
+| `UNAVAILABLE_SEATS` | `on_select` message tag, on a refusal | One `SEAT_ID` per seat a `SEAT-UNAVAILABLE` is about. The error object names codes rather than values, so the seats travel as data beside it |
 | `HOLD_INFO` | Order tag | `HOLD_ID`, `EXPIRES_AT`, `TTL_SECONDS` |
 | `MANIFEST` | Fulfillment tag | `SEAT_ID`/`NAME`/`AGE`/`GENDER` records |
 | `BOOKING_REF` | Fulfillment tag | `NUMBER` |
 | `VEHICLE_LOOKUP` | Fulfillment tag | `SERVICE_ID`, `TRAVEL_DATE` |
 | `REFUND_SLAB` | `on_cancel` message tag | `SLAB_CODE`, `PERCENT`, `REFUND_QUOTE_ID`, `QUOTE_EXPIRES_AT` |
+
+A quote line and a refund line each carry two fields where they used to carry
+one. `code` is the stable identifier a client keys off - `BASE_FARE`,
+`SLAB_DEDUCTION`, `RESERVATION_FEE`, `TOLL`, `TOLL_REFUND`,
+`<CLAIM>_CONCESSION` - and `title` is what the rider reads. They were one field
+carrying the code, which put `BASE_FARE` on a fare screen. The alternative was
+every client shipping its own private map from these codes to English, which is
+a translation table that rots the day a line is added, so both travel.
 
 ### 14.9 Error codes
 
@@ -2170,7 +2371,7 @@ a table-to-table exercise.
 | `OUTSIDE-BOOKING-WINDOW` | Too soon or too far out; names which edge and the boundary instant |
 | `FARE-NOT-PUBLISHED` | No fare cell for that boarding pair and class |
 | `SEAT-NOT-ON-MAP` | A seat id this class's seat map does not contain |
-| `SEAT-UNAVAILABLE` | Held or sold; names the seats and returns the current map |
+| `SEAT-UNAVAILABLE` | Held or sold; names the seats in `UNAVAILABLE_SEATS` and returns the current map and its layout |
 | `SEAT-GENDER-LOCKED` | Names the seat and the required gender, never the neighbour |
 | `SEAT-COUNT-MISMATCH` | `quantity.selected.count` disagrees with the seat list |
 | `HOLD-REQUIRED` | `init` or `confirm` with no live hold for this transaction |
@@ -2184,6 +2385,20 @@ a table-to-table exercise.
 | `REFUND-SLAB-MOVED` | Carries the new quote |
 | `REFUND-QUOTE-EXPIRED` | The `PT2M` quote lapsed |
 | `MIXED-CATEGORY-ORDER` | Reused; a reserved item cannot share an order with a ticket or a pass |
+| `INTERNAL-ERROR` | This provider could not build an answer, or built one it could not express within its own published shapes. **The outcome is not known from this message**, and the client's next move is a `status` read rather than an assumption in either direction |
+
+`INTERNAL-ERROR` is the twenty-third code and was on the wire before it was in
+this table: `handler.ts` emitted it as a bare string literal, so a client
+classified it as unknown, and unknown copy tends to read as reassurance -
+"nothing was charged" - which this code cannot promise. It is now a typed
+constant checked against the list in `domain.ts`, and a test reads every refusal
+code out of `src/reserved` and asserts each one is declared.
+
+A domain error carries a code and a sentence and nothing else. `paths` was
+declared on the error shape and never set by anything, which made it a field a
+client could wait for forever; it has been removed rather than shipped
+permanently absent, on the same reasoning section 9.1 uses to decline the bay.
+What a refusal has to say about particular seats it says in `message.tags`.
 
 ---
 
@@ -2474,6 +2689,29 @@ read against each other:
   the largest element on the ticket has nothing behind it.
 - **`SERVICE_NUMBER` is the rider-facing coach identifier**, distinct from
   `SERVICE_ID`, which is a join key and must never be shown. Section 9.2.
+- **A stop's role is published, and the app must read it.** `stop.type` says
+  where a stop falls in the sequence and never which of the two things it is.
+  `STOP_ROLE` (§4.1) says whether a rider may board there, alight there, or
+  both, and a pickup list built by taking every stop but the last will offer
+  Hosapete to a rider standing in Bengaluru. The boarding-point id stays opaque
+  and must not be parsed for this or anything else.
+- **The seat map's geometry is published beside its states.** `SEAT_MAP_LAYOUT`
+  (§5.4) carries deck, row, column, window, pairing and adjacency per seat. Any
+  layout the app reconstructs from this document's prose should be deleted: it
+  is a contract no schema constrains and no test compares, and it goes wrong
+  silently the day a fixture changes a row.
+- **A cancelled booking names the seats it released.** `SEATS` is what the
+  booking still holds and is absent when it holds none; `CANCELLED_SEATS` is
+  what the cancellation took (§14.7). An app that renders a cancelled booking by
+  diffing against its own stored copy no longer has to.
+- **A quote line carries `code` and `title`.** Render `title`; branch on `code`.
+  An app rendering `title` used to print `BASE_FARE` at the rider.
+- **`INTERNAL-ERROR` is a declared code and means the outcome is unknown.** It
+  is not "nothing happened" and must not render as one. The honest response is
+  a `status` read.
+- **`SEAT-UNAVAILABLE` names its seats in `UNAVAILABLE_SEATS`.** An app
+  promising the rider that the map below is current can now say which seats
+  moved without parsing an English sentence for seat ids.
 - **`ONDC_ENABLED` is irrelevant to this category.** Tatak's spec is right that
   reservations should not ride the ONDC flag, and the domain string in section 2
   is what makes that structurally true rather than merely conventional: this is a
@@ -2760,6 +2998,33 @@ schema; a malformed request NACKs with the documented envelope; a domain error
 arrives as an `error` on the callback with no `message.order`; `transaction_id`
 is byte-identical across all hops of one booking; the reserved domain's items
 never appear in a `ONDC:TRV11` search and vice versa.
+
+**The first of those was worth less than it read, and the whole-booking
+cancellation is why.** "Every generated `on_*` validates" meant every payload
+the golden lifecycle happened to produce, and the golden lifecycle cancelled one
+seat of two. A shape no test ever generated was a shape no test could validate,
+and a generated callback that fails its own schema is not a warning, it is
+silence on the wire: the callback is not sent and the client waits out its
+timeout. So the layer is now three things rather than one.
+
+- **The golden lifecycle runs the shapes, not a sample of them.** It cancels a
+  seat, then the whole booking, then reads the cancelled booking back, so the
+  end state of every branch is a payload that gets validated.
+- **The http sink validates everything it receives.** Every reserved callback
+  that reaches the collector in `tests/reserved/app.test.ts` is checked against
+  the schema for its action, so a payload this provider cannot express fails
+  whichever test drove it rather than passing quietly in a log line. The file
+  claimed this in its own header comment for some time before it did it.
+- **A structural sweep, so the next instance is caught by shape rather than by
+  luck.** No payload the lifecycle produces carries a tag with an empty list; no
+  instant inside `message` carries an offset other than `+05:30`; no line a
+  rider reads is a screaming-case code; every refusal code written anywhere in
+  `src/reserved` is in section 14.9's table, read out of the source rather than
+  out of a second hand-maintained list.
+
+And the answer of last resort itself: a handler given a validator that refuses
+its callback still dispatches, with `INTERNAL-ERROR` and a message that does not
+claim nothing happened.
 
 Plus the three grep guards of section 2, which are cheap and catch a class of
 mistake that code review reliably misses: no `ONDC` or `TRV11` under

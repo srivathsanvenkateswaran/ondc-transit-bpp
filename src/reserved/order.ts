@@ -2,18 +2,21 @@ import { randomUUID } from "node:crypto";
 
 import {
   bookingWindowStatus,
+  istIsoInstant,
   runsOn,
   stopInstantMilliseconds,
 } from "./calendar.js";
 import {
   RESERVED_CATEGORY,
   bookingRefTag,
+  cancelledSeatsTag,
   catalogueFulfillment,
   holdInfoTag,
   orderFulfillment,
   refundSlabTag,
   reservedItem,
   reservedSearchQuery,
+  seatMapLayoutTag,
   seatMapRefTag,
   seatMapTag,
   seatsTag,
@@ -24,6 +27,7 @@ import {
 import {
   concessionDiscountPaise,
   concessionFromOrderTags,
+  concessionLabel,
   concessionRatePercent,
 } from "./concession.js";
 import {
@@ -293,6 +297,7 @@ export class ReservedOrderService {
           {
             unavailableSeatIds: simulated,
             seatMap: seatMapTag(resolved.seatMap.seatMapId, snapshot.states),
+            seatMapLayout: seatMapLayoutTag(resolved.seatMap),
           },
         );
       }
@@ -320,6 +325,7 @@ export class ReservedOrderService {
           throw new ReservedLifecycleError(error.code, error.message, {
             ...error.attachment,
             seatMap: seatMapTag(resolved.seatMap.seatMapId, after.states),
+            seatMapLayout: seatMapLayoutTag(resolved.seatMap),
           });
         }
         throw error;
@@ -619,7 +625,7 @@ export class ReservedOrderService {
     if (quote.expiresAt <= nowMs) {
       throw new ReservedLifecycleError(
         "REFUND-QUOTE-EXPIRED",
-        `Refund quote ${quote.id} lapsed at ${new Date(quote.expiresAt).toISOString()}`,
+        `Refund quote ${quote.id} lapsed at ${istIsoInstant(quote.expiresAt)}`,
       );
     }
 
@@ -687,31 +693,78 @@ export class ReservedOrderService {
    * quote is what was sold, and shrinking it retroactively would leave no
    * record of what the rider actually bought. What came back is the refund,
    * which is a separate figure and travels separately.
+   *
+   * **A cancelled booking holds no seats, and it says so by carrying no seat
+   * list rather than by carrying an empty one.** This is where a whole-booking
+   * cancellation used to become unanswerable. The rewrite mapped `SEATS` and
+   * `MANIFEST` in place, so cancelling everything left both with an empty
+   * `list`; `tag.list` is `minItems: 1` in this domain's own schema, so the
+   * generated `on_cancel` failed its own validation, was never sent, and the
+   * client waited out its timeout with no answer at all. Partial cancellation
+   * left at least one seat behind, which is why it worked and why this
+   * survived.
+   *
+   * Of the three answers available - relax the schema to admit an empty list,
+   * omit the tag, or give a cancelled order a different shape - the schema is
+   * right and the writer was wrong. A tag with no entries carries no
+   * information and is a shape bug everywhere else it could occur, and this
+   * file already knew it: `buildOrder` publishes no `SEATS` tag at all on a
+   * browse with no seats. The rewrite simply did not follow its own precedent.
+   *
+   * Omission alone would lose something, though, so the cancelled seats are
+   * published rather than merely subtracted. `SEATS` is what the booking still
+   * holds and `CANCELLED_SEATS` is what it released; on a whole-booking
+   * cancellation the first is absent and the second names every seat. Nothing
+   * is ambiguous: a settled order carries `SEATS` whenever it holds seats, so
+   * its absence means none, and `status: CANCELLED` says the same thing about
+   * the booking. A partial cancellation now says which seats it took, which it
+   * previously dropped on the floor.
    */
   private cancelledOrder(booking: BookingRecord): Record<string, unknown> {
     const order = structuredClone(booking.order) as Record<string, unknown>;
     const remaining = booking.seats.filter((seat) => seat.status === "CONFIRMED");
+    const released = booking.seats.filter((seat) => seat.status === "CANCELLED");
     order.status = booking.status === "CANCELLED" ? "CANCELLED" : "ACTIVE";
-    order.tags = (order.tags as Tag[]).map((candidate) =>
-      candidate.descriptor.code === "SEATS"
-        ? seatsTag(remaining.map((seat) => seat.seatId))
-        : candidate,
-    );
+    // Rewritten where the seat list already sat, so a second cancellation on
+    // the same booking does not shuffle the order of its own tags.
+    const seatTags = [
+      ...(remaining.length > 0
+        ? [seatsTag(remaining.map((seat) => seat.seatId))]
+        : []),
+      ...(released.length > 0
+        ? [cancelledSeatsTag(released.map((seat) => seat.seatId))]
+        : []),
+    ];
+    let seatTagsPlaced = false;
+    order.tags = (order.tags as Tag[]).flatMap((candidate) => {
+      if (
+        candidate.descriptor.code !== "SEATS" &&
+        candidate.descriptor.code !== "CANCELLED_SEATS"
+      ) {
+        return [candidate];
+      }
+      if (seatTagsPlaced) return [];
+      seatTagsPlaced = true;
+      return seatTags;
+    });
     order.fulfillments = (order.fulfillments as Array<Record<string, unknown>>).map(
       (fulfillment) => ({
         ...fulfillment,
-        tags: (fulfillment.tags as Tag[]).map((candidate) =>
-          candidate.descriptor.code === "MANIFEST"
-            ? manifestTagFrom(
-                remaining.map((seat) => ({
-                  seatId: seat.seatId,
-                  name: seat.name ?? "",
-                  age: seat.age,
-                  gender: seat.gender,
-                })),
-              )
-            : candidate,
-        ),
+        tags: (fulfillment.tags as Tag[]).flatMap((candidate) => {
+          if (candidate.descriptor.code !== "MANIFEST") return [candidate];
+          // A manifest of nobody is not an empty manifest, it is no manifest.
+          if (remaining.length === 0) return [];
+          return [
+            manifestTagFrom(
+              remaining.map((seat) => ({
+                seatId: seat.seatId,
+                name: seat.name ?? "",
+                age: seat.age,
+                gender: seat.gender,
+              })),
+            ),
+          ];
+        }),
       }),
     );
     return order;
@@ -731,22 +784,26 @@ export class ReservedOrderService {
       // coming back rather than wondering where it went.
       breakup: [
         {
-          title: "BASE_FARE",
+          code: "BASE_FARE",
+          title: "Base fare",
           price: { currency: "INR", value: signedPaiseToRupees(refund.basePaise) },
         },
         {
-          title: "SLAB_DEDUCTION",
+          code: "SLAB_DEDUCTION",
+          title: "Cancellation deduction",
           price: {
             currency: "INR",
             value: signedPaiseToRupees(-refund.slabDeductionPaise),
           },
         },
         {
-          title: "RESERVATION_FEE",
+          code: "RESERVATION_FEE",
+          title: "Reservation fee",
           price: { currency: "INR", value: signedPaiseToRupees(0) },
         },
         {
-          title: "TOLL_REFUND",
+          code: "TOLL_REFUND",
+          title: "Toll refund",
           price: {
             currency: "INR",
             value: signedPaiseToRupees(refund.tollRefundPaise),
@@ -765,11 +822,13 @@ export class ReservedOrderService {
       price: { currency: "INR", value: signedPaiseToRupees(refundPaise) },
       breakup: [
         {
-          title: "BASE_FARE",
+          code: "BASE_FARE",
+          title: "Base fare",
           price: { currency: "INR", value: signedPaiseToRupees(basePaise) },
         },
         {
-          title: "SLAB_DEDUCTION",
+          code: "SLAB_DEDUCTION",
+          title: "Cancellation deduction",
           price: {
             currency: "INR",
             value: signedPaiseToRupees(
@@ -778,11 +837,13 @@ export class ReservedOrderService {
           },
         },
         {
-          title: "RESERVATION_FEE",
+          code: "RESERVATION_FEE",
+          title: "Reservation fee",
           price: { currency: "INR", value: signedPaiseToRupees(0) },
         },
         {
-          title: "TOLL_REFUND",
+          code: "TOLL_REFUND",
+          title: "Toll refund",
           price: { currency: "INR", value: signedPaiseToRupees(tollPaise) },
         },
       ],
@@ -831,15 +892,23 @@ export class ReservedOrderService {
       : 0;
     const totalPaise = basePaise - discountPaise + feePaise + tollPaise;
 
+    // `title` is what the rider reads and `code` is what a client keys off.
+    // They were one field carrying the code, which put `BASE_FARE` on a fare
+    // screen: a client cannot invent a label for a code it was never given a
+    // label for, and the alternative - every client shipping its own private
+    // map from this provider's codes to English - is a translation table that
+    // silently rots the day a line is added. So both travel.
     const breakup: Array<Record<string, unknown>> = [
       {
-        title: "BASE_FARE",
+        code: "BASE_FARE",
+        title: "Base fare",
         price: { currency: "INR", value: paiseToRupees(basePaise) },
       },
       ...(discountPaise > 0
         ? [
             {
-              title: `${input.concessionClaim}_CONCESSION`,
+              code: `${input.concessionClaim}_CONCESSION`,
+              title: `${concessionLabel(input.concessionClaim!)} concession`,
               price: {
                 currency: "INR",
                 value: signedPaiseToRupees(-discountPaise),
@@ -850,13 +919,15 @@ export class ReservedOrderService {
       {
         // Never refunded, in any slab. Named on the quote so that the refund
         // breakup's zero line is not the first a rider hears of it.
-        title: "RESERVATION_FEE",
+        code: "RESERVATION_FEE",
+        title: "Reservation fee",
         price: { currency: "INR", value: paiseToRupees(feePaise) },
       },
       {
         // Refunded in full, in every slab. It was never the corporation's
         // revenue: it is a pass-through to a toll authority.
-        title: "TOLL",
+        code: "TOLL",
+        title: "Toll",
         price: { currency: "INR", value: paiseToRupees(tollPaise) },
       },
     ];
@@ -912,8 +983,13 @@ export class ReservedOrderService {
       ],
       ...(input.createdAt
         ? {
-            created_at: new Date(input.createdAt).toISOString(),
-            updated_at: new Date(input.createdAt).toISOString(),
+            // `+05:30`, like every other instant inside a message this
+            // category builds. The envelope's own `context.timestamp` stays
+            // `Z`: that field belongs to the protocol and is shared with the
+            // two categories next door, and moving it would move a path this
+            // change has no business moving.
+            created_at: istIsoInstant(input.createdAt),
+            updated_at: istIsoInstant(input.createdAt),
           }
         : {}),
       tags: [
@@ -921,6 +997,9 @@ export class ReservedOrderService {
         // Both decks, every seat, every time, so a client always has a current
         // view without a second call.
         seatMapTag(resolved.seatMap.seatMapId, snapshot.states),
+        // And the geometry those states are states of, so that a client draws
+        // this coach rather than its own reading of a paragraph.
+        seatMapLayoutTag(resolved.seatMap),
         ...(input.seatIds.length > 0 ? [seatsTag(input.seatIds)] : []),
         ...(input.hold
           ? [
@@ -975,8 +1054,11 @@ export class ReservedOrderService {
     if (status !== "LIVE") {
       throw new ReservedLifecycleError(
         "HOLD-EXPIRED",
-        `Hold ${hold.holdId} expired at ${new Date(hold.expiresAt).toISOString()}, which is the instant published on the select that took it`,
-        { holdId: hold.holdId, expiresAt: new Date(hold.expiresAt).toISOString() },
+        // The sentence claims to quote the instant published on the select
+        // that took the hold, so it has to be that instant character for
+        // character. `HOLD_INFO.EXPIRES_AT` is `+05:30`; this said `Z`.
+        `Hold ${hold.holdId} expired at ${istIsoInstant(hold.expiresAt)}, which is the instant published on the select that took it`,
+        { holdId: hold.holdId, expiresAt: istIsoInstant(hold.expiresAt) },
       );
     }
     if (

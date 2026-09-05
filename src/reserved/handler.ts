@@ -2,7 +2,12 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { ack, nack } from "../protocol/ack.js";
 import { dispatchCallback } from "../protocol/dispatch.js";
-import { RESERVED_DOMAIN, RESERVED_VERSION } from "./domain.js";
+import { unavailableSeatsTag } from "./catalog.js";
+import {
+  RESERVED_DOMAIN,
+  RESERVED_INTERNAL_ERROR,
+  RESERVED_VERSION,
+} from "./domain.js";
 import { ReservedLifecycleError } from "./errors.js";
 import type { ReservedOrderService } from "./order.js";
 import type { ReservedValidator } from "./schema.js";
@@ -121,6 +126,42 @@ function callbackValidation(
   return validators[action](body);
 }
 
+/**
+ * What rides beside a refusal, where anything does.
+ *
+ * Never an order: a refused action produced none, and inventing one would tell
+ * a client the action half succeeded.
+ *
+ * Exported because the golden lifecycle needs the same translation, and it
+ * used to carry its own copy. A copy is worse than useless here: the golden
+ * refusal payload is checked into the repository as a record of what this
+ * provider sends, and a second implementation of the translation meant it was
+ * a record of what a test file sends. The seat ids were computed into the
+ * attachment and dropped by both, so a `SEAT-UNAVAILABLE` named the seats only
+ * inside its English sentence, and a client that promised the rider a current
+ * map could not say which seats had moved without parsing prose for seat ids.
+ * They travel as a tag rather than on the error object, because this domain's
+ * error object carries a code and a sentence and nothing else.
+ */
+export function refusalMessage(
+  error: ReservedLifecycleError,
+): Record<string, unknown> {
+  const attachment = error.attachment ?? {};
+  const message: Record<string, unknown> = {};
+  const tags = [
+    ...(Array.isArray(attachment.unavailableSeatIds) &&
+    attachment.unavailableSeatIds.length > 0
+      ? [unavailableSeatsTag(attachment.unavailableSeatIds as string[])]
+      : []),
+    ...(attachment.seatMap ? [attachment.seatMap] : []),
+    ...(attachment.seatMapLayout ? [attachment.seatMapLayout] : []),
+  ];
+  if (tags.length > 0) message.tags = tags;
+  if (attachment.tags) message.tags = attachment.tags;
+  if (attachment.refund) message.refund = attachment.refund;
+  return message;
+}
+
 function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
@@ -167,22 +208,14 @@ export function createReservedHandler(dependencies: ReservedHandlerDependencies)
           context,
           message: {},
           error: {
-            code: "INTERNAL-ERROR",
+            code: RESERVED_INTERNAL_ERROR,
             message: "Provider could not process the request",
           },
         };
       }
-      // What rides beside a refusal, where anything does. Never an order: a
-      // refused action produced none, and inventing one would tell a client
-      // the action half succeeded.
-      const attachment = error.attachment ?? {};
-      const message: Record<string, unknown> = {};
-      if (attachment.seatMap) message.tags = [attachment.seatMap];
-      if (attachment.tags) message.tags = attachment.tags;
-      if (attachment.refund) message.refund = attachment.refund;
       return {
         context,
-        message,
+        message: refusalMessage(error),
         error: { code: error.code, message: error.message },
       };
     }
@@ -208,24 +241,78 @@ export function createReservedHandler(dependencies: ReservedHandlerDependencies)
     }
   }
 
+  /**
+   * The answer of last resort, for when this provider cannot express its own.
+   *
+   * Nothing but the context and an error, so it validates against every
+   * callback schema in the tree by their `error` branch, whatever went wrong
+   * upstream. The message is deliberately not a reassurance: a callback that
+   * failed its own schema may have been built from an action that already
+   * changed state - the whole-booking cancellation this replaced had committed
+   * the cancellation and then found it could not say so - and a client told
+   * "nothing happened" would be told something this provider does not know.
+   */
+  function lastResort(
+    request: ReservedProtocolRequest,
+    onAction: ReservedCallbackAction,
+  ): Record<string, unknown> {
+    return {
+      context: callbackContext(request, onAction),
+      message: {},
+      error: {
+        code: RESERVED_INTERNAL_ERROR,
+        message:
+          "This provider could not express an answer to this request within its own published shapes; the outcome is not known from this message and a status read is the way to find it",
+      },
+    };
+  }
+
   async function answerAction(
     action: ReservedAction,
     request: ReservedProtocolRequest,
   ): Promise<void> {
     const onAction = `on_${action}` as ReservedCallbackAction;
     try {
-      const callback = await buildCallback(action, request);
+      let callback = await buildCallback(action, request);
       const validation = callbackValidation(
         dependencies.validator,
         onAction,
         callback,
       );
       if (!validation.valid) {
-        throw new Error(
-          `Generated ${onAction} failed schema validation: ${JSON.stringify(
+        // This used to throw, which meant the callback was never sent and the
+        // client waited out its own timeout against silence. A provider that
+        // cannot say what happened must still say that much: an unanswerable
+        // request is answered with the code for it, and the schema failure is
+        // logged beside it rather than instead of it.
+        //
+        // The refusal itself is validated too. If even that will not pass, the
+        // catch below logs and nothing is sent, which is the one case where
+        // silence is the only thing left.
+        dependencies.logEvent({
+          transaction_id: request.context.transaction_id,
+          message_id: request.context.message_id,
+          action: onAction,
+          subscriber_id: dependencies.runtime.subscriberId,
+          operator: "ksrtc",
+          outcome: "SCHEMA_ERROR",
+          error: `Generated ${onAction} failed schema validation: ${JSON.stringify(
             validation.errors,
           )}`,
+        });
+        callback = lastResort(request, onAction);
+        const fallbackValidation = callbackValidation(
+          dependencies.validator,
+          onAction,
+          callback,
         );
+        if (!fallbackValidation.valid) {
+          throw new Error(
+            `Generated ${onAction} and its refusal both failed schema validation: ${JSON.stringify(
+              fallbackValidation.errors,
+            )}`,
+          );
+        }
       }
       await sleep(dependencies.runtime.callbackDelayMs);
       await dispatchCallback(

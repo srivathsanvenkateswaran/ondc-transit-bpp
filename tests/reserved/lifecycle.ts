@@ -4,6 +4,7 @@ import { openReservedDatabase } from "../../src/reserved/db.js";
 import { RESERVED_DOMAIN, RESERVED_VERSION } from "../../src/reserved/domain.js";
 import { ReservedLifecycleError } from "../../src/reserved/errors.js";
 import { FixtureReservedSource } from "../../src/reserved/fixture.js";
+import { refusalMessage } from "../../src/reserved/handler.js";
 import { ReservedOrderService } from "../../src/reserved/order.js";
 import { ReservedStore } from "../../src/reserved/store.js";
 import {
@@ -63,15 +64,18 @@ function envelope(action: string, message: Record<string, unknown>) {
   return { context: callbackContext(action), message };
 }
 
+/**
+ * The refusal exactly as the handler sends it.
+ *
+ * This function used to reimplement the handler's translation from an error's
+ * attachment to a callback message, which meant the refusal payload checked
+ * into this repository was a record of what this test file builds rather than
+ * of what the provider puts on a wire. The two had already diverged.
+ */
 function errorEnvelope(action: string, error: ReservedLifecycleError) {
-  const attachment = error.attachment ?? {};
-  const message: Record<string, unknown> = {};
-  if (attachment.seatMap) message.tags = [attachment.seatMap];
-  if (attachment.tags) message.tags = attachment.tags;
-  if (attachment.refund) message.refund = attachment.refund;
   return {
     context: callbackContext(action),
-    message,
+    message: refusalMessage(error),
     error: { code: error.code, message: error.message },
   };
 }
@@ -196,6 +200,41 @@ export async function runGoldenLifecycle(): Promise<GoldenPayloads> {
       }) as never,
     ),
   );
+
+  // The whole booking, after the partial. Cancelling everything is the shape
+  // that had never been generated anywhere in this suite: `cancellation.test`
+  // calls `orders.cancel` directly and validates no callback, and the one
+  // http-level cancel test stops at `SOFT_CANCEL`. So the rewritten order
+  // emptied its own `SEATS` and `MANIFEST` lists, failed this domain's
+  // `minItems: 1` on `tag.list`, and was never sent - and no test could see
+  // it, because none of them ever produced a payload with nothing left in it.
+  const wholeQuote = await orders.cancel(
+    reservedCancelRequest({ orderId, code: "SOFT_CANCEL" }) as never,
+  );
+  payloads.on_cancel_whole_quote = envelope("cancel", wholeQuote);
+  const wholeQuoteId = (
+    (wholeQuote.tags as Array<{
+      descriptor: { code: string };
+      list: Array<{ descriptor: { code: string }; value: string }>;
+    }>)[0].list.find((entry) => entry.descriptor.code === "REFUND_QUOTE_ID")!
+  ).value;
+  payloads.on_cancel_whole_committed = envelope(
+    "cancel",
+    await orders.cancel(
+      reservedCancelRequest({
+        orderId,
+        code: "CONFIRM_CANCEL",
+        quoteId: wholeQuoteId,
+      }) as never,
+    ),
+  );
+  // And the read back, because a cancelled booking is stored in the shape it
+  // was answered in and `on_status` has to be able to publish it too.
+  payloads.on_status_cancelled = envelope(
+    "status",
+    orders.status(reservedStatusRequest({ orderId }) as never),
+  );
+
   store.close();
   return payloads;
 }

@@ -1,4 +1,4 @@
-import { stopInstant } from "./calendar.js";
+import { istIsoInstant, stopInstant } from "./calendar.js";
 import {
   RESERVED_CATEGORY_CODE,
   RESERVED_CATEGORY_ID,
@@ -18,6 +18,7 @@ import type {
   BoardingPoint,
   ReservedSearchQuery,
   ReservedService,
+  SeatMap,
   ServiceClass,
   SourcingLabel,
 } from "./types.js";
@@ -167,16 +168,104 @@ export function holdInfoTag(hold: {
     // Absolute and authoritative. A client whose device clock is wrong shows a
     // wrong countdown and is still accepted or refused correctly, because the
     // decision is made here against this provider's own clock.
-    entry("EXPIRES_AT", new Date(hold.expiresAt).toISOString()),
+    //
+    // `+05:30`, like every other instant this category publishes. It was `Z`,
+    // which is the same instant and a different wire: a client reading two
+    // offsets on one payload has to decide whether that means anything, and
+    // the answer here is that it never did.
+    entry("EXPIRES_AT", istIsoInstant(hold.expiresAt)),
     // Published only so a client can write "held for ten minutes" without
     // subtracting two instants. It is never the thing counted against.
     entry("TTL_SECONDS", String(hold.ttlSeconds)),
   ]);
 }
 
+/**
+ * The geometry the states are states of.
+ *
+ * `SEAT_MAP` says what every seat is doing; without this, nothing on the wire
+ * says where any of them is. A client had exactly two ways to draw a coach:
+ * reconstruct the layout from section 5's prose, which is a shared secret in a
+ * document rather than data on a wire and drifts the day a fixture changes, or
+ * draw a grid that is not this coach. Tatak took the first, reproduced both
+ * layouts seat for seat, and flagged it as the piece of itself most likely to
+ * be wrong. It was right to.
+ *
+ * Published beside the states rather than at a URL of its own, because the
+ * moment a client needs geometry is the moment it has states, and a second
+ * fetch would introduce a cache-coherence question where none exists. It is
+ * not published on `on_search`, where no states are published and no seat map
+ * is drawn.
+ *
+ * Read as records delimited by `SEAT_ID`, the same convention `MANIFEST`
+ * already uses. `PAIRED_SEAT_ID` and `ADJACENT_SEAT_IDS` are omitted where
+ * there is nothing to say rather than sent empty. Adjacency is authored rather
+ * than derived, and it is what tells a client where the aisle is: two seats
+ * with consecutive columns and no adjacency between them have the aisle
+ * between them, which is not recoverable from the column numbers alone.
+ */
+export function seatMapLayoutTag(seatMap: SeatMap): Tag {
+  return tag("SEAT_MAP_LAYOUT", false, [
+    entry("SEAT_MAP_ID", seatMap.seatMapId),
+    entry("KIND", seatMap.kind),
+    entry("DECKS", String(seatMap.decks)),
+    ...(seatMap.documentedCapacity === null ||
+    seatMap.documentedCapacity === undefined
+      ? []
+      : [entry("DOCUMENTED_CAPACITY", String(seatMap.documentedCapacity))]),
+    ...seatMap.seats.flatMap((seat) => [
+      entry("SEAT_ID", seat.seatId),
+      entry("DECK", String(seat.deck)),
+      entry("ROW", String(seat.row)),
+      entry("COLUMN", String(seat.column)),
+      entry("WINDOW", seat.window ? "true" : "false"),
+      ...(seat.pairedSeatId
+        ? [entry("PAIRED_SEAT_ID", seat.pairedSeatId)]
+        : []),
+      ...(seat.adjacentSeatIds.length > 0
+        ? [entry("ADJACENT_SEAT_IDS", seat.adjacentSeatIds.join(","))]
+        : []),
+    ]),
+  ]);
+}
+
 export function seatsTag(seatIds: string[]): Tag {
   return tag(
     "SEATS",
+    false,
+    seatIds.map((seatId) => entry("SEAT_ID", seatId)),
+  );
+}
+
+/**
+ * The seats a cancellation took, as against `SEATS`, which is what the booking
+ * still holds.
+ *
+ * Without it a whole-booking cancellation says nothing about seats at all -
+ * `SEATS` would be an empty list, which is not a shape this domain publishes -
+ * and a partial cancellation silently drops the seats it released. The order
+ * is the record of what happened to the booking, so it names both halves.
+ */
+export function cancelledSeatsTag(seatIds: string[]): Tag {
+  return tag(
+    "CANCELLED_SEATS",
+    true,
+    seatIds.map((seatId) => entry("SEAT_ID", seatId)),
+  );
+}
+
+/**
+ * The seats a `SEAT-UNAVAILABLE` refusal is about.
+ *
+ * The error object carries a code and a sentence, and by this domain's own
+ * rule it names codes rather than values. So the seats ride beside it as data,
+ * with the current map. A client that promises the rider "the map below is up
+ * to date" can now say which seats moved without parsing an English sentence
+ * for seat ids.
+ */
+export function unavailableSeatsTag(seatIds: string[]): Tag {
+  return tag(
+    "UNAVAILABLE_SEATS",
     false,
     seatIds.map((seatId) => entry("SEAT_ID", seatId)),
   );
@@ -212,7 +301,7 @@ export function refundSlabTag(quote: {
     entry("SLAB_CODE", quote.slabCode),
     entry("PERCENT", String(quote.slabPercent)),
     entry("REFUND_QUOTE_ID", quote.quoteId),
-    entry("QUOTE_EXPIRES_AT", new Date(quote.quoteExpiresAt).toISOString()),
+    entry("QUOTE_EXPIRES_AT", istIsoInstant(quote.quoteExpiresAt)),
   ]);
 }
 
@@ -288,6 +377,57 @@ function stopLocation(point: BoardingPoint) {
 }
 
 /**
+ * Whether a stop can be boarded at, alighted at, or both.
+ *
+ * `stop.type` is the positional axis and cannot carry this. Its three values
+ * say first, somewhere in the middle, and last, which is a fact about the
+ * sequence; whether a rider may get on or off is a fact about the stop, and
+ * flattening the two lists into one typed sequence lost it. The observed cost
+ * was concrete: on `2259BNGHMP` the three Bengaluru pickups and the Hosapete
+ * dropping point all came out as `INTERMEDIATE_STOP`, so a buyer app offered
+ * Hosapete as a pickup six hundred kilometres from the rider and could never
+ * offer it as a dropping point, which is exactly the alight-at-Hosapete case
+ * the Hampi corridor turns on.
+ *
+ * This provider already enforced the distinction - `boardingPairFromStops`
+ * refuses a pair that does not board and alight where it says - so the rule
+ * existed and was simply unpublished, discoverable only by being refused.
+ *
+ * A point that appears in both lists carries both roles rather than two stops.
+ */
+function stopRoleTag(roles: readonly string[]): Tag {
+  return tag(
+    "STOP_ROLE",
+    true,
+    roles.map((role) => entry("ROLE", role)),
+  );
+}
+
+interface RunStop {
+  point: BoardingPoint;
+  roles: string[];
+}
+
+/** The published run, in travel order, each point once, carrying its roles. */
+function runStops(service: ReservedService): RunStop[] {
+  const ordered: RunStop[] = [];
+  const byId = new Map<string, RunStop>();
+  const add = (point: BoardingPoint, role: string) => {
+    const existing = byId.get(point.boardingPointId);
+    if (existing) {
+      if (!existing.roles.includes(role)) existing.roles.push(role);
+      return;
+    }
+    const stop: RunStop = { point, roles: [role] };
+    byId.set(point.boardingPointId, stop);
+    ordered.push(stop);
+  };
+  service.boardingPoints.forEach((point) => add(point, "BOARDING"));
+  service.droppingPoints.forEach((point) => add(point, "DROPPING"));
+  return ordered;
+}
+
+/**
  * The whole run, in travel order, with an absolute instant at every stop.
  *
  * The instants are allowed to cross midnight: an overnight departure arrives
@@ -304,28 +444,29 @@ export function catalogueFulfillment(
     travelDate,
     service.serviceClass,
   );
-  const points = [...service.boardingPoints, ...service.droppingPoints];
+  const stops = runStops(service);
   return {
     id: reservedFulfillmentId(itemId),
     type: RESERVED_FULFILLMENT_TYPE,
     vehicle: { category: RESERVED_VEHICLE_CATEGORY },
-    stops: points.map((point, index) => ({
+    stops: stops.map((stop, index) => ({
       id: String(index + 1),
       ...(index === 0 ? {} : { parent_stop_id: String(index) }),
       type:
         index === 0
           ? "START"
-          : index === points.length - 1
+          : index === stops.length - 1
             ? "END"
             : "INTERMEDIATE_STOP",
-      location: stopLocation(point),
+      location: stopLocation(stop.point),
       time: {
         timestamp: stopInstant(
           travelDate,
           service.departureMinute,
-          point.reportingOffsetMinutes,
+          stop.point.reportingOffsetMinutes,
         ),
       },
+      tags: [stopRoleTag(stop.roles)],
     })),
     tags: [seatMapRefTag(service.seatMapId)],
   };
@@ -380,6 +521,11 @@ export function orderFulfillment(
             from.reportingOffsetMinutes,
           ),
         },
+        // Redundant here, where `START` and `END` already say which is which,
+        // and published anyway so that one stop shape is read one way
+        // everywhere rather than two ways depending on which message it
+        // arrived on.
+        tags: [stopRoleTag(["BOARDING"])],
       },
       {
         id: "2",
@@ -393,6 +539,7 @@ export function orderFulfillment(
             to.reportingOffsetMinutes,
           ),
         },
+        tags: [stopRoleTag(["DROPPING"])],
       },
     ],
     tags,

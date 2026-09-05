@@ -9,7 +9,7 @@
         "code": "std:080"
       }
     },
-    "action": "on_confirm",
+    "action": "on_cancel",
     "version": "0.1.0",
     "bap_id": "bap.example.test",
     "bap_uri": "https://bap.example.test",
@@ -23,7 +23,7 @@
   "message": {
     "order": {
       "id": "SPECIMEN-RSV-KSRTC-00000002",
-      "status": "ACTIVE",
+      "status": "CANCELLED",
       "provider": {
         "id": "P1",
         "descriptor": {
@@ -291,62 +291,6 @@
                     "code": "NUMBER"
                   },
                   "value": "SPECIMEN-KSRTC-00000002"
-                }
-              ]
-            },
-            {
-              "descriptor": {
-                "code": "MANIFEST"
-              },
-              "display": false,
-              "list": [
-                {
-                  "descriptor": {
-                    "code": "SEAT_ID"
-                  },
-                  "value": "U3A"
-                },
-                {
-                  "descriptor": {
-                    "code": "NAME"
-                  },
-                  "value": "A Passenger"
-                },
-                {
-                  "descriptor": {
-                    "code": "AGE"
-                  },
-                  "value": "34"
-                },
-                {
-                  "descriptor": {
-                    "code": "GENDER"
-                  },
-                  "value": "female"
-                },
-                {
-                  "descriptor": {
-                    "code": "SEAT_ID"
-                  },
-                  "value": "U3B"
-                },
-                {
-                  "descriptor": {
-                    "code": "NAME"
-                  },
-                  "value": "B Passenger"
-                },
-                {
-                  "descriptor": {
-                    "code": "AGE"
-                  },
-                  "value": "36"
-                },
-                {
-                  "descriptor": {
-                    "code": "GENDER"
-                  },
-                  "value": "male"
                 }
               ]
             },
@@ -1824,9 +1768,9 @@
         },
         {
           "descriptor": {
-            "code": "SEATS"
+            "code": "CANCELLED_SEATS"
           },
-          "display": false,
+          "display": true,
           "list": [
             {
               "descriptor": {
@@ -1843,6 +1787,80 @@
           ]
         }
       ]
-    }
+    },
+    "refund": {
+      "price": {
+        "currency": "INR",
+        "value": "515"
+      },
+      "breakup": [
+        {
+          "code": "BASE_FARE",
+          "title": "Base fare",
+          "price": {
+            "currency": "INR",
+            "value": "550"
+          }
+        },
+        {
+          "code": "SLAB_DEDUCTION",
+          "title": "Cancellation deduction",
+          "price": {
+            "currency": "INR",
+            "value": "-55"
+          }
+        },
+        {
+          "code": "RESERVATION_FEE",
+          "title": "Reservation fee",
+          "price": {
+            "currency": "INR",
+            "value": "0"
+          }
+        },
+        {
+          "code": "TOLL_REFUND",
+          "title": "Toll refund",
+          "price": {
+            "currency": "INR",
+            "value": "20"
+          }
+        }
+      ]
+    },
+    "tags": [
+      {
+        "descriptor": {
+          "code": "REFUND_SLAB"
+        },
+        "display": true,
+        "list": [
+          {
+            "descriptor": {
+              "code": "SLAB_CODE"
+            },
+            "value": "OVER_72H"
+          },
+          {
+            "descriptor": {
+              "code": "PERCENT"
+            },
+            "value": "10"
+          },
+          {
+            "descriptor": {
+              "code": "REFUND_QUOTE_ID"
+            },
+            "value": "RFQ-KSRTC-00000004"
+          },
+          {
+            "descriptor": {
+              "code": "QUOTE_EXPIRES_AT"
+            },
+            "value": "2026-09-20T15:32:00.000+05:30"
+          }
+        ]
+      }
+    ]
   }
 }

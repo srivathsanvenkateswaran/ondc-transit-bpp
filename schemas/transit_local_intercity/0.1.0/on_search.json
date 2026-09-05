@@ -1,10 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/on_search.json",
+  "$comment": "A refused search answers with an error and no catalog, exactly as the other five callbacks do. This document required `message.catalog` unconditionally, which meant a search this provider refuses - two stops of the same type, say, which the request schema admits and `reservedSearchQuery` rejects - produced a callback that failed this schema and was therefore never sent. The client had no answer at all. A callback that cannot express a refusal is a callback that sometimes sends nothing.",
   "type": "object",
   "required": [
-    "context",
-    "message"
+    "context"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "object",
+          "required": [
+            "catalog"
+          ]
+        }
+      }
+    },
+    {
+      "required": [
+        "error"
+      ]
+    }
   ],
   "properties": {
     "context": {
@@ -24,9 +44,6 @@
     },
     "message": {
       "type": "object",
-      "required": [
-        "catalog"
-      ],
       "properties": {
         "catalog": {
           "type": "object",
@@ -47,6 +64,9 @@
           }
         }
       }
+    },
+    "error": {
+      "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/error"
     }
   }
 }

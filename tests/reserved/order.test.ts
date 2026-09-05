@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { istIsoInstant } from "../../src/reserved/calendar.js";
 import { openReservedDatabase } from "../../src/reserved/db.js";
 import { ReservedLifecycleError } from "../../src/reserved/errors.js";
 import { FixtureReservedSource } from "../../src/reserved/fixture.js";
@@ -227,9 +228,12 @@ test("naming seats takes a hold and publishes its absolute expiry", async () => 
     }) as never,
   );
   const order = orderOf(message);
+  // `+05:30`, like every other instant this category publishes inside a
+  // message. It read `Z` while the stop times beside it read `+05:30`, on one
+  // payload, against this category's own stated rule.
   assert.equal(
     entryOf(order.tags, "HOLD_INFO", "EXPIRES_AT"),
-    new Date(NOW + HOLD_TTL_SECONDS * 1000).toISOString(),
+    istIsoInstant(NOW + HOLD_TTL_SECONDS * 1000),
   );
   assert.equal(entryOf(order.tags, "HOLD_INFO", "TTL_SECONDS"), "600");
   // The rider's own hold reads differently from a stranger's, so a client can
@@ -317,7 +321,10 @@ test("a departure outside the booking window refuses the sale and names the edge
     orders.select(reservedOrderRequest("select", { itemId: ITEM }) as never),
   );
   assert.equal(refusal.code, "OUTSIDE-BOOKING-WINDOW");
-  assert.match(refusal.message, /closed at 2026-09-30T16:44/);
+  // The boundary reads in IST, like every other instant this category
+  // publishes. 16:44 UTC is 22:14 in Bengaluru, on the evening the rider is
+  // actually being told about.
+  assert.match(refusal.message, /closed at 2026-09-30T22:14/);
 });
 
 test("a boarding pair this provider does not price is refused, not interpolated", async () => {
@@ -551,7 +558,7 @@ test("a confirm one second late is refused, even though the berth is still free"
   // Naming the instant that was already published on the select that took it.
   assert.match(
     refusal.message,
-    new RegExp(new Date(NOW + HOLD_TTL_SECONDS * 1000).toISOString()),
+    new RegExp(istIsoInstant(NOW + HOLD_TTL_SECONDS * 1000).replace(/\+/, "\\+")),
   );
   assert.equal(store.liveClaims("2259BNGHMP", TRAVEL_DATE).length, 0);
 
