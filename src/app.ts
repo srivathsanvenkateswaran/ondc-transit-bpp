@@ -23,6 +23,11 @@ import {
   type ValidationResult,
 } from "./protocol/validate.js";
 import { openReservedDatabase } from "./reserved/db.js";
+import {
+  HttpFleetManifestPublisher,
+  InertFleetManifestPublisher,
+  type FleetManifestPublisher,
+} from "./reserved/fleetManifest.js";
 import { FixtureReservedSource } from "./reserved/fixture.js";
 import { HttpReservedSource } from "./reserved/http.js";
 import {
@@ -155,6 +160,8 @@ export interface ReservedOverrides {
   source?: ReservedServiceSource;
   now?: () => Date;
   idFactory?: () => string;
+  /** A test's fake egress, so a manifest push can be asserted without a socket. */
+  fleetManifestPublisher?: FleetManifestPublisher;
 }
 
 export async function createApp(
@@ -243,6 +250,26 @@ export async function createApp(
         ? { idFactory: reservedOverrides.idFactory }
         : {},
     );
+    // No FLEET_MANIFEST_URL is the default-off case, exactly as no
+    // RESERVED_SOURCE_URL is above: this process builds an inert publisher
+    // and says so once, here, rather than on every booking.
+    const fleetManifestPublisher =
+      reservedOverrides.fleetManifestPublisher ??
+      (config.fleetManifestUrl
+        ? new HttpFleetManifestPublisher({
+            url: config.fleetManifestUrl,
+            token: config.fleetManifestToken ?? "",
+            ttlSeconds: config.fleetManifestTtlSeconds,
+            eventLogger,
+          })
+        : new InertFleetManifestPublisher());
+    if (!reservedOverrides.fleetManifestPublisher && !config.fleetManifestUrl) {
+      eventLogger({
+        action: "fleet_manifest_publish",
+        outcome: "INERT",
+        reason: "FLEET_MANIFEST_URL is not set; confirms and cancellations will not be pushed to a fleet",
+      });
+    }
     reserved = createReservedHandler({
       orders: new ReservedOrderService(
         "ksrtc",
@@ -252,6 +279,8 @@ export async function createApp(
         {
           publicBaseUrl: config.publicBaseUrl,
           reservation: config.reservation,
+          fleetManifest: fleetManifestPublisher,
+          eventLogger,
           ...(reservedOverrides.now ? { now: reservedOverrides.now } : {}),
           ...(reservedOverrides.idFactory
             ? { idFactory: reservedOverrides.idFactory }

@@ -102,6 +102,20 @@ export interface AppConfig {
   reservedSourceResponseSchema: string;
   reservedOperators?: Record<ReservedOperatorKey, OperatorRuntimeConfig>;
   reservation: ReservationConfig;
+  /**
+   * Where a confirm or a cancellation pushes the seat count that changed -
+   * `transit-fleet-sim`'s `PUT`/`DELETE /fleet/manifest`. No default, on the
+   * same reasoning `journeySourceUrl` and `reservedSourceUrl` already carry:
+   * a hardcoded fallback would make a deployment that never set this dial
+   * silently at a port nobody asked it to reach, rather than visibly not
+   * publishing at all. Absent means the publisher this process builds is
+   * inert - see `src/reserved/fleetManifest.ts`.
+   */
+  fleetManifestUrl?: string;
+  /** `MANIFEST_TOKEN` on the simulator's side. No default, for the same reason. */
+  fleetManifestToken?: string;
+  /** The `ttlSeconds` sent on every push. See `FLEET_MANIFEST_TTL_SECONDS`. */
+  fleetManifestTtlSeconds: number;
 }
 
 function required(env: NodeJS.ProcessEnv, name: string): string {
@@ -218,6 +232,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("Missing required environment variable RESERVED_SOURCE_URL");
   }
   if (reservedSourceUrl) parseHttpUrl(reservedSourceUrl, "RESERVED_SOURCE_URL");
+  // Unlike JOURNEY_SOURCE_URL and RESERVED_SOURCE_URL, there is no mode flag
+  // that makes this one required: a manifest push is best-effort by nature
+  // (see fleetManifest.ts), so its absence is never an error, only silence.
+  const fleetManifestUrl = env.FLEET_MANIFEST_URL?.trim();
+  if (fleetManifestUrl) parseHttpUrl(fleetManifestUrl, "FLEET_MANIFEST_URL");
+  const fleetManifestToken = env.FLEET_MANIFEST_TOKEN?.trim();
   return {
     host: required(env, "PROVIDER_HOST"),
     port: resolveProviderPort(env),
@@ -322,5 +342,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         30,
       ),
     },
+    ...(fleetManifestUrl ? { fleetManifestUrl } : {}),
+    ...(fleetManifestToken ? { fleetManifestToken } : {}),
+    // Matches transit-fleet-sim's own INTERCITY_MANIFEST_MAX_AGE_SECONDS
+    // default (docs/intercity-coaches.md §12.8): this provider pushes fresh
+    // on every change, so the two only need to agree on an order of
+    // magnitude, not be pinned together.
+    fleetManifestTtlSeconds: optionalIntegerInRange(
+      env,
+      "FLEET_MANIFEST_TTL_SECONDS",
+      1,
+      86_400,
+      3_600,
+    ),
   };
 }

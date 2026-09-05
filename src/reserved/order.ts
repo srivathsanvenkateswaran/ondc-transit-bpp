@@ -43,6 +43,12 @@ import {
   type BoardingPair,
 } from "./fares.js";
 import {
+  InertFleetManifestPublisher,
+  manifestSeatCounts,
+  type FleetManifestEventLogger,
+  type FleetManifestPublisher,
+} from "./fleetManifest.js";
+import {
   assertManifestMatchesHold,
   manifestTag,
   manifestTagFrom,
@@ -106,6 +112,15 @@ export interface ReservedOrderOptions {
   reservation: ReservationRuntime;
   now?: () => Date;
   idFactory?: () => string;
+  /**
+   * Where a confirm or a cancellation pushes the seat count that changed.
+   * Absent means `InertFleetManifestPublisher`: no `FLEET_MANIFEST_URL`
+   * configured is the default-off case, on the same reasoning `src/config.ts`
+   * already applies to the http sources next door, and it is silent rather
+   * than a guess at a port nobody asked it to dial.
+   */
+  fleetManifest?: FleetManifestPublisher;
+  eventLogger?: FleetManifestEventLogger;
 }
 
 interface ReservedContext {
@@ -154,6 +169,8 @@ interface Snapshot {
 export class ReservedOrderService {
   private readonly now: () => Date;
   private readonly idFactory: () => string;
+  private readonly fleetManifest: FleetManifestPublisher;
+  private readonly eventLogger: FleetManifestEventLogger;
   private readonly confirmations = new Map<string, Promise<BookingRecord>>();
 
   constructor(
@@ -168,6 +185,8 @@ export class ReservedOrderService {
   ) {
     this.now = options.now ?? (() => new Date());
     this.idFactory = options.idFactory ?? randomUUID;
+    this.fleetManifest = options.fleetManifest ?? new InertFleetManifestPublisher();
+    this.eventLogger = options.eventLogger ?? (() => undefined);
   }
 
   /* ---------------------------------------------------------------- *
@@ -485,6 +504,7 @@ export class ReservedOrderService {
           createdAt: nowMs,
         }),
     });
+    await this.publishManifestFor(resolved.service.serviceId, resolved.travelDate);
     return booking;
   }
 
@@ -596,11 +616,11 @@ export class ReservedOrderService {
     };
   }
 
-  private confirmCancel(
+  private async confirmCancel(
     booking: BookingRecord,
     seats: BookingRecord["seats"],
     tags: Array<Record<string, unknown>> | undefined,
-  ): Record<string, unknown> {
+  ): Promise<Record<string, unknown>> {
     const live = seats.filter((seat) => seat.status === "CONFIRMED");
     if (live.length === 0) {
       // Idempotent on an already-cancelled booking: the stored figure from the
@@ -672,6 +692,7 @@ export class ReservedOrderService {
     });
     const rewritten = this.cancelledOrder(updated);
     this.store.updateStoredOrder(updated.id, rewritten);
+    await this.publishManifestFor(booking.serviceId, booking.travelDate);
     return {
       order: rewritten,
       refund: this.refundPayload(refund),
@@ -1211,6 +1232,68 @@ export class ReservedOrderService {
       );
     }
     return map;
+  }
+
+  /**
+   * Push the current state of one dated departure's seat count to
+   * `transit-fleet-sim`, or clear it if nothing is booked or held on it at
+   * all. `docs/intercity-coaches.md` §7.4 (sibling repository): a confirm
+   * that succeeds and a cancellation that completes are the two events that
+   * change the count, and this is the one place both of those paths call
+   * into.
+   *
+   * **The clearing test is at the network's own granularity, not the order's.**
+   * `cancelledOrder` below omits this order's own `MANIFEST` tag when this
+   * order's own remaining seats reach zero, because that tag describes one
+   * order. This manifest is keyed on `(serviceId, travelDate)` across every
+   * order that ever touched that departure, so the question here is whether
+   * *anything* is still held or booked on it - a different booking on the
+   * same coach must keep the simulator's manifest alive even though the
+   * order that just triggered this push is now fully cancelled.
+   *
+   * Always resolved, never rejected: `HttpFleetManifestPublisher` already
+   * catches its own transport failures, and the `try`/`catch` here is
+   * defence against a synchronous failure resolving the service or its seat
+   * map, for the same reason - a sale that already committed in this
+   * provider's own store must not be undone by a peer that will not answer.
+   */
+  private async publishManifestFor(
+    serviceId: string,
+    travelDate: string,
+  ): Promise<void> {
+    const asOf = this.now();
+    try {
+      const service = await this.source.service(serviceId);
+      if (!service) return;
+      const seatMap = await this.seatMapFor(service);
+      const claims = this.store.liveClaims(serviceId, travelDate);
+      if (claims.length === 0) {
+        await this.fleetManifest.clear({ serviceId, travelDate });
+        return;
+      }
+      await this.fleetManifest.publish({
+        serviceId,
+        travelDate,
+        asOf,
+        seats: manifestSeatCounts(
+          {
+            service,
+            seatMap,
+            travelDate,
+            occupancySeed: this.options.reservation.occupancySeed,
+          },
+          claims,
+        ),
+      });
+    } catch (error) {
+      this.eventLogger({
+        action: "fleet_manifest_publish",
+        outcome: "FAILED",
+        serviceId,
+        travelDate,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   private async fareTableFor(service: ReservedService): Promise<FareTable> {

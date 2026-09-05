@@ -196,6 +196,46 @@ test("an http reserved source needs the address of the dataset it reads", () => 
   assert.equal(config.reservedSourceUrl, "http://dataset.internal:9000/reserved");
 });
 
+test("the fleet manifest publisher names no base URL of its own", () => {
+  // The trap journeySourceUrl and reservedSourceUrl already document: a
+  // hardcoded fallback would let a deployment that never set this dial
+  // silently reach a port nobody asked it to, rather than visibly not
+  // publishing at all.
+  assert.equal(loadConfig(reservedEnvironment()).fleetManifestUrl, undefined);
+  assert.equal(loadConfig(validEnvironment()).fleetManifestUrl, undefined);
+});
+
+test("a configured fleet manifest URL must be a valid absolute URL", () => {
+  assert.throws(
+    () =>
+      loadConfig({ ...validEnvironment(), FLEET_MANIFEST_URL: "not-a-url" }),
+    /FLEET_MANIFEST_URL must be a valid absolute URL/,
+  );
+  const config = loadConfig({
+    ...validEnvironment(),
+    FLEET_MANIFEST_URL: "http://fleet-sim.internal:8080",
+    FLEET_MANIFEST_TOKEN: "shared-secret",
+  });
+  assert.equal(config.fleetManifestUrl, "http://fleet-sim.internal:8080");
+  assert.equal(config.fleetManifestToken, "shared-secret");
+});
+
+test("the fleet manifest push ttl defaults to an hour and is configurable", () => {
+  assert.equal(loadConfig(validEnvironment()).fleetManifestTtlSeconds, 3600);
+  assert.equal(
+    loadConfig({
+      ...validEnvironment(),
+      FLEET_MANIFEST_TTL_SECONDS: "60",
+    }).fleetManifestTtlSeconds,
+    60,
+  );
+  assert.throws(
+    () =>
+      loadConfig({ ...validEnvironment(), FLEET_MANIFEST_TTL_SECONDS: "0" }),
+    /FLEET_MANIFEST_TTL_SECONDS must be an integer from 1/,
+  );
+});
+
 test("the hold lasts ten minutes unless a deployment says otherwise", () => {
   // Twice the best-documented incumbent figure, and the departure is argued
   // rather than assumed: that five minutes covers a form and a payment, and

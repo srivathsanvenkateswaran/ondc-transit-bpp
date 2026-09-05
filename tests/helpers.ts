@@ -25,6 +25,7 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     ).pathname,
     reservedMigrationRoot: new URL("../migrations/reserved", import.meta.url)
       .pathname,
+    fleetManifestTtlSeconds: 3600,
     reservation: {
       closeMinutes: 45,
       horizonDays: 30,
