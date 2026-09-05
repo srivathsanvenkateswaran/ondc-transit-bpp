@@ -42,7 +42,7 @@ path a reader has:
 |---|---|
 | [`docs/research/ksrtc-domain-research.md`](research/ksrtc-domain-research.md) | Service classes, the three corridors, reservation mechanics, cancellation slabs, concessions, the Shakti exclusions |
 | [`docs/research/karnataka-data-acquisition.md`](research/karnataka-data-acquisition.md) | What data exists and what does not, and therefore what every provenance value in section 3.2 can honestly claim |
-| [`docs/research/karnataka-network-scope.md`](research/karnataka-network-scope.md) | The four-corporation territorial split, and the operating-corporation disclosure gap in section 10 |
+| [`docs/research/karnataka-network-scope.md`](research/karnataka-network-scope.md) | The four-corporation territorial split, the operating-corporation attribution gap and its settlement consequence in section 10, and the KSRTC/NWKRTC boundary the coastal corridor of section 10.5 crosses |
 | [`docs/research/reservation-ux-study.md`](research/reservation-ux-study.md) | The hold mechanism and its real TTL (section 8.1), seat-map failure modes (section 5.2), boarding-point data quality (section 4), and what an incumbent e-ticket actually carries (section 9.1) |
 
 Where two of them disagree, this document says which it followed and why. The
@@ -1194,7 +1194,7 @@ no bay number on their ticket. What this provider can honestly give them:
 | Brand | `OPERATOR_DISCLOSURE.BRAND` | Yes |
 | Departure and reporting time | The fulfillment's stop timestamps | Yes |
 | Registration plate | **Not this provider's.** `transit-fleet-sim`, at run time | No |
-| Operating corporation | `OPERATOR_DISCLOSURE.CORPORATION`, where confirmed | No |
+| Operating corporation | Retired from the rider surface by section 10.2's ruling. Was `OPERATOR_DISCLOSURE.CORPORATION`; now settlement-only (section 10.3) | Never |
 
 The first five are what a real KSRTC e-ticket gives a rider, and they are enough
 to find a coach at a stand, because they are what the coach itself displays.
@@ -1212,17 +1212,21 @@ which is where a real ticket leaves them anyway. `duty.status: unknown` from the
 simulator and no reachable simulator at all must render identically, because the
 rider's situation is identical in both.
 
-**A corporation resolved by the simulator is not the corporation section 10
-discloses.** The simulator assigns a vehicle from a fleet it generated; the
-corporation attached to that assignment is a property of the simulation, not a
-claim about who dispatches the real 22:59 to Hampi. It must never be promoted
-into `OPERATOR_DISCLOSURE.CORPORATION`, and the two must not render in the same
-place. Confusing them would turn a deliberate refusal to guess (section 10) into
-a guess arriving through a side door.
+**A corporation resolved by the simulator is not the corporation section 10.3
+attributes a sale to.** The simulator assigns a vehicle from a fleet it
+generated; the corporation attached to that assignment is a property of the
+simulation, not a claim about who dispatches the real 22:59 to Hampi, still
+less a claim about who is owed money for the seat. It must never be written
+into `bookings.settlement_corporation`, and the two must never be compared or
+merged. Confusing them would turn a deliberate refusal to guess (section 10.4)
+into a guess arriving through a side door, and this guess would be worse than
+the disclosure-era one: a wrong screen misleads a rider who sees it, a wrong
+settlement attribution misdirects money nobody is watching closely enough to
+catch the error.
 
 ---
 
-## 10. The operating-corporation disclosure
+## 10. The operating corporation: a disclosure retired, an attribution kept
 
 Karnataka has four state-owned road transport corporations, not one: BMTC
 (Bengaluru city), KSRTC (southern Karnataka excluding Bengaluru city, and the
@@ -1259,7 +1263,7 @@ services into Kerala and Goa without those being KSRTC territory [I]. That is
 plausible and it is not evidence, which is exactly why section 22's second open
 question stays open.
 
-### The field, and why it is nullable
+### 10.1 The field, and why it is nullable
 
 ```json
 {
@@ -1273,11 +1277,21 @@ question stays open.
 }
 ```
 
+**This shape is superseded. Section 10.2 records the ruling: `CORPORATION` and
+`CORPORATION_BASIS` are retired from `OPERATOR_DISCLOSURE` outright, not made
+conditional on being known.** The reasoning below is kept rather than deleted,
+because the case for treating the field as nullable when it did exist on the
+wire is the same case now used to argue that a `null` value settles a ledger
+rather than a screen (section 10.3, section 10.4) - the argument survived the
+ruling even though the wire shape did not.
+
 `BRAND` is always present: it is what the rider is being sold and there is no
-uncertainty about it. `CORPORATION` and `CORPORATION_BASIS` are **omitted
-entirely** when the operating corporation is not known to a `confirmed`
-standard. Absence means unknown, and a buyer app must render the brand alone -
-never `brand` in the corporation's place.
+uncertainty about it. Under the shape this subsection originally proposed,
+`CORPORATION` and `CORPORATION_BASIS` would have been **omitted entirely** when
+the operating corporation was not known to a `confirmed` standard, so that
+absence meant unknown and a buyer app rendered the brand alone rather than
+`brand` in the corporation's place. Section 10.2 goes further: the fields are
+never present, known or not.
 
 **This narrows Tatak's spec, which types the ticket field as
 `operatingCorporation: 'KSRTC' | 'NWKRTC' | 'KKRTC' | 'BMTC'` with no null**
@@ -1305,6 +1319,270 @@ on the wire.
 **Do not conflate this with `provenance`.** A service can be `confirmed` (several
 sources agree it runs at 22:59) while its operating corporation is unknown. The
 two are different claims about different things and share only a type.
+
+### 10.2 Ruled: the corporation comes off the rider's screen
+
+Section 10.1's whole argument assumed the operating corporation was something a
+rider benefits from knowing - a value differentiator, because "no consumer
+surface examined discloses this," and closing that gap was the entire reason to
+publish `CORPORATION` and `CORPORATION_BASIS` on the wire at all. The owner has
+ruled that assumption wrong, and the ruling changes what the fact is *for*
+rather than whether it exists:
+
+> "since we are plannign to build a uniform QR system, it's just that if NWKRTC
+> operates the bus from Gokarna to mangaluru, they get the sale, if KSRTC
+> operates the bus from Mangaluru to Honnavara, they get the sale. It's just our
+> headache, the end experience for the user will be the same."
+
+**The fact still has to be known and recorded**, because somebody is owed money
+for every seat sold, and it will not always be the corporation whose brand
+printed the ticket. That is the argument section 10.1 already made in full, and
+none of it was wrong - a coach booked under one brand can be a different
+corporation's vehicle, and the three corporations sharing AWATAR does not make
+the underlying revenue shared. The gap section 10.1 found real is still real.
+
+**But the rider gets none of it.** A uniform QR system, by the owner's own
+framing, means the boarding experience is identical regardless of which
+corporation's coach shows up - the rider does the same thing at the same gate
+for a KSRTC coach and an NWKRTC one, and there is nothing on that screen for a
+corporation name to add. Disclosing it would be publishing an operational fact
+the rider has no decision to make with, dressed as though it mattered to their
+trip.
+
+So `OPERATOR_DISCLOSURE.CORPORATION` and `OPERATOR_DISCLOSURE.CORPORATION_BASIS`
+are withdrawn from the wire entirely - not made optional, not demoted to
+`display: false`, removed. `BRAND` stays, `display: true`, because it is
+genuinely what the rider bought and there is no ambiguity about it. The tag's
+name no longer describes everything it once carried; `OPERATOR_DISCLOSURE` used
+to disclose a brand and a corporation, and now it carries only the brand.
+Renaming the tag is left to whoever builds this and is not required for
+correctness - the wire test in section 10.6 checks for the absence of the
+corporation fields, not for a particular tag name.
+
+Section 9.2's "Operating corporation" row and section 17's instruction to
+render `brand` in the corporation's absence both describe a rider-facing
+corporation field that no longer exists on the wire. Both are corrected in
+place, below, rather than left standing as though the ruling had not happened.
+
+The fact itself moves rather than disappearing: sections 10.3 onward are the
+same information, held for a different reader.
+
+### 10.3 Settlement attribution: what a sale is owed to, and where it comes from
+
+**The attribution.** Every `CONFIRMED` booking carries a claim about which
+corporation the sale is owed to. It is resolved once, at the instant `confirm`
+succeeds, never recomputed afterward, and it is never carried on any Beckn
+payload this provider sends - not in `on_search`, not in `on_select`, not in
+`on_init`, not in `on_confirm`, not in `on_status`, not in `on_cancel`. It
+exists in exactly one place: a pair of columns on the `bookings` row this
+provider already keeps (section 15).
+
+```sql
+ALTER TABLE bookings ADD COLUMN settlement_corporation TEXT
+  CHECK (settlement_corporation IN ('KSRTC','NWKRTC','KKRTC'));
+ALTER TABLE bookings ADD COLUMN settlement_basis TEXT NOT NULL
+  CHECK (settlement_basis IN ('confirmed','inferred','none'));
+```
+
+`settlement_basis` reuses `ServiceProvenance`'s three values for the same
+reason `operatingCorporationBasis` does (section 3.2, section 10.1): a second
+confidence vocabulary would say nothing the first one doesn't. It is a
+different field from the wire tag `SETTLEMENT_BASIS` that already exists in
+this stack's Beckn settlement-terms machinery (`SPEC.md` section 9, the
+`BUYER_FINDER_FEES` / `SETTLEMENT_WINDOW` group) - that one is a BAP-BPP
+financial-settlement term carried on every order to make the payload validate,
+and it means nothing today because no money moves (`SPEC.md` section 9). This
+one means the opposite of nothing: it is the honesty label on an internal
+accounting fact. The two share a word because English only has the one word for
+it, not because they share a mechanism, and neither is ever compared against
+the other or carried on the same payload.
+
+**Where it comes from.** `ReservedService.operatingCorporation` and
+`operatingCorporationBasis`, and nothing else. At the moment a booking's status
+becomes `CONFIRMED`, this provider copies both fields from the service record
+as it stands for that `(serviceId, travelDate)` pair straight onto the booking
+row. No inference happens at this step - inference, where it happens at all,
+already happened upstream, when the fixture or the source (section 16) decided
+what `operatingCorporationBasis` a service carries. Confirm is a copy, not a
+computation.
+
+**Resolved at confirm, not at search.** A `select`, even one that takes a hold,
+commits nobody to anything - section 8.6 is explicit that no money moves
+anywhere in this stack, and a hold that lapses unconfirmed was never a sale.
+Computing an attribution for a hold would be doing accounting work for a
+transaction that, most of the time, never happens. It also has to be frozen
+once done, for the same reason `refund_paise` and `slab_code` are frozen at the
+moment of cancellation and never recomputed on a later read (section 13): a
+corporation attribution that shifted underneath an already-confirmed booking -
+because a later data refresh reclassified the service - would let a settled
+sale get quietly reassigned to someone else's ledger after the fact, and
+nothing about a re-ingested fixture should be able to reach back into a
+transaction that already closed.
+
+### 10.4 The honest gap: most sales cannot be attributed at the moment of sale
+
+Section 3.2 already states it as a fact about provenance: no corridor in the
+shipped fixtures reaches `confirmed`, and `operatingCorporationBasis` is a
+stricter claim than `provenance` is - even a `confirmed` corridor's *timetable*
+can leave its *operator* unknown, which is exactly the Bengaluru-Hampi case
+(section 10.1). The reason is structural, not a gap this research pass left for
+a better source to close: AWATAR is one booking backend shared by three
+corporations, each contributing buses to jointly-branded route names, and
+nothing published anywhere - not the reservation terms, not an OTA listing, not
+a depot roster this project has access to - establishes which corporation's
+coach is rostered against a given service on a given night. The three
+corporations settle that among themselves, off any network this provider or
+AWATAR exposes, and the owner's own framing says as much: "it's just our
+headache."
+
+So this provider will, for nearly every service it can sell today, reach
+`confirm` without knowing who the money is owed to.
+
+**Refuse the sale.** The cleanest-sounding option, and the wrong one. This
+provider already refuses rather than guesses in every case where guessing
+would misinform a party who reads the answer - a missing fare cell
+(`FARE-NOT-PUBLISHED`, section 4), an unpublished concession rate
+(`CONCESSION-RATE-NOT-PUBLISHED`, section 11), a stale cancellation quote
+(`REFUND-SLAB-MOVED`, section 12). Those refusals cost one transaction each, in
+a case a rider or a buyer app can act on by asking again or asking differently.
+Refusing an unattributable sale is not that: `operatingCorporation` is null on
+nearly every service this specification ships, so the refusal would not be an
+edge case, it would be the default outcome, and it would refuse a seat the real
+operator sells today without having solved this problem either - AWATAR takes
+the booking, prints the ticket, and the three corporations settle between
+themselves afterward. A specimen that is stricter than the system it specimens
+is not more honest, it is inventing a rule the incumbent does not have in order
+to dodge a problem the incumbent already lives with.
+
+**Attribute provisionally, from the territory the boarding point sits in.**
+Tempting because it fills the field with *something*, and wrong for the same
+reason section 10.1 already argued against publishing an inferred corporation
+on the disclosure - a claim that is sometimes wrong is worse than an admitted
+unknown, because it looks resolved when it is not. Territory is a fact about
+geography, not about which coach and crew showed up; a coach can be dispatched
+from any corporation's depot to run a route through another corporation's
+district, which is the entire reason the Hampi corridor is ambiguous in the
+first place (KKRTC territory, widely sold and likely operated as a KSRTC
+service, section 10.1). Deriving a corporation from territory would not be a
+second, independent confirmation of anything - it would be manufacturing a
+value at the same `inferred` confidence the field already refuses to publish,
+and then treating the manufactured value as though it settled a ledger. Section
+10.5 is the sharper version of this argument, because that corridor makes
+territory disagree with itself mid-route.
+
+**Record `null`, and reconcile later. The ruling.** `settlement_corporation` is
+`NULL` whenever `operatingCorporationBasis` is not `confirmed`, and
+`settlement_basis` carries whatever the service's own basis actually is -
+`inferred` or `none` - never silently promoted. An unattributed sale is not a
+failure state; it is the accurate description of what this provider currently
+knows, recorded rather than hidden, exactly as `provenance: 'inferred'` already
+is for the same corridors and the same reason (section 3.2). What resolves it
+is not this specification: a reconciliation process, run by whoever actually
+splits the three corporations' revenue, against whatever record tells them
+which depot's coach ran which service on which night - a roster, a driver's own
+logbook, a fuel-card charge, none of which this provider has or should invent
+access to.
+
+What this specification does own is naming the shape of the backlog that
+process would consume, because an honest `null` nobody can query is not
+meaningfully better than a guess nobody can check:
+
+```sql
+-- Illustrative. Not built by this specimen (section 19): there is no real
+-- money to reconcile yet, the same reason there is no payment gateway.
+SELECT service_id, travel_date,
+       COUNT(*)                                              AS bookings,
+       SUM(base_paise + reservation_fee_paise - refund_paise) AS owed_paise
+FROM bookings
+WHERE settlement_corporation IS NULL
+  AND status IN ('CONFIRMED', 'CANCELLED')
+GROUP BY service_id, travel_date;
+```
+
+`owed_paise` is not the gross fare - section 10.6 below says why, and it is the
+same figure a cancelled-and-attributed booking would owe. Grouping by
+`(service_id, travel_date)` rather than by booking is deliberate: whoever
+eventually confirms which corporation ran a given dated departure resolves
+every unattributed booking against that one service instance in a single
+stroke, which is the shape the real problem actually has.
+
+### 10.5 The coastal corridor that crosses a boundary
+
+No corridor in section 3.4's shipped fixtures runs this route; it is used here
+because it is the sharpest available proof of the resolution rule in 10.3, not
+because it ships. The coastal spine from Mangaluru to Karwar crosses a
+territorial seam partway along its own length: Dakshina Kannada and Udupi, at
+the Mangaluru end, are KSRTC territory; Uttara Kannada, toward Karwar, is
+NWKRTC territory [V - `docs/research/karnataka-network-scope.md` section 2, the
+confirmed post-2000 territorial split]. A single overnight service can board at
+one end and alight at the other, so its boarding point sits in one
+corporation's home territory and its dropping point sits in another's, and
+neither fact is a claim about who is driving.
+
+**Territory-of-boarding and territory-of-alighting can disagree, and this
+provider consults neither.** Section 10.4 already rules out territory as an
+attribution source generally; this corridor is why the rule cannot carry a
+boundary-crossing exception. If territory were consulted, a coach that boards
+in KSRTC's home ground and alights in NWKRTC's would have two candidate answers
+from one trip, and picking either - boarding, alighting, or some rule about
+which one "counts more" - would be inventing a tie-break for a question
+territory was never evidence for in the first place. The operator is a fact
+about one vehicle and one crew running one scheduled trip start to finish; it
+does not change at a district line, because the vehicle does not swap
+corporations mid-route.
+
+**The resolution is the same resolution as any other corridor:
+`ReservedService.operatingCorporation`, whole-trip, or `null`.** A single
+service has exactly one attribution for its entire run, matching the reality
+that one coach makes the whole journey. If the coastal spine's
+`operatingCorporation` is confirmed - say, because it is rostered out of a
+specific KSRTC depot - the full sale, Mangaluru boarding through Karwar
+alighting, is owed to KSRTC, including the leg that physically runs through
+Uttara Kannada. If it is unconfirmed, which is the ordinary case per section
+10.4, the sale attributes to `null` and reconciles later exactly like every
+other service. **The boundary crossing changes nothing about how the sale is
+attributed**, and that is the intended outcome of ruling territory out
+entirely: a rule with a special case for the corridor that crosses a boundary
+would be a rule that was quietly using territory everywhere else.
+
+A rider boarding at an intermediate stop inside either territory still pays the
+fare their boarding-to-alighting pair prices (section 4); which district that
+boarding point falls in has no bearing on the fare, and, per this section, no
+bearing on the corporation the fare is owed to either.
+
+### 10.6 What the rider sees: nothing
+
+**Stated plainly: no settlement field of any kind appears in any response this
+provider returns to a rider or to a buyer app acting on one.** Not
+`settlement_corporation`, not `settlement_basis`, not the retired
+`OPERATOR_DISCLOSURE.CORPORATION` or `CORPORATION_BASIS` (section 10.2), in any
+of `on_search`, `on_select`, `on_init`, `on_confirm`, `on_status` or
+`on_cancel`, confirmed or not, attributed or not. An unattributed sale is
+exactly as invisible to the rider as an attributed one - the honest `null` in
+section 10.4 is an accounting state, not a rendering state, and it must never
+surface as a gap on a screen the way a missing fare or a missing gps coordinate
+correctly does elsewhere in this document. There is no case in which this fact
+should reach a rider partially, cautiously, or "for transparency" - the ruling
+in section 10.2 is total.
+
+This is the same kind of leak the module-boundary guards in section 2 already
+exist to catch for the domain string, extended to a new payload rather than a
+new vocabulary:
+
+| Assertion | What it prevents |
+|---|---|
+| `settlement_corporation`, `settlement_basis` and `SETTLEMENT_CORPORATION` appear nowhere in any generated `on_search`, `on_select`, `on_init`, `on_confirm`, `on_status` or `on_cancel` payload, asserted against every fixture in `tests/fixtures/reserved-golden/` (section 20) | The accounting fact leaking onto a rider's screen through a wire tag nobody remembered to strip |
+| `CORPORATION` and `CORPORATION_BASIS` appear nowhere under the `OPERATOR_DISCLOSURE` tag in any of the same fixtures | Section 10.2's ruling regressing under a later edit that reintroduces the field it retired, rather than by anyone deciding to |
+| No file responsible for shaping a wire payload (`src/reserved/schema.ts`, and whatever eventually builds `on_confirm`) imports or reads `bookings.settlement_corporation` or `bookings.settlement_basis` | The two columns acquiring a serializer by copy-paste from a neighbouring column that does belong on the wire, such as `refund_paise` |
+
+The middle row earns its own line even though the first row's fixture check
+would likely also catch it, for the same reason section 20 keeps its
+fare-basis check as two separate assertions rather than one: a single broad
+test that happens to catch two different mistakes gives one failure message for
+both, and the person reading it should be told which promise broke.
+
+Cancellation's effect on the attribution is specified in section 12, where the
+rest of cancellation's arithmetic already lives.
 
 ---
 
@@ -1479,6 +1757,59 @@ rider boarded, since nobody scans a coach ticket at the door. A `HELD` row whose
 hold lapsed is `EXPIRED`, which means something unrelated and must not share a
 word with either. The four stored states in section 15 are exactly the four that
 distinction needs.
+
+### Cancellation reverses an attribution, not a fact about who ran the service
+
+A refund reverses money, not history. Cancelling a `CONFIRMED` booking does not
+change `settlement_corporation` or `settlement_basis` (section 10.3) - whichever
+corporation the confirmed sale was owed to, or, per section 10.4, was not yet
+known to be owed to, is unaffected by whether the passenger later cancelled,
+because the attribution is a claim about which corporation actually ran the
+service, and a cancellation changes nothing about that. What changes is how
+much of the sale is still owed.
+
+**The reservation fee is never refunded, so it is never reversed either.** A
+whole-booking cancellation leaves the reservation fee, plus whatever share of
+the base fare the applicable slab retains, still owed to whichever corporation
+the booking was attributed to. The toll is not part of this at all: it is
+refunded in full in every slab because it was never the corporation's revenue
+to begin with - a pass-through to a toll authority - and a settlement
+attribution was never claiming that portion in the first place.
+
+The amount still owed after a cancellation is derivable from the figures this
+provider already stores, and it needs no column of its own:
+
+```
+retainedPaise = round(basePaise × slabPercent / 100) + reservationFeePaise
+```
+
+which is the complement of this section's own `refundPaise` formula
+(`round(basePaise × (100 - slabPercent) / 100) + tollPaise`) - the two split the
+same base fare between the rider and the corporation, and the toll sits outside
+the split on both sides. Nothing new is stored: `base_paise`,
+`reservation_fee_paise` and `refund_paise` are already on the `bookings` row
+(section 15), computed once at the moment of cancellation and never
+re-evaluated (section 13), and `retainedPaise` is arithmetic over them at read
+time, not a fact that needs its own frozen copy.
+
+**Partial cancellation prorates the retained amount the same way it already
+prorates the refund.** This section's partial-cancellation rule deducts the
+reservation fee once per cancelled seat and applies the slab to each cancelled
+seat's base-fare share; the retained amount for a partial cancellation is the
+same `retainedPaise` formula summed over the cancelled seats only, leaving the
+uncancelled seats' full base fare, plus their own reservation fees, owed as an
+ordinary confirmed sale. A booking with three attributed seats, one cancelled,
+owes the attributed corporation two full seats' worth of revenue and one
+cancelled seat's retained share - never zero, and never the whole original
+sale, for the same reason the refund itself is neither.
+
+**An unattributed booking that gets cancelled reconciles for the retained
+amount, not the gross fare.** Section 10.4's reconciliation query already
+reflects this - it sums `base_paise + reservation_fee_paise - refund_paise`
+rather than the raw fare, and includes `CANCELLED` bookings alongside
+`CONFIRMED` ones for exactly this reason. Whoever eventually resolves a `null`
+attribution is resolving a claim on whatever is actually still owed at that
+point, cancellations included, not on a snapshot of the original sale.
 
 ---
 
@@ -1820,7 +2151,7 @@ a table-to-table exercise.
 | `SERVICE_INFO` | Item tag | `SERVICE_ID`, `SERVICE_NUMBER`, `TRAVEL_DATE`, `SERVICE_CLASS`, `RUNNING_MINUTES` |
 | `PRICED_FOR` | Item tag | `FROM_BOARDING_POINT_ID`, `TO_BOARDING_POINT_ID` - the pair the headline price is for (§17.1) |
 | `SERVICE_PROVENANCE` | Item tag | `BASIS`, `SOURCE_COUNT` |
-| `OPERATOR_DISCLOSURE` | Item tag | `BRAND`, optional `CORPORATION`, `CORPORATION_BASIS` |
+| `OPERATOR_DISCLOSURE` | Item tag | `BRAND` only. `CORPORATION` and `CORPORATION_BASIS` are retired by section 10.2's ruling; the corporation is a settlement fact (§10.3), never a wire field |
 | `SIMULATED_INVENTORY` | Item tag | `NOTICE` |
 | `SEAT_MAP_REF` / `SEAT_MAP` | Fulfillment tag / order tag | `SEAT_MAP_ID`, then one entry per seat |
 | `SEATS` | Order tag, cancel message tag | One `SEAT_ID` per seat |
@@ -2122,8 +2453,12 @@ read against each other:
 - **A seat map is simulated and says so.** The app's `SIMULATED_INVENTORY_MARK`
   survives, marking a value received rather than a value computed, and it must
   still be undroppable by a caller.
-- **`operatingCorporation` may be absent, and absence means unknown.** Never
-  render `brand` in its place. Section 10, and the open question in section 22.
+- **`operatingCorporation` never reaches the app at all.** Section 10.2's ruling
+  retired `OPERATOR_DISCLOSURE.CORPORATION` and `CORPORATION_BASIS` from the
+  wire entirely; the app renders `brand` and nothing else, in every case, not
+  only when the corporation happens to be unknown. The fact still exists -
+  section 10.3 - but it settles a ledger this provider keeps, not a screen the
+  app draws.
 - **The refund figure comes from a `SOFT_CANCEL` and may move.** The app shows
   the quote, and handles `REFUND-SLAB-MOVED` by re-showing rather than by
   retrying silently. Sheet 08's "refund slab shown before the money moves" is a
@@ -2305,12 +2640,13 @@ builds.
 section 9.1 declines the field rather than moving the gap from the catalogue to
 the roster and calling it solved.
 
-**Nor for the corporation that section 10 discloses.** The simulator's fleet is
-generated, so a corporation attached to a generated vehicle is a fact about the
-simulation rather than about Karnataka. It may perfectly well report which
-corporation it modelled the coach as belonging to; that value renders, if at all,
-beside the plate and under the same "simulated" framing, never in the disclosure
-slot.
+**Nor for the corporation that section 10.3 attributes a sale to.** The
+simulator's fleet is generated, so a corporation attached to a generated
+vehicle is a fact about the simulation rather than about Karnataka. It may
+perfectly well report which corporation it modelled the coach as belonging to;
+that value renders, if at all, beside the plate and under the same "simulated"
+framing, never in `bookings.settlement_corporation` and never on any rider
+surface at all (section 10.6).
 
 **What the rider sees when the simulator has nothing** is section 9.2's table
 without its last two rows: the service number, the destination, the class, the
@@ -2346,11 +2682,11 @@ the manifest's field set, and the refusal to collect anything identifying.
 | Timetables | Departure and arrival times are secondary-sourced. The Bengaluru-Hampi 22:59 departure comes from a route-aggregator page reached through a search summary; the primary fetch failed with a DNS error and was not re-verified [S]. | Fixture times carry their label. No output may present one as a published timetable. |
 | Fares | Aggregator floor prices and single-route anecdotes, per cell [S, weak]. No corporation-published fare table was found for any corridor or class. | `FARE-NOT-PUBLISHED` rather than interpolation, and no GST arithmetic on an invented number (§4). |
 | Service provenance | Every shipped corridor is `inferred`. None reaches `confirmed`. | The app renders the mark on all of them, which is the accurate reading. |
-| The operating corporation | Unconfirmed for the Bengaluru-Hampi service, which is the corridor where it matters most [I]. | Omitted rather than guessed (§10). |
+| The operating corporation | Unconfirmed for the Bengaluru-Hampi service, which is the corridor where the settlement stakes are highest [I]. | Recorded as `null` and reconciled later rather than guessed (§10.4), and never rendered to a rider in any case, known or not (§10.2, §10.6). |
 | Concessions | Senior 25% on Rajahamsa and lower [V], but where Pallakki sits in that ordering is unestablished. The child 50-75% range is not a rate. | Published only where sourced; refused elsewhere with the existing code (§11). |
 | The booking | A specimen. No coach carries the manifest, no conductor checks it, no seat is held anywhere but here. | `SPECIMEN - NOT VALID FOR TRAVEL - not issued by KSRTC, NWKRTC or KKRTC` on every order. |
 | Payment | No gateway, no collection, no settlement. `status: PAID` is written because the field is required. | No money moves, and no refund is paid. A refund figure is arithmetic, not a payment. |
-| The vehicle | Not named here at all. | The plate join is `transit-fleet-sim`'s, through an endpoint that does not exist yet (§18). A corporation the simulator assigns is a property of the simulation and must never reach the §10 disclosure. |
+| The vehicle | Not named here at all. | The plate join is `transit-fleet-sim`'s, through an endpoint that does not exist yet (§18). A corporation the simulator assigns is a property of the simulation and must never reach `settlement_corporation` or any rider surface (§10.6, §18). |
 | The boarding bay | No source exists for bay-level data at any Karnataka stand, and a real bay is assigned near departure rather than at booking. | Declined outright rather than carried as a permanently-null field (§9.1). Sheet 09's headline becomes the reporting time and the service number, with *bay announced at the station* where the number was. |
 | The operator's systems | **No call is made to ksrtc.in, to AWATAR, or to any operator booking system, at request time or at any other time, from this service.** | The dataset is fixtures and, optionally, a source this provider reads over HTTP. Whether Tatak harvests offline to build that dataset is Tatak's ruling and its consequence, not this provider's runtime behaviour. |
 
@@ -2436,6 +2772,11 @@ any other pair is not compared. Both halves are asserted, because a test that
 only checked the equal case would pass an implementation that compared every
 pair and fired constantly in production.
 
+And the two settlement-boundary guards of section 10.6: `settlement_corporation`,
+`settlement_basis` and the retired `CORPORATION`/`CORPORATION_BASIS` fields
+appear nowhere in any generated `on_*` payload, checked against every golden
+fixture below rather than against one hand-picked example.
+
 **What is missing, and it is the important one.** `SPEC.md` section 11.3's layer
 B - contract tests asserting that generated payloads share a key structure with
 ONDC's own published example files - **cannot exist for this category**, because
@@ -2467,7 +2808,8 @@ Engineer-days, one person, at this repository's demonstrated pace.
 | **9. Cancellation** | Slab evaluation, the two-step quote and commitment, `REFUND-SLAB-MOVED`, partial cancellation, refund persistence | **1.5** |
 | **10. `HttpReservedSource`** | The adapter, `docs/reserved-source-http.md`, `schemas/reserved-source-response.json`, the fallback path | **0.75** |
 | **11. Repository furniture** | This document's cross-links, README sections, `.env.example`, `/terms` extension for the reserved slabs, and the module-boundary grep guards of section 2 | **0.75** |
-| | **Total** | **15.5** |
+| **12. Settlement attribution** | The two `bookings` columns of section 10.3, the confirm-time copy from `operatingCorporation`/`operatingCorporationBasis`, removing `CORPORATION`/`CORPORATION_BASIS` from the wire, and the two wire-boundary tests of section 10.6. No new endpoint and no new storage beyond two columns, which is why this rides on top of unit 7 rather than opening its own phase | **1.0** |
+| | **Total** | **16.5** |
 
 The four research documents are already vendored into `docs/research/`, so that
 line has left the estimate rather than being costed.
@@ -2501,17 +2843,26 @@ to `confirmed`. This provider runs on fixtures without any of it.
 
 These are genuine, not rhetorical. Each names what would settle it.
 
-1. **Should `operatingCorporation` be nullable on the app-side ticket?** Section
-   10 argues yes, narrowing Tatak's spec's non-null
-   `'KSRTC' | 'NWKRTC' | 'KKRTC' | 'BMTC'`. The argument is that publishing an
-   inferred corporation defeats the disclosure's whole purpose. **This changes an
-   already-written spec and needs the owner's ruling.** Settled by a decision,
-   not by research.
+1. **Should `operatingCorporation` be nullable on the app-side ticket?** Moot as
+   originally framed. Section 10.1 argued yes, narrowing Tatak's spec's non-null
+   `'KSRTC' | 'NWKRTC' | 'KKRTC' | 'BMTC'` on the reasoning that publishing an
+   inferred corporation would defeat the disclosure's whole purpose. Section
+   10.2's ruling removes the field from the app-side ticket altogether rather
+   than choosing its type, so the nullability question this item originally
+   posed has no surface left to apply to. The field should simply come out of
+   the app-side ticket type, which is a smaller change than the one originally
+   asked for. **Settled by the owner's ruling recorded in section 10.2**, not by
+   further research.
 
 2. **Which corporation actually operates the Bengaluru-Hampi nightly Pallakki?**
-   The research could not establish it from any primary source, and it is the
-   corridor where the disclosure matters most. Settled by a primary source from
-   KSRTC, KKRTC or a route permit, or by accepting that it stays unknown.
+   No longer a disclosure question - section 10.2 retired that - but a real
+   settlement one: this is the corridor where `settlement_corporation` staying
+   `null` (section 10.4) costs the most, because it is the best-attested
+   corridor this provider ships (section 3.4) and the unresolved amount
+   compounds nightly. The research could not establish it from any primary
+   source (section 10.1). Settled by a primary source from KSRTC, KKRTC or a
+   route permit, or by whatever depot-level reconciliation section 10.4
+   eventually runs.
 
 3. **Where does Pallakki sit relative to Rajahamsa for the senior concession?**
    "Rajahamsa and lower classes" [V] is precise about its upper bound and silent
@@ -2552,3 +2903,20 @@ These are genuine, not rhetorical. Each names what would settle it.
    [S] and is the obvious candidate, which is not the same as it being agreed.
    Settled by the three repositories writing it down once, before any of them
    builds a join against it.
+
+10. **Who runs the reconciliation query in section 10.4, and how often?** This
+    specification names the shape of the backlog - a query grouped by
+    `(service_id, travel_date)` over unattributed bookings - and deliberately
+    does not build the process that consumes it, for the same reason it builds
+    no payment gateway (section 19). A real deployment needs an owner for that
+    process and a cadence, and neither is a research question. Settled by a
+    decision, once there is real money for the process to reconcile.
+
+11. **Does a corporation ever get told which of this platform's sales attributed
+    to it?** Section 10.6 is unambiguous that a rider sees nothing; it says
+    nothing about whether a corporation itself would eventually want a feed of
+    its own `settlement_corporation` bookings to check against its own roster.
+    That is a real integration surface this specification has not designed,
+    because no corporation has asked for one and inventing an API nobody
+    requested would be speculative in the direction this document otherwise
+    avoids.
