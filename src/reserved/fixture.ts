@@ -173,6 +173,13 @@ export class FixtureReservedSource implements ReservedServiceSource {
     );
   }
 
+  async service(serviceId: string): Promise<ReservedService | undefined> {
+    const service = this.catalogue.services.find(
+      (candidate) => candidate.serviceId === serviceId,
+    );
+    return service ? structuredClone(service) : undefined;
+  }
+
   /** Every service the fixture set carries, for integrity checks and tests. */
   async allServices(): Promise<ReservedService[]> {
     return structuredClone(this.catalogue.services);

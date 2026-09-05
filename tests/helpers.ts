@@ -17,7 +17,21 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
       "../schemas/transit_local_intercity/0.1.0",
       import.meta.url,
     ).pathname,
-    reservation: { closeMinutes: 45, horizonDays: 30, occupancySeed: 20_260_905 },
+    reservedDatabaseUrl: ":memory:",
+    reservedSource: "fixture",
+    reservedSourceResponseSchema: new URL(
+      "../schemas/reserved-source-response.json",
+      import.meta.url,
+    ).pathname,
+    reservedMigrationRoot: new URL("../migrations/reserved", import.meta.url)
+      .pathname,
+    reservation: {
+      closeMinutes: 45,
+      horizonDays: 30,
+      occupancySeed: 20_260_905,
+      holdTtlSeconds: 600,
+      manifestRetentionDays: 30,
+    },
     callbackTimeoutMs: 1000,
     contextTtl: "PT30S",
     orderInspectionToken: "test-inspection-token",
@@ -151,5 +165,220 @@ export function reservedSearchRequest(
   return request as typeof request & {
     context: Record<string, unknown>;
     message: { intent: { fulfillment: Record<string, unknown> } };
+  };
+}
+
+/**
+ * The context every reserved action after `search` carries.
+ *
+ * `bpp_id` and `bpp_uri` are required from `select` onward, because an action
+ * against an order names the seller it is addressed to, and a request that
+ * names somebody else is answered by nobody.
+ */
+export function reservedContext(
+  action: string,
+  overrides: { transactionId?: string; bapId?: string; bapUri?: string } = {},
+) {
+  return {
+    domain: "TRANSIT.LOCALHOST:INTERCITY",
+    location: { country: { code: "IND" }, city: { code: "std:080" } },
+    action,
+    version: "0.1.0",
+    bap_id: overrides.bapId ?? "bap.example.test",
+    bap_uri: overrides.bapUri ?? "https://bap.example.test",
+    bpp_id: "ksrtc.provider.example.test",
+    bpp_uri: "https://ksrtc-network.example.test",
+    transaction_id: overrides.transactionId ?? "0b0e1f6a-5c47-4d19-9a2f-3c8b1d6e7f01",
+    message_id: "7d3f2c81-4a6b-4f0e-8c15-2b9d7e4a6c33",
+    timestamp: "2026-09-20T10:00:00.000Z",
+    ttl: "PT15S",
+  };
+}
+
+export interface ReservedOrderRequestOptions {
+  itemId: string;
+  seatIds?: string[];
+  count?: number;
+  fromBoardingPointId?: string;
+  toBoardingPointId?: string;
+  transactionId?: string;
+  bapId?: string;
+  manifest?: Array<{
+    seatId: string;
+    name: string;
+    age?: number;
+    gender?: string;
+    extra?: Array<{ code: string; value: string }>;
+  }>;
+  concession?: string;
+  paymentStatus?: "NOT_PAID" | "PAID";
+}
+
+function manifestEntries(options: ReservedOrderRequestOptions) {
+  return (options.manifest ?? []).flatMap((passenger) => [
+    { descriptor: { code: "SEAT_ID" }, value: passenger.seatId },
+    { descriptor: { code: "NAME" }, value: passenger.name },
+    ...(passenger.age === undefined
+      ? []
+      : [{ descriptor: { code: "AGE" }, value: String(passenger.age) }]),
+    ...(passenger.gender === undefined
+      ? []
+      : [{ descriptor: { code: "GENDER" }, value: passenger.gender }]),
+    ...(passenger.extra ?? []).map((entry) => ({
+      descriptor: { code: entry.code },
+      value: entry.value,
+    })),
+  ]);
+}
+
+export function reservedOrderRequest(
+  action: "select" | "init" | "confirm",
+  options: ReservedOrderRequestOptions,
+) {
+  const seatIds = options.seatIds ?? [];
+  const paid = options.paymentStatus ?? (action === "confirm" ? "PAID" : "NOT_PAID");
+  return {
+    context: reservedContext(action, {
+      ...(options.transactionId ? { transactionId: options.transactionId } : {}),
+      ...(options.bapId ? { bapId: options.bapId } : {}),
+    }),
+    message: {
+      order: {
+        provider: { id: "P1" },
+        items: [
+          {
+            id: options.itemId,
+            quantity: {
+              selected: { count: options.count ?? Math.max(seatIds.length, 1) },
+            },
+          },
+        ],
+        fulfillments: [
+          {
+            id: `F-${options.itemId}`,
+            stops: [
+              {
+                type: "START",
+                location: {
+                  descriptor: {
+                    code: options.fromBoardingPointId ?? "BP-BLR-MAJESTIC",
+                  },
+                },
+              },
+              {
+                type: "END",
+                location: {
+                  descriptor: {
+                    code: options.toBoardingPointId ?? "BP-HMP-HAMPI",
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        ...(action === "select"
+          ? {}
+          : {
+              billing: { name: "A Booker", phone: "+919999999999" },
+              payments: [
+                { collected_by: "BPP", status: paid, type: "PRE_ORDER" },
+              ],
+            }),
+        tags: [
+          ...(seatIds.length > 0
+            ? [
+                {
+                  descriptor: { code: "SEATS" },
+                  list: seatIds.map((seatId) => ({
+                    descriptor: { code: "SEAT_ID" },
+                    value: seatId,
+                  })),
+                },
+              ]
+            : []),
+          ...(options.manifest
+            ? [
+                {
+                  descriptor: { code: "MANIFEST" },
+                  display: false,
+                  list: manifestEntries(options),
+                },
+              ]
+            : []),
+          ...(options.concession
+            ? [
+                {
+                  descriptor: { code: "CONCESSION" },
+                  list: [
+                    { descriptor: { code: "CLASS" }, value: options.concession },
+                  ],
+                },
+              ]
+            : []),
+        ],
+      },
+    },
+  };
+}
+
+export function reservedCancelRequest(options: {
+  orderId: string;
+  code: "SOFT_CANCEL" | "CONFIRM_CANCEL";
+  seatIds?: string[];
+  quoteId?: string;
+  transactionId?: string;
+  bapId?: string;
+}) {
+  return {
+    context: reservedContext("cancel", {
+      ...(options.transactionId ? { transactionId: options.transactionId } : {}),
+      ...(options.bapId ? { bapId: options.bapId } : {}),
+    }),
+    message: {
+      order_id: options.orderId,
+      descriptor: { code: options.code },
+      tags: [
+        ...(options.seatIds
+          ? [
+              {
+                descriptor: { code: "SEATS" },
+                list: options.seatIds.map((seatId) => ({
+                  descriptor: { code: "SEAT_ID" },
+                  value: seatId,
+                })),
+              },
+            ]
+          : []),
+        ...(options.quoteId
+          ? [
+              {
+                descriptor: { code: "REFUND_SLAB" },
+                list: [
+                  {
+                    descriptor: { code: "REFUND_QUOTE_ID" },
+                    value: options.quoteId,
+                  },
+                ],
+              },
+            ]
+          : []),
+      ],
+    },
+  };
+}
+
+export function reservedStatusRequest(options: {
+  orderId?: string;
+  refId?: string;
+  bapId?: string;
+}) {
+  return {
+    context: reservedContext("status", {
+      ...(options.bapId ? { bapId: options.bapId } : {}),
+    }),
+    message: {
+      ...(options.orderId ? { order_id: options.orderId } : {}),
+      ...(options.refId ? { ref_id: options.refId } : {}),
+    },
   };
 }

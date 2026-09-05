@@ -39,6 +39,27 @@ export interface ReservationConfig {
    * golden file meaningless.
    */
   occupancySeed: number;
+  /**
+   * How long a hold lasts, absolutely, from the instant this provider takes
+   * it. Ten minutes is twice the best-documented incumbent figure of five, and
+   * the departure is deliberate: that five minutes covers a passenger form and
+   * a payment, while this window covers a name, an age and a gender per seat,
+   * six fields for a couple and twelve for a family of four, typed on a phone
+   * by somebody who may be asking the person beside them for their age. There
+   * is also no payment step here to fail fast and end the window early.
+   *
+   * The cost is bounded: on a thirty-berth sleeper, a ten-minute hold caps the
+   * damage one abandoned session can do at 3.3% of the coach for a sixth of an
+   * hour. If that trade is judged wrong, five minutes is the better default
+   * and this constant is the one line that changes.
+   */
+  holdTtlSeconds: number;
+  /**
+   * How long a passenger name outlives its journey. The booking row survives,
+   * because a rider needs to see that a journey happened; the names do not,
+   * because nothing needs them once the coach has gone.
+   */
+  manifestRetentionDays: number;
 }
 
 export interface AppConfig {
@@ -63,6 +84,22 @@ export interface AppConfig {
    */
   reservedEnabled: boolean;
   reservedSchemaRoot: string;
+  /**
+   * Where held and booked seats live. One file beside the process by default,
+   * and in memory under test. A held seat is a shared, finite resource rather
+   * than a settled fact on somebody's phone, so it has to outlive a release.
+   */
+  reservedDatabaseUrl: string;
+  reservedMigrationRoot: string;
+  /**
+   * Where the reserved catalogue comes from. The fixtures by default, so that
+   * a stranger cloning this repository gets a working seller with nothing else
+   * running; a dataset over http where one exists, with the fixtures still
+   * underneath it as the fallback.
+   */
+  reservedSource: "fixture" | "http";
+  reservedSourceUrl?: string;
+  reservedSourceResponseSchema: string;
   reservedOperators?: Record<ReservedOperatorKey, OperatorRuntimeConfig>;
   reservation: ReservationConfig;
 }
@@ -172,6 +209,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     parseHttpUrl(journeySourceUrl, "JOURNEY_SOURCE_URL");
   }
   const reservedEnabled = (env.RESERVED_ENABLED?.trim() || "false") === "true";
+  const reservedSource = env.RESERVED_SOURCE?.trim() || "fixture";
+  if (reservedSource !== "fixture" && reservedSource !== "http") {
+    throw new Error(`Unsupported RESERVED_SOURCE ${reservedSource}`);
+  }
+  const reservedSourceUrl = env.RESERVED_SOURCE_URL?.trim();
+  if (reservedSource === "http" && !reservedSourceUrl) {
+    throw new Error("Missing required environment variable RESERVED_SOURCE_URL");
+  }
+  if (reservedSourceUrl) parseHttpUrl(reservedSourceUrl, "RESERVED_SOURCE_URL");
   return {
     host: required(env, "PROVIDER_HOST"),
     port: resolveProviderPort(env),
@@ -223,6 +269,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     reservedSchemaRoot:
       env.RESERVED_SCHEMA_ROOT ??
       join(process.cwd(), "schemas", "transit_local_intercity", "0.1.0"),
+    reservedDatabaseUrl:
+      env.RESERVED_DB_URL?.trim() || `file:${join(process.cwd(), "data", "reserved.db")}`,
+    reservedMigrationRoot:
+      env.RESERVED_MIGRATION_ROOT ?? join(process.cwd(), "migrations", "reserved"),
+    reservedSource,
+    ...(reservedSourceUrl ? { reservedSourceUrl } : {}),
+    reservedSourceResponseSchema:
+      env.RESERVED_SOURCE_RESPONSE_SCHEMA ??
+      join(process.cwd(), "schemas", "reserved-source-response.json"),
     ...(reservedEnabled
       ? {
           reservedOperators: {
@@ -251,6 +306,20 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         0,
         2_147_483_647,
         DEFAULT_SEAT_OCCUPANCY_SEED,
+      ),
+      holdTtlSeconds: optionalIntegerInRange(
+        env,
+        "RESERVATION_HOLD_TTL_SECONDS",
+        30,
+        3_600,
+        600,
+      ),
+      manifestRetentionDays: optionalIntegerInRange(
+        env,
+        "RESERVED_MANIFEST_RETENTION_DAYS",
+        1,
+        3_650,
+        30,
       ),
     },
   };

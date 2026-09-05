@@ -45,7 +45,11 @@
       "type": "object",
       "properties": {
         "order": {
-          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/confirmedOrder"
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/settledOrder"
+        },
+        "refund": {
+          "$comment": "What came back, on a booking that was cancelled. Read from the figures frozen at the moment of cancellation rather than re-evaluated, so that asking twice never returns a smaller number than asking once.",
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/refund"
         }
       }
     },

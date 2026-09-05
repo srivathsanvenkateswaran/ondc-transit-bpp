@@ -172,3 +172,73 @@ test("a non-numeric occupancy seed fails at startup rather than at first search"
     /SEAT_OCCUPANCY_SEED must be/,
   );
 });
+
+test("the reserved source defaults to fixtures and refuses an unknown one", () => {
+  const config = loadConfig(reservedEnvironment());
+  assert.equal(config.reservedSource, "fixture");
+  assert.equal(config.reservedSourceUrl, undefined);
+  assert.throws(
+    () => loadConfig({ ...reservedEnvironment(), RESERVED_SOURCE: "guesswork" }),
+    /Unsupported RESERVED_SOURCE guesswork/,
+  );
+});
+
+test("an http reserved source needs the address of the dataset it reads", () => {
+  assert.throws(
+    () => loadConfig({ ...reservedEnvironment(), RESERVED_SOURCE: "http" }),
+    /Missing required environment variable RESERVED_SOURCE_URL/,
+  );
+  const config = loadConfig({
+    ...reservedEnvironment(),
+    RESERVED_SOURCE: "http",
+    RESERVED_SOURCE_URL: "http://dataset.internal:9000/reserved",
+  });
+  assert.equal(config.reservedSourceUrl, "http://dataset.internal:9000/reserved");
+});
+
+test("the hold lasts ten minutes unless a deployment says otherwise", () => {
+  // Twice the best-documented incumbent figure, and the departure is argued
+  // rather than assumed: that five minutes covers a form and a payment, and
+  // this window covers a name, an age and a gender per seat with no payment
+  // step to end it early. The constant exists so revisiting the trade is one
+  // line rather than a code change.
+  assert.equal(loadConfig(reservedEnvironment()).reservation.holdTtlSeconds, 600);
+  assert.equal(
+    loadConfig({
+      ...reservedEnvironment(),
+      RESERVATION_HOLD_TTL_SECONDS: "300",
+    }).reservation.holdTtlSeconds,
+    300,
+  );
+  assert.throws(
+    () =>
+      loadConfig({ ...reservedEnvironment(), RESERVATION_HOLD_TTL_SECONDS: "5" }),
+    /RESERVATION_HOLD_TTL_SECONDS must be an integer from 30/,
+  );
+});
+
+test("a manifest outlives its journey by a configurable number of days", () => {
+  assert.equal(
+    loadConfig(reservedEnvironment()).reservation.manifestRetentionDays,
+    30,
+  );
+  assert.equal(
+    loadConfig({
+      ...reservedEnvironment(),
+      RESERVED_MANIFEST_RETENTION_DAYS: "7",
+    }).reservation.manifestRetentionDays,
+    7,
+  );
+});
+
+test("held seats live in a file by default and in memory under test", () => {
+  // A confirmed ticket next door is a settled fact whose loss costs nothing. A
+  // held seat is a shared, finite resource, and a restart that forgot every
+  // hold would release seats somebody is mid-checkout on.
+  assert.match(loadConfig(reservedEnvironment()).reservedDatabaseUrl, /reserved\.db$/);
+  assert.equal(
+    loadConfig({ ...reservedEnvironment(), RESERVED_DB_URL: ":memory:" })
+      .reservedDatabaseUrl,
+    ":memory:",
+  );
+});

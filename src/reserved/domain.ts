@@ -101,7 +101,10 @@ export const RESERVED_TAG_CODES = [
 
 export type ReservedTagCode = (typeof RESERVED_TAG_CODES)[number];
 
-/** Section 14.9's table. Declared here so no caller invents a nineteenth. */
+/**
+ * Section 14.9's table, plus one this implementation had to add, declared
+ * here so that no caller invents a twenty-first in a message string.
+ */
 export const RESERVED_ERROR_CODES = [
   "TRAVEL-DATE-REQUIRED",
   "SERVICE-NOT-FOUND",
@@ -122,6 +125,25 @@ export const RESERVED_ERROR_CODES = [
   "REFUND-SLAB-MOVED",
   "REFUND-QUOTE-EXPIRED",
   "MIXED-CATEGORY-ORDER",
+  /**
+   * The twentieth, and this implementation's own addition to a table of
+   * nineteen. A cancellation may name the seats it means, and the
+   * specification carries no code for one that names a seat the booking does
+   * not hold. Both alternatives were worse: reusing `SEAT-NOT-ON-MAP` would
+   * tell a client the seat does not exist when it does, and ignoring the
+   * unknown seat would cancel less than the rider asked for without saying so.
+   */
+  "CANCEL-SEAT-NOT-ON-BOOKING",
+  /**
+   * Not a domain refusal from the table either, but the same envelope-level
+   * check the two existing paths already make: a request that names somebody
+   * else as the seller is answered by nobody. Declared here rather than
+   * written into a message string, so that the set of codes a client can
+   * receive stays enumerable in one place.
+   */
+  "BPP-ADDRESS-MISMATCH",
+  /** Likewise: init is sent unpaid and confirm is sent paid, as next door. */
+  "INVALID-PAYMENT-STATUS",
 ] as const;
 
 export type ReservedErrorCode = (typeof RESERVED_ERROR_CODES)[number];
@@ -149,6 +171,31 @@ export function reservedItemId(
     );
   }
   return `RSV-${serviceId}-${travelDate}-${serviceClass}`;
+}
+
+/**
+ * Read a reserved item id back into the three facts it carries.
+ *
+ * A buyer app must never do this: the id is opaque to it, and the
+ * `SERVICE_INFO` tag carries the same three fields precisely so that nothing
+ * on that side has to parse a string. This provider is the party that minted
+ * the id, so reading its own format back is not parsing somebody else's data.
+ *
+ * The alternative was a per-transaction catalogue cache, in the shape the
+ * single-journey path already uses, and it is the wrong shape here: it would
+ * make a select impossible unless a search had happened in the same
+ * transaction and the same process, which is exactly the dependence on process
+ * memory that moved holds and bookings into a database in the first place.
+ *
+ * Matched rather than split, because a service id is free to contain a hyphen
+ * and neither the date nor the class code ever does.
+ */
+export function parseReservedItemId(
+  itemId: string,
+): { serviceId: string; travelDate: string; serviceClass: string } | undefined {
+  const match = /^RSV-(.+)-(\d{4}-\d{2}-\d{2})-([A-Z_]+)$/.exec(itemId);
+  if (!match) return undefined;
+  return { serviceId: match[1], travelDate: match[2], serviceClass: match[3] };
 }
 
 export function reservedFulfillmentId(itemId: string): string {

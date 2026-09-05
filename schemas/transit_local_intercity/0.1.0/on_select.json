@@ -47,6 +47,13 @@
       "properties": {
         "order": {
           "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/baseOrder"
+        },
+        "tags": {
+          "$comment": "A refusal carries what a client needs to act on it, beside the error rather than on an order: a select refused because somebody else took the seat comes back with the current seat map, so the loser can re-render without a second round trip. It is not an order, because a refused select produced none.",
+          "type": "array",
+          "items": {
+            "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/tag"
+          }
         }
       }
     },

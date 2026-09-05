@@ -72,28 +72,49 @@ test("the vocabulary table is exactly the one a future mapping has to read", () 
   ]);
 });
 
+const DOCUMENTED_ERROR_CODES = [
+  "BOOKING-NOT-FOUND",
+  "CONCESSION-NOT-APPLICABLE",
+  "CONCESSION-RATE-NOT-PUBLISHED",
+  "FARE-NOT-PUBLISHED",
+  "HOLD-EXPIRED",
+  "HOLD-REQUIRED",
+  "HOLD-SEAT-MISMATCH",
+  "MANIFEST-FIELD-NOT-ACCEPTED",
+  "MANIFEST-INCOMPLETE",
+  "MIXED-CATEGORY-ORDER",
+  "OUTSIDE-BOOKING-WINDOW",
+  "REFUND-QUOTE-EXPIRED",
+  "REFUND-SLAB-MOVED",
+  "SEAT-COUNT-MISMATCH",
+  "SEAT-GENDER-LOCKED",
+  "SEAT-NOT-ON-MAP",
+  "SEAT-UNAVAILABLE",
+  "SERVICE-NOT-FOUND",
+  "TRAVEL-DATE-REQUIRED",
+];
+
 test("every error code the document names is declared", () => {
-  assert.deepEqual([...RESERVED_ERROR_CODES].sort(), [
-    "BOOKING-NOT-FOUND",
-    "CONCESSION-NOT-APPLICABLE",
-    "CONCESSION-RATE-NOT-PUBLISHED",
-    "FARE-NOT-PUBLISHED",
-    "HOLD-EXPIRED",
-    "HOLD-REQUIRED",
-    "HOLD-SEAT-MISMATCH",
-    "MANIFEST-FIELD-NOT-ACCEPTED",
-    "MANIFEST-INCOMPLETE",
-    "MIXED-CATEGORY-ORDER",
-    "OUTSIDE-BOOKING-WINDOW",
-    "REFUND-QUOTE-EXPIRED",
-    "REFUND-SLAB-MOVED",
-    "SEAT-COUNT-MISMATCH",
-    "SEAT-GENDER-LOCKED",
-    "SEAT-NOT-ON-MAP",
-    "SEAT-UNAVAILABLE",
-    "SERVICE-NOT-FOUND",
-    "TRAVEL-DATE-REQUIRED",
-  ]);
+  const declared = new Set<string>(RESERVED_ERROR_CODES);
+  assert.deepEqual(
+    DOCUMENTED_ERROR_CODES.filter((code) => !declared.has(code)),
+    [],
+  );
+});
+
+test("the codes this implementation added are declared and are three", () => {
+  // The table in the document is nineteen codes and this implementation issues
+  // twenty-two. Each addition is deliberate and each is worth naming rather
+  // than letting the set drift: a cancellation may name a seat the booking
+  // does not hold, a request may address a different seller, and an init or a
+  // confirm may arrive with the wrong payment status. The document has no code
+  // for any of the three, and inventing one in a message string rather than in
+  // this list is how a client ends up matching on prose.
+  const documented = new Set<string>(DOCUMENTED_ERROR_CODES);
+  assert.deepEqual(
+    [...RESERVED_ERROR_CODES].filter((code) => !documented.has(code)).sort(),
+    ["BPP-ADDRESS-MISMATCH", "CANCEL-SEAT-NOT-ON-BOOKING", "INVALID-PAYMENT-STATUS"],
+  );
 });
 
 test("nothing this software issues claims to be valid for travel", () => {

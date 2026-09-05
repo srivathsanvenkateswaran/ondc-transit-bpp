@@ -1,4 +1,8 @@
-FROM node:22-alpine AS build
+# Node 24 rather than 22, and the reason is the reserved intercity category:
+# held and booked seats live in SQLite, and the runtime's own SQLite module is
+# available without a flag only from Node 23.4 onward. Nothing else in this
+# image needs the newer runtime.
+FROM node:24-alpine AS build
 
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -7,7 +11,7 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build
 
-FROM node:22-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 # ── Server ────────────────────────────────────────────────────────────────────
 ENV NODE_ENV=production \
@@ -36,6 +40,9 @@ ENV BMRCL_BPP_ID=bmrcl.bpp.transit.localhost \
 # registry, and an image that switched it on by default would start a seller
 # nobody had registered.
 ENV RESERVED_ENABLED=false \
+    RESERVED_SOURCE=fixture \
+    RESERVED_DB_URL=file:/app/data/reserved.db \
+    RESERVED_MIGRATION_ROOT=/app/migrations/reserved \
     KSRTC_BPP_ID=ksrtc.bpp.transit.localhost \
     KSRTC_BPP_URI=http://localhost:6202 \
     KSRTC_CALLBACK_URL=http://localhost:6201/on_search \
@@ -47,6 +54,11 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist/src ./dist/src
 COPY fixtures ./fixtures
 COPY schemas ./schemas
+COPY migrations ./migrations
+# Where held and booked seats live. Mount a volume here in any deployment that
+# means it: without one, a container restart loses every hold and every
+# booking, which is the failure the database exists to prevent.
+RUN mkdir -p /app/data
 RUN chown -R node:node /app
 USER node
 

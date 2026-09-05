@@ -306,6 +306,17 @@ export interface ReservedServiceSource {
   /** Services running between two towns on one calendar date. */
   services(query: ReservedSearchQuery): Promise<ReservedService[]>;
 
+  /**
+   * One service by its own id.
+   *
+   * An extension to the interface the specification sketches, and it earns its
+   * place: every action after `search` names an item rather than a town pair,
+   * and resolving one through the town search would mean reconstructing the
+   * question a rider asked several actions ago from an answer that no longer
+   * carries it.
+   */
+  service(serviceId: string): Promise<ReservedService | undefined>;
+
   /** The seat map a class uses. Authored per class, not per service. */
   seatMap(seatMapId: string): Promise<SeatMap | undefined>;
 

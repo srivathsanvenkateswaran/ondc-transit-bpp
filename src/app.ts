@@ -22,6 +22,18 @@ import {
   type ProtocolValidator,
   type ValidationResult,
 } from "./protocol/validate.js";
+import { openReservedDatabase } from "./reserved/db.js";
+import { FixtureReservedSource } from "./reserved/fixture.js";
+import { HttpReservedSource } from "./reserved/http.js";
+import {
+  RESERVED_ROUTE,
+  createReservedHandler,
+  type ReservedHandler,
+} from "./reserved/handler.js";
+import { ReservedOrderService } from "./reserved/order.js";
+import { createReservedValidator } from "./reserved/schema.js";
+import { ReservedStore } from "./reserved/store.js";
+import type { ReservedServiceSource } from "./reserved/types.js";
 import { FixtureJourneySource } from "./sources/fixture.js";
 import { HttpJourneySource } from "./sources/http.js";
 import type { JourneySource, OperatorKey } from "./sources/types.js";
@@ -133,10 +145,23 @@ function callbackValidation(
   return validators[action](body);
 }
 
+/**
+ * What a test needs to hold still on the reserved path, and nothing a
+ * deployment sets. The clock is injected because whether a hold is live and
+ * which refund slab applies are decisions made against it, and no test should
+ * have to wait ten real minutes to see one.
+ */
+export interface ReservedOverrides {
+  source?: ReservedServiceSource;
+  now?: () => Date;
+  idFactory?: () => string;
+}
+
 export async function createApp(
   config: AppConfig,
   sourceOverrides: Partial<Record<OperatorKey, JourneySource>> = {},
   eventLogger: typeof logEvent = logEvent,
+  reservedOverrides: ReservedOverrides = {},
 ) {
   const validator = createProtocolValidator(config.schemaRoot);
   if (config.journeySource === "http" && !config.journeySourceUrl) {
@@ -177,6 +202,70 @@ export async function createApp(
       { publicBaseUrl: config.publicBaseUrl },
     ),
   };
+
+  /**
+   * The third path, and it is off unless a deployment asked for it. A second
+   * domain means a second registry subscription and a second gateway routing
+   * entry, neither of which an existing deployment has, so nothing here is
+   * constructed while the flag is false: no database file is opened, no
+   * migration runs, and the routes answer exactly the 404 they answered
+   * before.
+   */
+  let reserved: ReservedHandler | undefined;
+  let reservedStore: ReservedStore | undefined;
+  if (config.reservedEnabled) {
+    const reservedOperator = config.reservedOperators?.ksrtc;
+    if (!reservedOperator) {
+      throw new Error(
+        "RESERVED_ENABLED is on and no KSRTC operator identity is configured",
+      );
+    }
+    const reservedFixtures = await FixtureReservedSource.load(
+      config.fixtureRoot,
+      "ksrtc",
+    );
+    const reservedSource =
+      reservedOverrides.source ??
+      (config.reservedSource === "http"
+        ? new HttpReservedSource({
+            url: config.reservedSourceUrl!,
+            fallback: reservedFixtures,
+            responseSchemaPath: config.reservedSourceResponseSchema,
+            eventLogger,
+          })
+        : reservedFixtures);
+    reservedStore = new ReservedStore(
+      openReservedDatabase({
+        url: config.reservedDatabaseUrl,
+        migrationRoot: config.reservedMigrationRoot,
+      }),
+      reservedOverrides.idFactory
+        ? { idFactory: reservedOverrides.idFactory }
+        : {},
+    );
+    reserved = createReservedHandler({
+      orders: new ReservedOrderService(
+        "ksrtc",
+        reservedSource,
+        reservedOperator,
+        reservedStore,
+        {
+          publicBaseUrl: config.publicBaseUrl,
+          reservation: config.reservation,
+          ...(reservedOverrides.now ? { now: reservedOverrides.now } : {}),
+          ...(reservedOverrides.idFactory
+            ? { idFactory: reservedOverrides.idFactory }
+            : {}),
+        },
+      ),
+      validator: createReservedValidator(config.reservedSchemaRoot),
+      runtime: reservedOperator,
+      contextTtl: config.contextTtl,
+      callbackTimeoutMs: config.callbackTimeoutMs,
+      logEvent: eventLogger,
+      ...(reservedOverrides.now ? { now: reservedOverrides.now } : {}),
+    });
+  }
 
   async function buildCallback(
     operatorKey: OperatorKey,
@@ -305,7 +394,7 @@ export async function createApp(
     }
   }
 
-  return createServer(async (request, response) => {
+  const server = createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", "http://provider.invalid");
     if (request.method === "GET" && url.pathname === "/") {
       json(response, 200, {
@@ -319,6 +408,7 @@ export async function createApp(
           orders: "GET /orders/:orderId  (requires Bearer token)",
           bmtc: ["POST /bmtc/search", "POST /bmtc/select", "POST /bmtc/init", "POST /bmtc/confirm", "POST /bmtc/status", "POST /bmtc/inbound"],
           bmrcl: ["POST /bmrcl/search", "POST /bmrcl/select", "POST /bmrcl/init", "POST /bmrcl/confirm", "POST /bmrcl/status", "POST /bmrcl/inbound"],
+          ...(reserved ? { ksrtc: reserved.endpoints } : {}),
         },
       });
       return;
@@ -335,6 +425,28 @@ export async function createApp(
       json(response, 200, {
         specimen: true,
         notice: "Local demonstration only. No ticket is valid for travel.",
+        ...(config.reservedEnabled
+          ? {
+              // The one policy in this repository that is the operator's own
+              // published words rather than something it invented. Published
+              // here because a cancellation quote names a slab code and a
+              // rider is entitled to read what the code means.
+              reservedCancellation: {
+                notice:
+                  "Deducted from the base fare. The reservation fee is not refunded in any slab and the toll is refunded in full in every slab.",
+                slabs: [
+                  { code: "OVER_72H", when: "more than 72 hours before departure", deductionPercent: 10 },
+                  { code: "72H_TO_24H", when: "72 to 24 hours before departure", deductionPercent: 25 },
+                  { code: "24H_TO_2H", when: "24 to 2 hours before departure", deductionPercent: 50 },
+                  { code: "UNDER_2H", when: "less than 2 hours before departure, or after it", deductionPercent: 100 },
+                ],
+                quoteValidity: "PT2M",
+                holdTtlSeconds: config.reservation.holdTtlSeconds,
+                money:
+                  "No money moves in this specimen. A refund figure is arithmetic, not a payment.",
+              },
+            }
+          : {}),
       });
       return;
     }
@@ -357,8 +469,41 @@ export async function createApp(
         json(response, 400, { error: "Invalid order id encoding" });
         return;
       }
-      const order = store.inspect(orderId);
+      // The reserved store is asked second and only when the in-memory one
+      // has nothing, so an operator with one reference does not have to know
+      // which category issued it. What comes back for a reserved booking
+      // includes the passenger manifest, which makes leaving this endpoint
+      // enabled on a shared host a more consequential decision than it was
+      // when the only thing behind it was a specimen ticket.
+      const order =
+        store.inspect(orderId) ?? reservedStore?.inspect(orderId)?.order;
       json(response, order ? 200 : 404, order ?? { error: "Order not found" });
+      return;
+    }
+
+    const reservedMatch = url.pathname.match(RESERVED_ROUTE);
+    if (request.method === "POST" && reservedMatch) {
+      if (!reserved) {
+        json(response, 404, { error: "Not found" });
+        return;
+      }
+      let reservedBody: unknown;
+      try {
+        reservedBody = await readJson(request);
+      } catch (error) {
+        json(
+          response,
+          400,
+          nack(error instanceof Error ? error.message : "Invalid JSON"),
+        );
+        return;
+      }
+      await reserved.handle(
+        reservedMatch[2],
+        reservedBody,
+        request,
+        (status, payload) => json(response, status, payload),
+      );
       return;
     }
 
@@ -446,4 +591,10 @@ export async function createApp(
     });
     void answerAction(operatorKey, action, protocolRequest);
   });
+
+  // The reserved database outlives no server that closed. Nothing else in
+  // this process holds an operating-system resource, which is why this is the
+  // only hook of its kind here.
+  server.on("close", () => reservedStore?.close());
+  return server;
 }

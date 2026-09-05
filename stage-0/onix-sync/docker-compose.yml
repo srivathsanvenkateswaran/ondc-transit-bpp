@@ -158,8 +158,20 @@ services:
       KSRTC_CALLBACK_DELAY_MS: ${KSRTC_CALLBACK_DELAY_MS:-0}
       RESERVATION_CLOSE_MINUTES: ${RESERVATION_CLOSE_MINUTES:-45}
       RESERVATION_HORIZON_DAYS: ${RESERVATION_HORIZON_DAYS:-30}
+      RESERVATION_HOLD_TTL_SECONDS: ${RESERVATION_HOLD_TTL_SECONDS:-600}
       SEAT_OCCUPANCY_SEED: ${SEAT_OCCUPANCY_SEED:-20260905}
+      RESERVED_SOURCE: ${RESERVED_SOURCE:-fixture}
+      RESERVED_SOURCE_URL: ${RESERVED_SOURCE_URL:-}
+      RESERVED_DB_URL: ${RESERVED_DB_URL:-file:/app/data/reserved.db}
+      RESERVED_MIGRATION_ROOT: ${RESERVED_MIGRATION_ROOT:-/app/migrations/reserved}
+      RESERVED_MANIFEST_RETENTION_DAYS: ${RESERVED_MANIFEST_RETENTION_DAYS:-30}
     ports: ["${HOST_BIND_ADDRESS:-127.0.0.1}:${PROVIDER_PORT:-7001}:${PROVIDER_PORT:-7001}"]
+    # Held and booked seats are the one thing this provider keeps that a
+    # restart must not lose. Without this volume a compose down releases every
+    # hold and orphans every booking, which is the failure the database exists
+    # to prevent.
+    volumes:
+      - reserved_data:/app/data
     networks: [beckn]
 
 networks:
@@ -169,3 +181,4 @@ networks:
 
 volumes:
   sync_mongo_data:
+  reserved_data:

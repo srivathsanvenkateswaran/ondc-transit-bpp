@@ -45,10 +45,17 @@
       "type": "object",
       "properties": {
         "order": {
-          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/confirmedOrder"
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/settledOrder"
         },
         "refund": {
           "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/refund"
+        },
+        "tags": {
+          "$comment": "The REFUND_SLAB group: the slab code that applied, its percentage, the quote id and the instant the quote lapses. On a refusal because the slab moved, this carries the replacement quote, so the rider sees the real figure before committing again.",
+          "type": "array",
+          "items": {
+            "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/tag"
+          }
         }
       }
     },
