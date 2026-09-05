@@ -1,0 +1,249 @@
+/**
+ * The domain this category is published under, and the vocabulary it invents.
+ *
+ * `TRANSIT.LOCALHOST:INTERCITY` at version `0.1.0` is a locally owned,
+ * Beckn-shaped domain string. It claims conformance to nothing. The reasoning
+ * is set out in full in `docs/reserved-intercity.md` section 2; the short
+ * version is that the released mobility specification this repository already
+ * implements covers unreserved public transit only, the intercity coach
+ * specification that would cover this category is still a draft branch, and no
+ * state road transport corporation is a live participant on any real network
+ * for intercity booking. Publishing under an administered namespace would
+ * assert two things that are not true - conformance to a released
+ * specification, and membership of a namespace somebody else administers.
+ *
+ * `TRANSIT.LOCALHOST` is the namespace half of the subscriber ids this stack
+ * already uses. `.localhost` is reserved by RFC 6761 and unresolvable, so the
+ * domain string cannot collide with an issued one by the same mechanism that
+ * already stops the subscriber ids colliding. `INTERCITY` names the product.
+ *
+ * Version `0.1.0` rather than a two-part number: a zero major says this is
+ * pre-stable and locally owned, and it cannot be mistaken for a release number
+ * of the specification next door.
+ *
+ * Every code in this file is this repository's own naming. There is no
+ * published enumeration to transcribe from, and section 14.8 keeps the codes
+ * in one table so that mapping them onto a released specification, if one ever
+ * arrives, is a table-to-table exercise rather than a search through source.
+ */
+
+export const RESERVED_DOMAIN = "TRANSIT.LOCALHOST:INTERCITY";
+export const RESERVED_VERSION = "0.1.0";
+
+/** The third catalogue axis, alongside the two this provider already sells. */
+export const RESERVED_CATEGORY_ID = "C3";
+export const RESERVED_CATEGORY_CODE = "RESERVED";
+
+/** `Item.descriptor.code`. */
+export const RESERVED_ITEM_CODE = "RESERVED";
+
+/** `Fulfillment.type`. A reserved booking is neither a trip nor a pass. */
+export const RESERVED_FULFILLMENT_TYPE = "RESERVATION";
+
+/** `vehicle.category`. An intercity coach is not a city bus. */
+export const RESERVED_VEHICLE_CATEGORY = "COACH";
+
+/**
+ * The mark that rides on every reserved item and every seat map. The seats a
+ * rider sees as sold here were sold by an algorithm in this process, not by
+ * anybody's booking system, and a surface that let a rider read them as live
+ * availability would be making a claim this provider cannot make.
+ */
+export const SIMULATED_INVENTORY_MARK =
+  "Modelled inventory. The seats shown as sold are simulated by this specimen provider, not KSRTC's live availability.";
+
+export const SPECIMEN_NOTICE = "SPECIMEN - NOT VALID FOR TRAVEL";
+
+/**
+ * The five states a seat can be published in, and a client's legend must
+ * enumerate all five. A legend that undercounts the states actually on screen
+ * is a documented real-world failure, compounded in the documented case by the
+ * missing state being the safety-relevant one.
+ *
+ * `SOLD:simulated` and `SOLD:booked` render identically to a rider and differ
+ * on the wire, so a client can honestly say "sold in this demonstration" about
+ * one and nothing at all about the other. `FEMALE_ONLY` is a distinct
+ * enumerated value rather than a hint folded into `AVAILABLE`, because the
+ * documented failure is a ladies-only seat distinguished by a pale border and
+ * a rider booking one by accident.
+ */
+export const SEAT_STATES = [
+  "AVAILABLE",
+  "HELD",
+  "HELD_BY_YOU",
+  "FEMALE_ONLY",
+  "SOLD:simulated",
+  "SOLD:booked",
+] as const;
+
+export type SeatState = (typeof SEAT_STATES)[number];
+
+export const CONFIRMED_SPECIMEN_NOTICE =
+  "SPECIMEN - NOT VALID FOR TRAVEL - not issued by KSRTC, NWKRTC or KKRTC";
+
+/** Section 14.8's table, as a value so a test can assert the whole of it. */
+export const RESERVED_TAG_CODES = [
+  "SERVICE_INFO",
+  "PRICED_FOR",
+  "SERVICE_PROVENANCE",
+  "OPERATOR_DISCLOSURE",
+  "SIMULATED_INVENTORY",
+  "SPECIMEN_INFO",
+  "SEAT_MAP_REF",
+  "SEAT_MAP",
+  /**
+   * The geometry the states are states of. Published beside `SEAT_MAP` rather
+   * than left to a client to reconstruct from this document's prose: a layout
+   * a second client draws from a paragraph is a layout nobody can check, and
+   * it drifts silently the day a fixture changes. Section 5.4.
+   */
+  "SEAT_MAP_LAYOUT",
+  "SEATS",
+  /**
+   * The seats a cancellation released. `SEATS` shrinks to what the booking
+   * still holds, so without this a whole-booking cancellation would carry no
+   * seat list at all and a partial one would silently drop the seats it took.
+   */
+  "CANCELLED_SEATS",
+  /**
+   * The seats a `SEAT-UNAVAILABLE` refusal is about. The error object names
+   * codes rather than values, so the seats travel as data beside it rather
+   * than only inside an English sentence.
+   */
+  "UNAVAILABLE_SEATS",
+  /**
+   * Whether a stop on the published run can be boarded at, alighted at, or
+   * both. `stop.type` is the positional axis - first, intermediate, last - and
+   * it cannot carry this: the two are different facts and the wire needs both.
+   */
+  "STOP_ROLE",
+  "HOLD_INFO",
+  "MANIFEST",
+  "BOOKING_REF",
+  "VEHICLE_LOOKUP",
+  "REFUND_SLAB",
+] as const;
+
+export type ReservedTagCode = (typeof RESERVED_TAG_CODES)[number];
+
+/**
+ * Section 14.9's table, plus one this implementation had to add, declared
+ * here so that no caller invents a twenty-first in a message string.
+ */
+export const RESERVED_ERROR_CODES = [
+  "TRAVEL-DATE-REQUIRED",
+  "SERVICE-NOT-FOUND",
+  "OUTSIDE-BOOKING-WINDOW",
+  "FARE-NOT-PUBLISHED",
+  "SEAT-NOT-ON-MAP",
+  "SEAT-UNAVAILABLE",
+  "SEAT-GENDER-LOCKED",
+  "SEAT-COUNT-MISMATCH",
+  "HOLD-REQUIRED",
+  "HOLD-EXPIRED",
+  "HOLD-SEAT-MISMATCH",
+  "MANIFEST-INCOMPLETE",
+  "MANIFEST-FIELD-NOT-ACCEPTED",
+  "CONCESSION-RATE-NOT-PUBLISHED",
+  "CONCESSION-NOT-APPLICABLE",
+  "BOOKING-NOT-FOUND",
+  "REFUND-SLAB-MOVED",
+  "REFUND-QUOTE-EXPIRED",
+  "MIXED-CATEGORY-ORDER",
+  /**
+   * The twentieth, and this implementation's own addition to a table of
+   * nineteen. A cancellation may name the seats it means, and the
+   * specification carries no code for one that names a seat the booking does
+   * not hold. Both alternatives were worse: reusing `SEAT-NOT-ON-MAP` would
+   * tell a client the seat does not exist when it does, and ignoring the
+   * unknown seat would cancel less than the rider asked for without saying so.
+   */
+  "CANCEL-SEAT-NOT-ON-BOOKING",
+  /**
+   * Not a domain refusal from the table either, but the same envelope-level
+   * check the two existing paths already make: a request that names somebody
+   * else as the seller is answered by nobody. Declared here rather than
+   * written into a message string, so that the set of codes a client can
+   * receive stays enumerable in one place.
+   */
+  "BPP-ADDRESS-MISMATCH",
+  /** Likewise: init is sent unpaid and confirm is sent paid, as next door. */
+  "INVALID-PAYMENT-STATUS",
+  /**
+   * Not a domain refusal at all, and declared for exactly that reason. It is
+   * the answer of last resort: this provider could not build an answer, or
+   * built one it could not express within its own published shapes, and it
+   * says so rather than going quiet. A client that never received this code in
+   * its error table would classify it as unknown, and an unknown code renders
+   * as reassurance - "nothing happened" - which this code cannot promise. What
+   * it means is precisely that the outcome is not known from this message, and
+   * the client's next move is a `status` read rather than an assumption in
+   * either direction.
+   */
+  "INTERNAL-ERROR",
+] as const;
+
+export type ReservedErrorCode = (typeof RESERVED_ERROR_CODES)[number];
+
+/**
+ * The code the handler falls back to, held here rather than written into a
+ * string at the point of use so that the compiler checks it against the table
+ * above. It was a bare literal in `handler.ts` and therefore absent from the
+ * table, which is how a client ended up able to receive a code no document
+ * declared.
+ */
+export const RESERVED_INTERNAL_ERROR: ReservedErrorCode = "INTERNAL-ERROR";
+
+const IST_CALENDAR_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * An item's identity has to carry the date. Two calendar dates of the same
+ * scheduled service are two entirely different sellable inventories, so the
+ * item id is not the service - it is the service, the date and the class.
+ *
+ * This is the single largest structural difference from the two existing
+ * categories, where an item id is stable across every search forever. A buyer
+ * app must treat the string as opaque and read the fields off the
+ * `SERVICE_INFO` tag rather than parsing it back out.
+ */
+export function reservedItemId(
+  serviceId: string,
+  travelDate: string,
+  serviceClass: string,
+): string {
+  if (!IST_CALENDAR_DATE.test(travelDate)) {
+    throw new Error(
+      `A reserved item id needs a bare travel date in YYYY-MM-DD, not ${travelDate}`,
+    );
+  }
+  return `RSV-${serviceId}-${travelDate}-${serviceClass}`;
+}
+
+/**
+ * Read a reserved item id back into the three facts it carries.
+ *
+ * A buyer app must never do this: the id is opaque to it, and the
+ * `SERVICE_INFO` tag carries the same three fields precisely so that nothing
+ * on that side has to parse a string. This provider is the party that minted
+ * the id, so reading its own format back is not parsing somebody else's data.
+ *
+ * The alternative was a per-transaction catalogue cache, in the shape the
+ * single-journey path already uses, and it is the wrong shape here: it would
+ * make a select impossible unless a search had happened in the same
+ * transaction and the same process, which is exactly the dependence on process
+ * memory that moved holds and bookings into a database in the first place.
+ *
+ * Matched rather than split, because a service id is free to contain a hyphen
+ * and neither the date nor the class code ever does.
+ */
+export function parseReservedItemId(
+  itemId: string,
+): { serviceId: string; travelDate: string; serviceClass: string } | undefined {
+  const match = /^RSV-(.+)-(\d{4}-\d{2}-\d{2})-([A-Z_]+)$/.exec(itemId);
+  if (!match) return undefined;
+  return { serviceId: match[1], travelDate: match[2], serviceClass: match[3] };
+}
+
+export function reservedFulfillmentId(itemId: string): string {
+  return `F-${itemId}`;
+}

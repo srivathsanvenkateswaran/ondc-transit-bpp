@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/reserved-source-response.json",
+  "title": "Reserved intercity source response",
+  "$comment": "What any dataset must answer with to feed this provider's reserved intercity category. It carries the static shape of what is sellable: services, layouts and fares. It carries no inventory, and there is no field for one. Which seats are sold is decided in the provider process, because a source that could answer that would be a source with live operator inventory, which is exactly the thing nobody has.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["catalogue"],
+  "properties": {
+    "catalogue": { "$ref": "#/$defs/catalogue" }
+  },
+  "$defs": {
+    "catalogue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator",
+        "towns",
+        "boardingPoints",
+        "services",
+        "seatMaps",
+        "fareTables"
+      ],
+      "properties": {
+        "operator": { "$ref": "#/$defs/operator" },
+        "towns": { "type": "array", "items": { "$ref": "#/$defs/town" } },
+        "boardingPoints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/boardingPoint" }
+        },
+        "services": { "type": "array", "items": { "$ref": "#/$defs/service" } },
+        "seatMaps": { "type": "array", "items": { "$ref": "#/$defs/seatMap" } },
+        "fareTables": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fareTable" }
+        }
+      }
+    },
+    "serviceClass": {
+      "$comment": "Only classes that genuinely sell numbered seats. Unreserved walk-up classes are deliberately absent: gating on the corporation rather than the class would stop an ordinary intercity bus ever appearing as a walk-up option.",
+      "enum": [
+        "RAJAHAMSA",
+        "AIRAVAT",
+        "AIRAVAT_CLUB",
+        "PALLAKKI",
+        "AMBAARI_UTSAV"
+      ]
+    },
+    "corporation": { "enum": ["KSRTC", "NWKRTC", "KKRTC"] },
+    "provenance": {
+      "$comment": "How a claim is known. `confirmed` needs at least two independent sources that agree, and the source count is what makes it auditable rather than asserted. Only `inferred` and `none` are meant to render a mark: a verified tick would be an affirmative certification claim nobody is in a position to make.",
+      "enum": ["confirmed", "inferred", "none"]
+    },
+    "sourcing": {
+      "$comment": "V read against a primary source, S secondary, I an inference. Carried per fare cell rather than per table, because a per-table label would launder an interpolated cell into a sourced one.",
+      "enum": ["V", "S", "I"]
+    },
+    "operator": {
+      "type": "object",
+      "required": ["id", "name", "vehicleCategory", "serviceWindow"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "vehicleCategory": { "const": "COACH" },
+        "serviceWindow": {
+          "type": "object",
+          "required": ["startHHMM", "endHHMM"],
+          "properties": {
+            "startHHMM": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+            "endHHMM": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" }
+          }
+        }
+      }
+    },
+    "town": {
+      "type": "object",
+      "required": ["code", "name"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "nameLocal": { "type": "string", "minLength": 1 }
+      }
+    },
+    "boardingPoint": {
+      "$comment": "gps is optional and genuinely often absent. A boarding point is not a transit stop: it is a fare and a time identity, and one with no coordinate publishes none rather than one synthesised from a town centroid.",
+      "type": "object",
+      "required": ["boardingPointId", "name", "townCode", "reportingOffsetMinutes"],
+      "properties": {
+        "boardingPointId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "nameLocal": { "type": "string", "minLength": 1 },
+        "townCode": { "type": "string", "minLength": 1 },
+        "stopCode": { "type": "string", "minLength": 1 },
+        "reportingOffsetMinutes": { "type": "integer" },
+        "gps": {
+          "type": "object",
+          "required": ["lat", "lon"],
+          "properties": {
+            "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+            "lon": { "type": "number", "minimum": -180, "maximum": 180 }
+          }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "required": [
+        "serviceId",
+        "serviceNumber",
+        "brand",
+        "operatingCorporation",
+        "operatingCorporationBasis",
+        "provenance",
+        "provenanceSourceCount",
+        "serviceClass",
+        "boardingPoints",
+        "droppingPoints",
+        "operatingPattern",
+        "departureMinute",
+        "runningMinutes",
+        "seatMapId",
+        "fareTableId",
+        "popularity",
+        "reservationFeePaise",
+        "tollPaise"
+      ],
+      "properties": {
+        "serviceId": { "type": "string", "minLength": 1 },
+        "serviceNumber": { "type": "string", "minLength": 1 },
+        "brand": { "$ref": "#/$defs/corporation" },
+        "operatingCorporation": {
+          "$comment": "Null means unknown, and unknown must be published as null rather than as the brand. A named corporation must carry a confirmed basis: publishing an inferred one would be worse than publishing none, because a disclosure that is sometimes wrong closes nothing and misleads instead.",
+          "oneOf": [{ "$ref": "#/$defs/corporation" }, { "type": "null" }]
+        },
+        "operatingCorporationBasis": { "$ref": "#/$defs/provenance" },
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "provenanceSourceCount": { "type": "integer", "minimum": 0 },
+        "serviceClass": { "$ref": "#/$defs/serviceClass" },
+        "boardingPoints": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/boardingPoint" }
+        },
+        "droppingPoints": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/boardingPoint" }
+        },
+        "operatingPattern": { "$ref": "#/$defs/operatingPattern" },
+        "departureMinute": {
+          "$comment": "Minutes after midnight in the operator's own timezone. May exceed 1440 for a board that says the coach leaves after midnight on the date named.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "runningMinutes": { "type": "integer", "minimum": 1 },
+        "seatMapId": { "type": "string", "minLength": 1 },
+        "fareTableId": { "type": "string", "minLength": 1 },
+        "popularity": {
+          "$comment": "A fidelity dial rather than a claim: how full the coach tends to run, authored rather than derived, because no route-level ridership data exists.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reservationFeePaise": { "type": "integer", "minimum": 0 },
+        "tollPaise": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "operatingPattern": {
+      "$comment": "A search for a date the service does not run returns no item for it. There is no nearest-date fallback and no roll-forward: a rider asking about the 25th must not be sold the 26th.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": { "kind": { "const": "daily" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "days"],
+          "properties": {
+            "kind": { "const": "daysOfWeek" },
+            "days": {
+              "type": "array",
+              "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "dates"],
+          "properties": {
+            "kind": { "const": "dates" },
+            "dates": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "seatMap": {
+      "type": "object",
+      "required": [
+        "seatMapId",
+        "serviceClass",
+        "kind",
+        "decks",
+        "documentedCapacity",
+        "seats"
+      ],
+      "properties": {
+        "seatMapId": { "type": "string", "minLength": 1 },
+        "serviceClass": { "$ref": "#/$defs/serviceClass" },
+        "kind": { "enum": ["SEATER", "SLEEPER"] },
+        "decks": { "enum": [1, 2] },
+        "documentedCapacity": {
+          "$comment": "Null where no capacity was ever published for the class, so that an unsourced layout is not checked against a number nobody stated.",
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "seats": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/seat" }
+        }
+      }
+    },
+    "seat": {
+      "type": "object",
+      "required": [
+        "seatId",
+        "deck",
+        "row",
+        "column",
+        "kind",
+        "window",
+        "pairedSeatId",
+        "adjacentSeatIds"
+      ],
+      "properties": {
+        "seatId": { "type": "string", "minLength": 1 },
+        "deck": { "enum": [1, 2] },
+        "row": { "type": "integer", "minimum": 1 },
+        "column": {
+          "$comment": "1-based from the left as the rider faces forward. The aisle is a gap in this sequence rather than a column of its own.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "kind": { "enum": ["SEAT", "BERTH"] },
+        "window": { "type": "boolean" },
+        "pairedSeatId": { "type": ["string", "null"], "minLength": 1 },
+        "adjacentSeatIds": {
+          "$comment": "Physical adjacency, authored rather than derived. The aisle breaks it: two seats either side of one are numerically consecutive and are not adjacent, and deriving this from seat numbering would lock the wrong seat on every 2+2 coach in the fleet.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "fareTable": {
+      "type": "object",
+      "required": ["fareTableId", "currency", "fares"],
+      "properties": {
+        "fareTableId": { "type": "string", "minLength": 1 },
+        "currency": { "const": "INR" },
+        "fares": {
+          "$comment": "A table may be incomplete. A missing cell is refused at request time with a named code rather than interpolated, so demanding completeness here would push authors towards inventing the cells they are missing.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/fareCell" }
+        }
+      }
+    },
+    "fareCell": {
+      "type": "object",
+      "required": [
+        "fromBoardingPointId",
+        "toBoardingPointId",
+        "serviceClass",
+        "farePaise",
+        "sourcing"
+      ],
+      "properties": {
+        "fromBoardingPointId": { "type": "string", "minLength": 1 },
+        "toBoardingPointId": { "type": "string", "minLength": 1 },
+        "serviceClass": { "$ref": "#/$defs/serviceClass" },
+        "farePaise": { "type": "integer", "minimum": 0 },
+        "sourcing": { "$ref": "#/$defs/sourcing" }
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/on_status.json",
+  "type": "object",
+  "required": [
+    "context"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "object",
+          "required": [
+            "order"
+          ]
+        }
+      }
+    },
+    {
+      "required": [
+        "error"
+      ]
+    }
+  ],
+  "properties": {
+    "context": {
+      "allOf": [
+        {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/context"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "const": "on_status"
+            }
+          }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/settledOrder"
+        },
+        "refund": {
+          "$comment": "What came back, on a booking that was cancelled. Read from the figures frozen at the moment of cancellation rather than re-evaluated, so that asking twice never returns a smaller number than asking once.",
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/refund"
+        }
+      }
+    },
+    "error": {
+      "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/error"
+    }
+  }
+}

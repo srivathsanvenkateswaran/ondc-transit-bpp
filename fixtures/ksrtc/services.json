@@ -1,0 +1,91 @@
+{
+  "sourcing": {
+    "note": "Every service here is inferred, and none reaches confirmed. The Bengaluru-Hampi pair comes from a route-aggregator page reached only through a search summary; the direct fetch failed with a DNS error and was not independently re-verified. The Bengaluru-Chennai corridor's distance, running time, classes and boarding points are secondary-sourced, and the three departure times cited are very likely a subset of the real timetable rather than all of it. No output may present any of these times as a published timetable. The reservation fee and toll figures are this repository's own; what is the operator's own published policy is that the fee is non-refundable in every slab and the toll is refunded in full in every slab, which is why the two are separate fields.",
+    "label": "S"
+  },
+  "services": [
+    {
+      "serviceId": "2259BNGHMP",
+      "serviceNumber": "2259",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "operatingCorporationNote": "Hosapete is in Ballari district and Hampi in Vijayanagara district, both Kalyana Karnataka territory, and yet the three corporations share one reservation brand and portal and run their premium classes jointly. No primary source establishes which corporation dispatches this nightly Majestic-origin coach. Absence means unknown, and unknown must render as absent rather than as the brand.",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": { "kind": "daily" },
+      "departureMinute": 1379,
+      "runningMinutes": 451,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGHMP",
+      "popularity": 0.72,
+      "popularityNote": "A fidelity dial, not a claim. No route-level ridership data exists for these corporations, so this number is authored rather than derived. It is set high because an overnight sleeper to a destination people travel to on purpose fills better than a daytime seater.",
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        { "boardingPointId": "BP-BLR-MAJESTIC", "reportingOffsetMinutes": 0 },
+        { "boardingPointId": "BP-BLR-MADIWALA", "reportingOffsetMinutes": 32 },
+        { "boardingPointId": "BP-BLR-ELECTRONIC-CITY", "reportingOffsetMinutes": 52 }
+      ],
+      "droppingPoints": [
+        { "boardingPointId": "BP-HPT-HOSAPETE", "reportingOffsetMinutes": 421 },
+        { "boardingPointId": "BP-HMP-HAMPI", "reportingOffsetMinutes": 451 }
+      ]
+    },
+    {
+      "serviceId": "2001HMPBNG",
+      "serviceNumber": "2001",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": { "kind": "daily" },
+      "departureMinute": 1200,
+      "runningMinutes": 510,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGHMP",
+      "popularity": 0.66,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        { "boardingPointId": "BP-HMP-HAMPI", "reportingOffsetMinutes": 0 },
+        { "boardingPointId": "BP-HPT-HOSAPETE", "reportingOffsetMinutes": 30 }
+      ],
+      "droppingPoints": [
+        { "boardingPointId": "BP-BLR-MAJESTIC", "reportingOffsetMinutes": 510 }
+      ]
+    },
+    {
+      "serviceId": "1000BNGMAA",
+      "serviceNumber": "1000",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": { "kind": "daysOfWeek", "days": [0, 1, 2, 3, 4, 5] },
+      "operatingPatternNote": "Six days rather than seven, so that the fixture set contains a date on which a corridor genuinely does not run. A rider asking about a Saturday gets no item for it, and no roll-forward to the Sunday. Nothing in the research says this service does not run on Saturdays.",
+      "departureMinute": 600,
+      "runningMinutes": 510,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMAA",
+      "popularity": 0.58,
+      "reservationFeePaise": 2000,
+      "tollPaise": 4000,
+      "boardingPoints": [
+        { "boardingPointId": "BP-BLR-MAJESTIC", "reportingOffsetMinutes": 0 },
+        { "boardingPointId": "BP-BLR-MADIWALA", "reportingOffsetMinutes": 30 },
+        { "boardingPointId": "BP-BLR-ELECTRONIC-CITY", "reportingOffsetMinutes": 50 }
+      ],
+      "droppingPoints": [
+        { "boardingPointId": "BP-MAA-AMBATTUR", "reportingOffsetMinutes": 465 },
+        { "boardingPointId": "BP-MAA-KOYAMBEDU", "reportingOffsetMinutes": 480 },
+        { "boardingPointId": "BP-MAA-ADYAR", "reportingOffsetMinutes": 510 }
+      ]
+    }
+  ]
+}

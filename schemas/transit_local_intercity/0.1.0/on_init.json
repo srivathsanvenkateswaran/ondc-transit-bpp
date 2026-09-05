@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/on_init.json",
+  "$comment": "Either an order or an error, never both and never neither. A domain error - a locked seat, a lapsed hold, a missing fare - arrives here with no message.order.",
+  "type": "object",
+  "required": [
+    "context"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "object",
+          "required": [
+            "order"
+          ]
+        }
+      }
+    },
+    {
+      "required": [
+        "error"
+      ]
+    }
+  ],
+  "properties": {
+    "context": {
+      "allOf": [
+        {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/context"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "const": "on_init"
+            }
+          }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/baseOrder"
+        }
+      }
+    },
+    "error": {
+      "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/error"
+    }
+  }
+}

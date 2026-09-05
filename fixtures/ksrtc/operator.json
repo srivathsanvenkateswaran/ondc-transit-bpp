@@ -1,0 +1,12 @@
+{
+  "sourcing": {
+    "note": "The corporation, its full name and its retail brand are matters of public record. The service window is this repository's own: an intercity seller has no daily service window in the sense a city operator does, and the field exists only because the catalogue shape carries one.",
+    "label": "I"
+  },
+  "operator": {
+    "id": "P1",
+    "name": "Karnataka State Road Transport Corporation",
+    "vehicleCategory": "COACH",
+    "serviceWindow": { "startHHMM": "00:00", "endHHMM": "23:59" }
+  }
+}

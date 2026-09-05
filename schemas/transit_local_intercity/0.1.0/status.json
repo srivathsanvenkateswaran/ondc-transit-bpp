@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/status.json",
+  "$comment": "ref_id accepts the booking reference, which is the lookup path a rider holding only a printed reference needs.",
+  "type": "object",
+  "required": [
+    "context",
+    "message"
+  ],
+  "properties": {
+    "context": {
+      "allOf": [
+        {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/context"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "const": "status"
+            }
+          }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "oneOf": [
+        {
+          "required": [
+            "order_id"
+          ]
+        },
+        {
+          "required": [
+            "ref_id"
+          ]
+        }
+      ],
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ref_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

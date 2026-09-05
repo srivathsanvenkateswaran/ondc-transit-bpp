@@ -144,9 +144,122 @@ Paying for a ride with a pass is the ordinary on-board sale plus one payment
 tag, not a second order path. [`docs/passes.md`](docs/passes.md) is the full
 design and the fabrication disclosure for all of it.
 
+A third catalogue axis sells reserved intercity coach seats, under its own
+domain and behind a flag that defaults to off. It is the first thing this
+repository sells that another buyer can exhaust: a numbered berth on a dated
+departure, held for ten minutes while somebody fills in a manifest, refundable
+on the operator's own published slab. [`docs/reserved-intercity.md`](docs/reserved-intercity.md)
+is the design and the fabrication disclosure; the section below is what it
+means for running the thing.
+
 The optional HTTP journey source is documented in
-[`docs/journey-source-http.md`](docs/journey-source-http.md). The consuming BAP
-client and ticket mapping in Tatak remain outside this repository.
+[`docs/journey-source-http.md`](docs/journey-source-http.md), and the reserved
+one in [`docs/reserved-source-http.md`](docs/reserved-source-http.md). The
+consuming BAP client and ticket mapping in Tatak remain outside this
+repository.
+
+## Reserved intercity coach seats
+
+Off unless `RESERVED_ENABLED=true`. Turning it on means a second registry
+subscription and a second gateway routing entry, so a deployment that has made
+neither keeps booting exactly as it did: the `/ksrtc/*` routes answer 404, no
+database file is opened, and no migration runs.
+
+**It publishes under `TRANSIT.LOCALHOST:INTERCITY` version `0.1.0`, and claims
+conformance to nothing.** The released mobility specification this repository
+already implements covers unreserved public transit; the intercity coach
+specification that would cover this category is a draft branch, and no state
+road transport corporation is a live participant on any real network for
+intercity booking. Publishing under an administered namespace would assert two
+things that are not true. `.localhost` is reserved and unresolvable under RFC
+6761, which is the same mechanism that already stops this repository's
+subscriber IDs colliding with anybody's.
+
+**Seven actions**, on the same shape as the two existing sellers: `search`,
+`select`, `init`, `confirm`, `status`, `cancel`, and one `inbound` endpoint
+that dispatches by action. `cancel` is new; neither existing category has one.
+
+**What is real here, and it is the part worth reading the code for:** the seat
+map geometry per class, the hold arbitration and its concurrency guarantee, the
+cancellation slabs and their arithmetic, the boarding-point-pair fare key, the
+manifest's field set and the refusal to collect anything identifying.
+
+**What is simulated, and marked as such on every payload:** which seats are
+already sold. Occupancy is seeded from the service identity and the travel
+date, so the same coach on the same date draws the same map on every clone,
+and it does not fill as departure approaches. That is less lifelike on purpose:
+a booking curve would be indistinguishable on screen from real inventory
+moving, which is a claim this provider cannot make.
+
+### The three things most likely to surprise a reader
+
+**Holds are server-authoritative and the expiry is absolute.** This provider
+issues the hold, sets the TTL and publishes the instant it lapses. A client
+renders that instant; it never computes one and never extends one. A confirm
+that arrives one second late is refused with `HOLD-EXPIRED` **even when the
+berth is still free**, because forgiving lateness would make the outcome depend
+on whether an unrelated third party happened to be looking at the same coach in
+the same second, which a client cannot observe, cannot reproduce and cannot
+test against. That strictness is affordable only because no money moves
+anywhere in this stack, so a late confirm strands nothing and costs one extra
+round trip. On a stack where a payment had been captured against a lapsed hold,
+the rule would need a compensating answer and would not be this rule.
+
+**A seat beside a woman is held for a woman, and a cancellation can relock
+one.** The lock is a property of a seat's neighbourhood recomputed on every
+read rather than a stored flag, and the exemption is the shared booking: a
+couple taking one double berth is the ordinary case. Cancel one passenger of a
+mixed pair and the exemption goes with them, so a berth that was sellable to
+anybody a moment ago is female-only to everybody else. Adjacency is physical
+and authored on the seat map: the aisle breaks it, so `1B` and `1C` on a 2+2
+coach are numerically consecutive and are not adjacent.
+
+**Cancellation is a quote and then a commitment.** The refund is evaluated
+server-side at the moment of asking and the exact figure goes back before
+anything changes state, never "as per policy". The commitment re-evaluates
+rather than trusting the quote: a rider who quotes at 72 hours and one minute
+and commits at 71 hours and 59 has crossed a slab, and is refused with
+`REFUND-SLAB-MOVED` carrying the new figure rather than silently charged a
+different one. Partial cancellation prorates per seat, returns the berth to
+inventory and re-evaluates the lock for whoever stays.
+
+### Where a held seat lives
+
+In SQLite, one file, no extra service. `RESERVED_DB_URL` defaults to
+`file:./data/reserved.db` and takes `:memory:`. Everything the two existing
+categories hold is a settled fact whose loss costs nothing, because the rider's
+own device holds the wallet; a held or booked seat is the opposite, and a
+restart that forgot every hold would release seats somebody is mid-checkout on
+and make "how many seats are left" a function of this provider's uptime.
+Migrations are numbered, forward-only, plain SQL under `migrations/reserved/`,
+applied at boot inside a transaction, and the process refuses to start against
+a database written by a newer release. **Mount a volume at `/app/data` in any
+deployment that means it.**
+
+The design document names libSQL. What ships is the SQLite that comes with the
+runtime, which is the same engine reached without adding a dependency, and the
+swap is one module if a deployment ever needs a server rather than a file. It
+is also why the image is now Node 24: the runtime's own SQLite is available
+without a flag only from 23.4 onward.
+
+### The corporation nobody sees
+
+Karnataka has four state road transport corporations sharing one reservation
+brand, and a coach sold under one brand may be another corporation's vehicle.
+Somebody is owed money for every seat sold, and it is not always the
+corporation whose brand printed the ticket. So every confirmed booking carries
+a settlement attribution, copied from the service at the instant the confirm
+succeeds and frozen there.
+
+It reaches no payload. Not `on_search`, not `on_confirm`, not `on_status`, not
+`on_cancel`, attributed or not: the rider does the same thing at the same gate
+whichever corporation's coach turns up, and there is nothing on that screen for
+a corporation name to add. Where the operating corporation is not confirmed,
+which is every service in the shipped fixtures, the attribution is recorded as
+`NULL` and joins a reconciliation backlog rather than being guessed from the
+territory a boarding point sits in. Territory is a fact about geography, not
+about which coach and crew showed up, and a manufactured attribution would be
+worse than an admitted unknown because it looks resolved when it is not.
 
 ## Run locally
 
@@ -592,6 +705,23 @@ public URLs, or ports.
 | `BMRCL_WEBHOOK_URL` | `http://transit-bpp:7001/bmrcl/inbound` | BPP client webhook seam into the provider |
 | `BMRCL_CALLBACK_DELAY_MS` | `0` | Test-only artificial callback delay |
 | `SEARCH_TTL` | `PT4S` | ONIX synchronous discovery collection window |
+| `RESERVED_ENABLED` | `false` | Publishes the reserved intercity category and its `/ksrtc/*` routes |
+| `RESERVED_SCHEMA_ROOT` | `/app/schemas/transit_local_intercity/0.1.0` | Reserved input and output schema directory |
+| `RESERVED_SOURCE` | `fixture` | Reserved catalogue source: `fixture` or `http` |
+| `RESERVED_SOURCE_URL` | empty | Required dataset endpoint when `RESERVED_SOURCE=http` |
+| `RESERVED_SOURCE_RESPONSE_SCHEMA` | `/app/schemas/reserved-source-response.json` | Reserved dataset response JSON Schema |
+| `RESERVED_DB_URL` | `file:/app/data/reserved.db` | Where held and booked seats live; `:memory:` runs without a file |
+| `RESERVED_MIGRATION_ROOT` | `/app/migrations/reserved` | Numbered, forward-only migrations applied at boot |
+| `RESERVED_MANIFEST_RETENTION_DAYS` | `30` | Days after departure that passenger names are kept |
+| `RESERVATION_CLOSE_MINUTES` | `45` | Reservations close this long before departure |
+| `RESERVATION_HORIZON_DAYS` | `30` | How far ahead a date can be booked |
+| `RESERVATION_HOLD_TTL_SECONDS` | `600` | How long a seat hold lasts, absolutely |
+| `SEAT_OCCUPANCY_SEED` | `20260905` | Seeds the simulated seat map; fixed so every clone draws the same coach |
+| `KSRTC_BPP_ID` | `ksrtc.bpp.transit.localhost` | KSRTC BPP subscriber ID |
+| `KSRTC_BPP_URI` | `http://ksrtc-bpp-network:6202` | KSRTC BPP network subscriber URI |
+| `KSRTC_CALLBACK_URL` | `http://ksrtc-bpp-client:6201/on_search` | Provider callback destination |
+| `KSRTC_WEBHOOK_URL` | `http://transit-bpp:7001/ksrtc/inbound` | BPP client webhook seam into the provider |
+| `KSRTC_CALLBACK_DELAY_MS` | `0` | Test-only artificial callback delay |
 
 The pinned ONIX protocol server exposes one `client.webhook.url` per BPP, not a
 separate configurable webhook URL per action. This contradicts the per-action

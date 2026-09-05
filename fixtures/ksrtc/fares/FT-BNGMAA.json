@@ -1,0 +1,21 @@
+{
+  "sourcing": {
+    "note": "No fare of any kind was sourced for the Bengaluru-Chennai corridor, at any class. Every cell here is an inference and is labelled as one. The corridor is in the fixture set because it is the one that proves the fare key: the Chennai side genuinely has many distinct boarding and dropping points, each with its own time and potentially its own fare, which a distance-only model could reproduce only by inventing per-point distances anyway. No tax arithmetic is performed on any of these numbers.",
+    "label": "I"
+  },
+  "fareTable": {
+    "fareTableId": "FT-BNGMAA",
+    "currency": "INR",
+    "fares": [
+      { "fromBoardingPointId": "BP-BLR-MAJESTIC", "toBoardingPointId": "BP-MAA-AMBATTUR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 100000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-MAJESTIC", "toBoardingPointId": "BP-MAA-KOYAMBEDU", "serviceClass": "AIRAVAT_CLUB", "farePaise": 105000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-MAJESTIC", "toBoardingPointId": "BP-MAA-ADYAR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 110000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-MADIWALA", "toBoardingPointId": "BP-MAA-AMBATTUR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 97000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-MADIWALA", "toBoardingPointId": "BP-MAA-KOYAMBEDU", "serviceClass": "AIRAVAT_CLUB", "farePaise": 102000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-MADIWALA", "toBoardingPointId": "BP-MAA-ADYAR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 107000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY", "toBoardingPointId": "BP-MAA-AMBATTUR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 94000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY", "toBoardingPointId": "BP-MAA-KOYAMBEDU", "serviceClass": "AIRAVAT_CLUB", "farePaise": 99000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY", "toBoardingPointId": "BP-MAA-ADYAR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 104000, "sourcing": "I" }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "sourcing": {
+    "note": "Aggregator cheapest-fare figures of Rs 450-606 Bengaluru to Hampi and Rs 570-plus Bengaluru to Hosapete were reported, and both read like promotional floor prices rather than a fare table. The two cannot both be right: Hosapete is an earlier stop on the same run and cannot cost more than Hampi. Rather than ship a table in which an earlier stop is dearer, the Hampi headline is taken from the middle of the sourced range and every other cell is interpolated down from it and labelled as an inference. No corporation-published fare table was found for this corridor or this class, and no tax arithmetic is performed on any of these numbers: computing GST on a synthesised fare would dress a guess as a bill.",
+    "label": "S"
+  },
+  "fareTable": {
+    "fareTableId": "FT-BNGHMP",
+    "currency": "INR",
+    "fares": [
+      { "fromBoardingPointId": "BP-BLR-MAJESTIC", "toBoardingPointId": "BP-HMP-HAMPI", "serviceClass": "PALLAKKI", "farePaise": 55000, "sourcing": "S" },
+      { "fromBoardingPointId": "BP-BLR-MAJESTIC", "toBoardingPointId": "BP-HPT-HOSAPETE", "serviceClass": "PALLAKKI", "farePaise": 53000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-MADIWALA", "toBoardingPointId": "BP-HMP-HAMPI", "serviceClass": "PALLAKKI", "farePaise": 53000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-MADIWALA", "toBoardingPointId": "BP-HPT-HOSAPETE", "serviceClass": "PALLAKKI", "farePaise": 51000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY", "toBoardingPointId": "BP-HMP-HAMPI", "serviceClass": "PALLAKKI", "farePaise": 51000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY", "toBoardingPointId": "BP-HPT-HOSAPETE", "serviceClass": "PALLAKKI", "farePaise": 49000, "sourcing": "I" },
+      { "fromBoardingPointId": "BP-HMP-HAMPI", "toBoardingPointId": "BP-BLR-MAJESTIC", "serviceClass": "PALLAKKI", "farePaise": 55000, "sourcing": "S" },
+      { "fromBoardingPointId": "BP-HPT-HOSAPETE", "toBoardingPointId": "BP-BLR-MAJESTIC", "serviceClass": "PALLAKKI", "farePaise": 53000, "sourcing": "I" }
+    ]
+  }
+}

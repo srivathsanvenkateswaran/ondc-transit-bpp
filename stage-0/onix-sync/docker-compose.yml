@@ -90,6 +90,39 @@ services:
       - ./runtime/config/bmrcl-bpp-network.yml:/usr/src/app/config/default.yml:ro
       - ./schemas/core_2.0.1.yaml:/usr/src/app/schemas/core_2.0.1.yaml:ro
 
+  # The reserved intercity seller. A third BPP rather than a third category on
+  # an existing one, because it publishes a different domain string:
+  # TRANSIT.LOCALHOST:INTERCITY at version 0.1.0. A subscriber is registered
+  # against one domain, and the gateway routes a search by the domain in its
+  # context, so a second domain needs a second subscription and therefore a
+  # second pair of protocol servers.
+  #
+  # The command copies the context schema under this version's name and the
+  # core schema is mounted under its own, because the protocol server resolves
+  # both by the version in the request context. The copy is the same
+  # workaround the two sellers above already use for 2.0.1.
+  ksrtc-bpp-client:
+    image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
+    platform: linux/amd64
+    command: ["/bin/sh", "-c", "cp schemas/context_1.1.0.json schemas/context_0.1.0.json && exec node dist/app.js"]
+    depends_on: [sync-rabbitmq, sync-redis]
+    ports: ["${HOST_BIND_ADDRESS:-127.0.0.1}:${KSRTC_BPP_CLIENT_PORT:-6201}:${KSRTC_BPP_CLIENT_PORT:-6201}"]
+    networks: [beckn]
+    volumes:
+      - ./runtime/config/ksrtc-bpp-client.yml:/usr/src/app/config/default.yml:ro
+      - ./schemas/core_0.1.0.yaml:/usr/src/app/schemas/core_0.1.0.yaml:ro
+
+  ksrtc-bpp-network:
+    image: fidedocker/protocol-server@sha256:4f15b3a82c32a0a9b7aac79cc692a029b85d8b845f2b0b6c10fbefd0327b8e23
+    platform: linux/amd64
+    command: ["/bin/sh", "-c", "cp schemas/context_1.1.0.json schemas/context_0.1.0.json && exec node dist/app.js"]
+    depends_on: [sync-rabbitmq, sync-redis]
+    ports: ["${HOST_BIND_ADDRESS:-127.0.0.1}:${KSRTC_BPP_NETWORK_PORT:-6202}:${KSRTC_BPP_NETWORK_PORT:-6202}"]
+    networks: [beckn]
+    volumes:
+      - ./runtime/config/ksrtc-bpp-network.yml:/usr/src/app/config/default.yml:ro
+      - ./schemas/core_0.1.0.yaml:/usr/src/app/schemas/core_0.1.0.yaml:ro
+
   transit-bpp:
     build:
       context: ../..
@@ -114,7 +147,31 @@ services:
       BMRCL_BPP_URI: ${BMRCL_BPP_URI:-http://bmrcl-bpp-network:6102}
       BMRCL_CALLBACK_URL: ${BMRCL_CALLBACK_URL:-http://bmrcl-bpp-client:6101/on_search}
       BMRCL_CALLBACK_DELAY_MS: ${BMRCL_CALLBACK_DELAY_MS:-0}
+      # Off unless the deployment has also created the second network domain
+      # in the registry and subscribed this seller under it. See
+      # deploy/seed-registry.sh.
+      RESERVED_ENABLED: ${RESERVED_ENABLED:-false}
+      RESERVED_SCHEMA_ROOT: ${RESERVED_SCHEMA_ROOT:-/app/schemas/transit_local_intercity/0.1.0}
+      KSRTC_BPP_ID: ${KSRTC_BPP_ID:-ksrtc.bpp.transit.localhost}
+      KSRTC_BPP_URI: ${KSRTC_BPP_URI:-http://ksrtc-bpp-network:6202}
+      KSRTC_CALLBACK_URL: ${KSRTC_CALLBACK_URL:-http://ksrtc-bpp-client:6201/on_search}
+      KSRTC_CALLBACK_DELAY_MS: ${KSRTC_CALLBACK_DELAY_MS:-0}
+      RESERVATION_CLOSE_MINUTES: ${RESERVATION_CLOSE_MINUTES:-45}
+      RESERVATION_HORIZON_DAYS: ${RESERVATION_HORIZON_DAYS:-30}
+      RESERVATION_HOLD_TTL_SECONDS: ${RESERVATION_HOLD_TTL_SECONDS:-600}
+      SEAT_OCCUPANCY_SEED: ${SEAT_OCCUPANCY_SEED:-20260905}
+      RESERVED_SOURCE: ${RESERVED_SOURCE:-fixture}
+      RESERVED_SOURCE_URL: ${RESERVED_SOURCE_URL:-}
+      RESERVED_DB_URL: ${RESERVED_DB_URL:-file:/app/data/reserved.db}
+      RESERVED_MIGRATION_ROOT: ${RESERVED_MIGRATION_ROOT:-/app/migrations/reserved}
+      RESERVED_MANIFEST_RETENTION_DAYS: ${RESERVED_MANIFEST_RETENTION_DAYS:-30}
     ports: ["${HOST_BIND_ADDRESS:-127.0.0.1}:${PROVIDER_PORT:-7001}:${PROVIDER_PORT:-7001}"]
+    # Held and booked seats are the one thing this provider keeps that a
+    # restart must not lose. Without this volume a compose down releases every
+    # hold and orphans every booking, which is the failure the database exists
+    # to prevent.
+    volumes:
+      - reserved_data:/app/data
     networks: [beckn]
 
 networks:
@@ -124,3 +181,4 @@ networks:
 
 volumes:
   sync_mongo_data:
+  reserved_data:
