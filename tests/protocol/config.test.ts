@@ -99,3 +99,76 @@ test("order inspection remains disabled when its token is empty", () => {
     "inspection-secret",
   );
 });
+
+/* ------------------------------------------------------------------ *
+ * The reserved intercity domain
+ * ------------------------------------------------------------------ */
+
+function reservedEnvironment(): NodeJS.ProcessEnv {
+  return {
+    ...validEnvironment(),
+    RESERVED_ENABLED: "true",
+    KSRTC_BPP_ID: "ksrtc.example.test",
+    KSRTC_BPP_URI: "https://ksrtc-network.example.test",
+    KSRTC_CALLBACK_URL: "https://ksrtc-client.example.test/on_search",
+    KSRTC_CALLBACK_DELAY_MS: "0",
+  };
+}
+
+test("the reserved category is off unless a deployment asks for it", () => {
+  // A second domain means a second registry subscription and a second
+  // gateway routing entry. A deployment that has neither must keep booting
+  // exactly as it did, so the flag defaults to false and the KSRTC block is
+  // not required while it is.
+  const config = loadConfig(validEnvironment());
+  assert.equal(config.reservedEnabled, false);
+  assert.equal(config.reservedOperators, undefined);
+});
+
+test("enabling the reserved category requires its own operator identity", () => {
+  const environment = reservedEnvironment();
+  delete environment.KSRTC_BPP_ID;
+  assert.throws(
+    () => loadConfig(environment),
+    /Missing required environment variable KSRTC_BPP_ID/,
+  );
+});
+
+test("the third operator identity loads alongside the existing two", () => {
+  const config = loadConfig(reservedEnvironment());
+  assert.equal(config.reservedEnabled, true);
+  assert.equal(config.reservedOperators?.ksrtc.subscriberId, "ksrtc.example.test");
+  assert.equal(
+    config.reservedOperators?.ksrtc.subscriberUri,
+    "https://ksrtc-network.example.test",
+  );
+  // The two existing operators are untouched by any of this.
+  assert.equal(config.operators.bmtc.subscriberId, "bmtc.example.test");
+  assert.equal(config.operators.bmrcl.subscriberId, "bmrcl.example.test");
+});
+
+test("the reservation window defaults are the published ones", () => {
+  const config = loadConfig(reservedEnvironment());
+  // 45 is the conservative end of the operator's own published 30-to-45
+  // minute closing range; 30 days is its published advance window.
+  assert.equal(config.reservation.closeMinutes, 45);
+  assert.equal(config.reservation.horizonDays, 30);
+});
+
+test("the occupancy seed is a fixed constant so every clone draws the same coach", () => {
+  const config = loadConfig(reservedEnvironment());
+  assert.equal(Number.isSafeInteger(config.reservation.occupancySeed), true);
+  const overridden = loadConfig({
+    ...reservedEnvironment(),
+    SEAT_OCCUPANCY_SEED: "12345",
+  });
+  assert.equal(overridden.reservation.occupancySeed, 12_345);
+});
+
+test("a non-numeric occupancy seed fails at startup rather than at first search", () => {
+  assert.throws(
+    () =>
+      loadConfig({ ...reservedEnvironment(), SEAT_OCCUPANCY_SEED: "lucky" }),
+    /SEAT_OCCUPANCY_SEED must be/,
+  );
+});

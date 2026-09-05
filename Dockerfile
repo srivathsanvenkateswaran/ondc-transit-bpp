@@ -30,6 +30,17 @@ ENV BMRCL_BPP_ID=bmrcl.bpp.transit.localhost \
     BMRCL_CALLBACK_URL=http://localhost:6101/on_search \
     BMRCL_CALLBACK_DELAY_MS=0
 
+# ── KSRTC operator, reserved intercity ────────────────────────────────────────
+# A second domain, TRANSIT.LOCALHOST:INTERCITY at 0.1.0. Off by default: it
+# needs a second registry subscription and a second network domain in the
+# registry, and an image that switched it on by default would start a seller
+# nobody had registered.
+ENV RESERVED_ENABLED=false \
+    KSRTC_BPP_ID=ksrtc.bpp.transit.localhost \
+    KSRTC_BPP_URI=http://localhost:6202 \
+    KSRTC_CALLBACK_URL=http://localhost:6201/on_search \
+    KSRTC_CALLBACK_DELAY_MS=0
+
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force

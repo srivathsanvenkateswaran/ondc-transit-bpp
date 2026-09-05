@@ -1,0 +1,49 @@
+{
+  "sourcing": {
+    "note": "The Bengaluru points are named stands and localities on the corridors the research describes, and their coordinates are approximate town-level positions taken from public mapping. The Chennai points are named localities the research lists as boarding and dropping points on the Bengaluru-Chennai corridor; no coordinate was sourced for any of them and none is published. A boarding point with no coordinate publishes none rather than one synthesised from a town centroid: 2026-dated complaints against the incumbents still report a pin that does not match where the coach actually stops, so a pin is only as trustworthy as the operational data behind it.",
+    "label": "S"
+  },
+  "points": {
+    "BLR": [
+      {
+        "boardingPointId": "BP-BLR-MAJESTIC",
+        "name": "Majestic (Kempegowda Bus Station)",
+        "nameLocal": "ಮೆಜೆಸ್ಟಿಕ್ (ಕೆಂಪೇಗೌಡ ಬಸ್ ನಿಲ್ದಾಣ)",
+        "gps": { "lat": 12.9776, "lon": 77.5713 }
+      },
+      {
+        "boardingPointId": "BP-BLR-MADIWALA",
+        "name": "Madiwala",
+        "nameLocal": "ಮಡಿವಾಳ",
+        "gps": { "lat": 12.922, "lon": 77.6191 }
+      },
+      {
+        "boardingPointId": "BP-BLR-ELECTRONIC-CITY",
+        "name": "Electronic City",
+        "nameLocal": "ಎಲೆಕ್ಟ್ರಾನಿಕ್ ಸಿಟಿ",
+        "gps": { "lat": 12.8452, "lon": 77.6602 }
+      }
+    ],
+    "HPT": [
+      {
+        "boardingPointId": "BP-HPT-HOSAPETE",
+        "name": "Hosapete Bus Stand",
+        "nameLocal": "ಹೊಸಪೇಟೆ ಬಸ್ ನಿಲ್ದಾಣ",
+        "gps": { "lat": 15.2689, "lon": 76.3909 }
+      }
+    ],
+    "HMP": [
+      {
+        "boardingPointId": "BP-HMP-HAMPI",
+        "name": "Hampi",
+        "nameLocal": "ಹಂಪೆ",
+        "gps": { "lat": 15.335, "lon": 76.46 }
+      }
+    ],
+    "MAA": [
+      { "boardingPointId": "BP-MAA-AMBATTUR", "name": "Ambattur", "nameLocal": "அம்பத்தூர்" },
+      { "boardingPointId": "BP-MAA-KOYAMBEDU", "name": "Koyambedu (CMBT)", "nameLocal": "கோயம்பேடு" },
+      { "boardingPointId": "BP-MAA-ADYAR", "name": "Adyar", "nameLocal": "அடையாறு" }
+    ]
+  }
+}

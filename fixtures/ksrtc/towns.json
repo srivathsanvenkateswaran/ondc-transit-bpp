@@ -1,0 +1,12 @@
+{
+  "sourcing": {
+    "note": "Town names and their Kannada and Tamil forms are matters of public record. Hosapete and Hampi are listed separately because a rider may be sold to either and they are different dropping points with different times and different fares.",
+    "label": "V"
+  },
+  "towns": [
+    { "code": "BLR", "name": "Bengaluru", "nameLocal": "ಬೆಂಗಳೂರು" },
+    { "code": "HPT", "name": "Hosapete", "nameLocal": "ಹೊಸಪೇಟೆ" },
+    { "code": "HMP", "name": "Hampi", "nameLocal": "ಹಂಪೆ" },
+    { "code": "MAA", "name": "Chennai", "nameLocal": "சென்னை" }
+  ]
+}

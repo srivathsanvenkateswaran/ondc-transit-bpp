@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/on_cancel.json",
+  "type": "object",
+  "required": [
+    "context"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "object",
+          "required": [
+            "order"
+          ]
+        }
+      }
+    },
+    {
+      "required": [
+        "error"
+      ]
+    }
+  ],
+  "properties": {
+    "context": {
+      "allOf": [
+        {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/context"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "const": "on_cancel"
+            }
+          }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/confirmedOrder"
+        },
+        "refund": {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/refund"
+        }
+      }
+    },
+    "error": {
+      "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/error"
+    }
+  }
+}

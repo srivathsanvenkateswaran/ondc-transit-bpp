@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/on_search.json",
+  "type": "object",
+  "required": [
+    "context",
+    "message"
+  ],
+  "properties": {
+    "context": {
+      "allOf": [
+        {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/context"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "const": "on_search"
+            }
+          }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "required": [
+        "catalog"
+      ],
+      "properties": {
+        "catalog": {
+          "type": "object",
+          "required": [
+            "descriptor",
+            "providers"
+          ],
+          "properties": {
+            "descriptor": {
+              "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/descriptor"
+            },
+            "providers": {
+              "type": "array",
+              "items": {
+                "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/provider"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

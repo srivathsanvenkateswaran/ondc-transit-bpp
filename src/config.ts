@@ -1,5 +1,6 @@
 import { join } from "node:path";
 
+import type { ReservedOperatorKey } from "./reserved/types.js";
 import type { OperatorKey } from "./sources/types.js";
 
 export interface OperatorRuntimeConfig {
@@ -8,6 +9,36 @@ export interface OperatorRuntimeConfig {
   subscriberUri: string;
   callbackUrl: string;
   callbackDelayMs: number;
+}
+
+/**
+ * The dials the reserved intercity category needs before it can refuse a sale
+ * or draw a seat map. All three are constants with a stated standing rather
+ * than tuning knobs: two of them are the operator's own published figures, and
+ * the third exists so that this repository's tests, a demo recording and a
+ * stranger's first clone all draw the same coach.
+ */
+export interface ReservationConfig {
+  /**
+   * Reservations close this many minutes before departure. The conservative
+   * end of the operator's own published 30-to-45 minute range: refusing a sale
+   * this provider might have made costs nothing, and making one an operator
+   * would have refused is the wrong error.
+   */
+  closeMinutes: number;
+  /**
+   * How far ahead a date can be booked. Matches the operator's own published
+   * advance window, but the reason it is enforced here is a fidelity choice:
+   * inventing a seat map for a date nobody could book yet is fabrication with
+   * extra steps.
+   */
+  horizonDays: number;
+  /**
+   * The seed every occupancy draw is keyed through. Fixed by default, because
+   * a seat map that differed between two clones would make a screenshot and a
+   * golden file meaningless.
+   */
+  occupancySeed: number;
 }
 
 export interface AppConfig {
@@ -23,6 +54,17 @@ export interface AppConfig {
   contextTtl: string;
   orderInspectionToken?: string;
   operators: Record<OperatorKey, OperatorRuntimeConfig>;
+  /**
+   * A second domain is a second registry subscription and a second gateway
+   * routing entry, neither of which an existing deployment has. The flag
+   * defaults to false so a deployment that has not made those two changes
+   * boots exactly as it did, and the operator block below is required only
+   * once it is on.
+   */
+  reservedEnabled: boolean;
+  reservedSchemaRoot: string;
+  reservedOperators?: Record<ReservedOperatorKey, OperatorRuntimeConfig>;
+  reservation: ReservationConfig;
 }
 
 function required(env: NodeJS.ProcessEnv, name: string): string {
@@ -45,6 +87,22 @@ function integerInRange(
     throw new Error(
       `${name} must be an integer from ${minimum} to ${maximum}`,
     );
+  }
+  return value;
+}
+
+function optionalIntegerInRange(
+  env: NodeJS.ProcessEnv,
+  name: string,
+  minimum: number,
+  maximum: number,
+  fallback: number,
+): number {
+  const raw = env[name]?.trim();
+  if (!raw) return fallback;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < minimum || value > maximum) {
+    throw new Error(`${name} must be an integer from ${minimum} to ${maximum}`);
   }
   return value;
 }
@@ -74,6 +132,32 @@ function httpUrl(env: NodeJS.ProcessEnv, name: string): string {
   return parseHttpUrl(required(env, name), name);
 }
 
+/**
+ * The default occupancy seed. A fixed constant rather than a random one so
+ * that the repository's own tests, a demo recording and a stranger's first
+ * clone all draw the same coach on the same date.
+ */
+export const DEFAULT_SEAT_OCCUPANCY_SEED = 20_260_905;
+
+function operatorRuntimeConfig(
+  env: NodeJS.ProcessEnv,
+  key: OperatorKey | ReservedOperatorKey,
+  prefix: string,
+): OperatorRuntimeConfig {
+  return {
+    key,
+    subscriberId: required(env, `${prefix}_BPP_ID`),
+    subscriberUri: httpUrl(env, `${prefix}_BPP_URI`),
+    callbackUrl: httpUrl(env, `${prefix}_CALLBACK_URL`),
+    callbackDelayMs: integerInRange(
+      env,
+      `${prefix}_CALLBACK_DELAY_MS`,
+      0,
+      2_147_483_647,
+    ),
+  } as OperatorRuntimeConfig;
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const journeySource = env.JOURNEY_SOURCE?.trim() || "fixture";
   if (journeySource !== "fixture" && journeySource !== "http") {
@@ -87,6 +171,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   if (journeySourceUrl) {
     parseHttpUrl(journeySourceUrl, "JOURNEY_SOURCE_URL");
   }
+  const reservedEnabled = (env.RESERVED_ENABLED?.trim() || "false") === "true";
   return {
     host: required(env, "PROVIDER_HOST"),
     port: resolveProviderPort(env),
@@ -133,6 +218,40 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
           2_147_483_647,
         ),
       },
+    },
+    reservedEnabled,
+    reservedSchemaRoot:
+      env.RESERVED_SCHEMA_ROOT ??
+      join(process.cwd(), "schemas", "transit_local_intercity", "0.1.0"),
+    ...(reservedEnabled
+      ? {
+          reservedOperators: {
+            ksrtc: operatorRuntimeConfig(env, "ksrtc", "KSRTC"),
+          },
+        }
+      : {}),
+    reservation: {
+      closeMinutes: optionalIntegerInRange(
+        env,
+        "RESERVATION_CLOSE_MINUTES",
+        0,
+        1_440,
+        45,
+      ),
+      horizonDays: optionalIntegerInRange(
+        env,
+        "RESERVATION_HORIZON_DAYS",
+        1,
+        365,
+        30,
+      ),
+      occupancySeed: optionalIntegerInRange(
+        env,
+        "SEAT_OCCUPANCY_SEED",
+        0,
+        2_147_483_647,
+        DEFAULT_SEAT_OCCUPANCY_SEED,
+      ),
     },
   };
 }

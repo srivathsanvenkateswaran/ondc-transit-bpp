@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/cancel.json",
+  "$comment": "Two steps. SOFT_CANCEL quotes the slab against this provider's clock and changes nothing; CONFIRM_CANCEL re-evaluates it and either cancels or refuses with REFUND-SLAB-MOVED. Omitting the SEATS tag cancels the whole booking. Both descriptor codes are this repository's own naming, unverified against any published enumeration.",
+  "type": "object",
+  "required": [
+    "context",
+    "message"
+  ],
+  "properties": {
+    "context": {
+      "allOf": [
+        {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/context"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "const": "cancel"
+            }
+          }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "required": [
+        "order_id",
+        "descriptor"
+      ],
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "descriptor": {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "enum": [
+                "SOFT_CANCEL",
+                "CONFIRM_CANCEL"
+              ]
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/tag"
+          }
+        }
+      }
+    }
+  }
+}
