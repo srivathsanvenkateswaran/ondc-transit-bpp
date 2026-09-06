@@ -58,6 +58,14 @@
           "lat": 15.2689,
           "lon": 76.3909
         }
+      },
+      {
+        "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+        "name": "Hosapete JSW Vijayaganar Bus Terminal",
+        "gps": {
+          "lat": 15.275087639999999,
+          "lon": 76.38881015999999
+        }
       }
     ],
     "HMP": [
@@ -208,6 +216,46 @@
         "gps": {
           "lat": 14.5461529,
           "lon": 74.3191748
+        }
+      }
+    ],
+    "UDP": [
+      {
+        "boardingPointId": "BP-UDP-UDUPI",
+        "name": "Udupi Service Bus Station",
+        "gps": {
+          "lat": 13.3427023,
+          "lon": 74.7472121
+        }
+      }
+    ],
+    "BLL": [
+      {
+        "boardingPointId": "BP-BLL-BALLARI",
+        "name": "Ballari New Bus Terminal",
+        "gps": {
+          "lat": 15.13750737999999,
+          "lon": 76.91858056
+        }
+      }
+    ],
+    "KRK": [
+      {
+        "boardingPointId": "BP-KRK-KARKALA",
+        "name": "Karkala Bus Stand",
+        "gps": {
+          "lat": 13.2128782,
+          "lon": 74.9985126
+        }
+      }
+    ],
+    "SHV": [
+      {
+        "boardingPointId": "BP-SHV-SHIVAMOGGA",
+        "name": "Shivamogga Shimoga KSRTC Bus Stand",
+        "gps": {
+          "lat": 13.9289881,
+          "lon": 75.5680645
         }
       }
     ]

@@ -57,18 +57,100 @@ const FIXTURE_ROOT = join(HERE, "..", "fixtures", "ksrtc");
 const TATAK_ROOT = join(HERE, "..", "..", "Tatak", "data", "intercity");
 
 // -----------------------------------------------------------------------
-// The corridors this pass covers, and why these seven.
+// The corridors this pass covers, and why twelve now instead of seven.
 //
-// These are exactly the corridors that carry a real, sellable, reserved
-// (`reservationRequired`) working reachable from Kundalahalli Gate to one of
-// the eleven demo destinations - the set `book-audit2.ts` measures. Tatak
-// carries 35 corridor feeds in total; the other 28 are either KARNATAKA_SARIGE
-// only (walk-up, never reserved - see `CLASS_MAP` below), carry no real
-// service number at all (`KA-DND-ANK`, checked: zero), or simply never
-// surface on this app's own demo journeys. Extending this list to a new
-// corridor is exactly that: add its directory name and a fare-table id below,
-// and (if it calls anywhere `STAND_REGISTRY` does not already cover) add the
-// new stand there too. Nothing else in this file is corridor-specific.
+// The first seven were exactly the corridors that carry a real, sellable,
+// reserved (`reservationRequired`) working reachable from Kundalahalli Gate
+// to one of the eleven demo destinations - the set `book-audit2.ts` measures.
+// This pass drops that "reachable from one demo origin" restriction and asks
+// a broader question instead: of Tatak's 35 corridor feeds, which ones carry
+// a real, sellable working to any of nine named towns (Mangaluru, Udupi,
+// Dandeli, Murudeshwara, Mysuru, Madikeri, Mandya, Hampi, Hosapete)? Every
+// one of Tatak's 35 feeds was checked - not just the ones whose own name
+// mentions a target town, because a highway corridor two towns over can carry
+// a via-stop at a third (the KA-GEN-NH275 pattern already did exactly this
+// for Mandya and Madikeri before this pass ever touched it, since a real
+// Bengaluru-Madikeri working's own route pattern happens to stop at both on
+// the way through).
+//
+// Five corridors clear that bar and are new in this pass:
+//
+//   - `ka-gen-nh66`: the coastal highway grid (Karwar-Ullal). Its
+//     RAJAHAMSA_EXECUTIVE route-direction groups carry 13 real service
+//     numbers between them and their fullest pattern touches both Mangaluru
+//     and Udupi - the corridor that finally gives Udupi a sellable service at
+//     all (see the STAND_REGISTRY note on `KA-BP-UDUPI` below: Udupi was
+//     never in the registry before this pass, despite `ka-coast` already
+//     being read, because `ka-coast`'s own RAJAHAMSA_EXECUTIVE pattern's real
+//     numbers never got an Udupi stand to land on).
+//   - `ka-gen-nh169`: Shivamogga-Mangaluru via Sringeri. One real
+//     RAJAHAMSA_EXECUTIVE working (`KA-GEN-NH169-RAJAHAMSA_EXECUTIVE`
+//     direction 0) touches Mangaluru; it is a genuinely separate route from
+//     every other Mangaluru corridor already read, not a duplicate.
+//   - `ka-gen-nh67`: Ramanagara-Ballari via Dharwad, Gadag and Koppal - never
+//     touches Bengaluru at all. Its RAJAHAMSA_EXECUTIVE groups carry 8 real
+//     numbers whose pattern reaches Hosapete's JSW Vijayanagar terminal, a
+//     different real stand from the Hosapete Bus Stand the other corridors
+//     use (see the STAND_REGISTRY note on it).
+//   - `ka-gen-sh37`: Bengaluru-Udupi via Dharmasthala and Subrahmanya. 3 real
+//     RAJAHAMSA_EXECUTIVE numbers, an entirely different road from the coastal
+//     highway `ka-gen-nh66` runs.
+//   - `ka-bng-bgk`: Bengaluru-Bagalkot via Hosapete. 2 real PALLAKKI numbers
+//     touch Hosapete along the way.
+//
+// Of the remaining 22 feeds, every one that names or passes through a target
+// town was checked and excluded for a stated reason, not by omission:
+//
+//   - `ka-bng-hmp` (Hampi, Hosapete): DOES carry two real service numbers -
+//     `2259BNGHMP` and `2001HMPBNG` - but both are already sold, under a
+//     hand-authored two-point fixture (Majestic <-> Hampi/Hosapete only) that
+//     predates this generator. Reading this corridor here was tried and
+//     reverted: it faithfully reproduces Tatak's own richer, better-sourced
+//     fare and multi-point data (Majestic, Yeshwanthpur and Peenya all become
+//     pickups; the Majestic<->Hampi/Hosapete cells upgrade from an aggregator
+//     guess at S/I to KSRTC's own published V fare), but it changes zero
+//     coverage - both numbers were already sellable - while `BLR`/`HMP` is
+//     the default town pair a large fraction of this repository's OTHER test
+//     suites (order, cancellation, holds, seat state...) use as generic
+//     scaffolding, entirely unrelated to Hampi itself (see
+//     `tests/helpers.ts`'s own defaults). Swapping its fare and schedule out
+//     from under those tests broke about twenty of them for a coverage gain
+//     of exactly zero. Upgrading this corridor's own sourcing is worth doing
+//     on its own, deliberately, with those tests' defaults migrated off
+//     Hampi first - not as a side effect of a pass whose job is coverage.
+//   - `ka-dnd-ank` (Dandeli): zero real service numbers of any class, on any
+//     route-direction, anywhere in the feed. Dandeli has no real KSRTC/NWKRTC
+//     working sourced at all here, reserved or unreserved.
+//   - `ka-coast`, `ka-gen-nh66` (Murudeshwara): both carry real numbers, but
+//     only on their KARNATAKA_SARIGE route-direction groups, and SARIGE is
+//     unreserved walk-up and outside `CLASS_MAP` by design (see its own note
+//     below). Neither corridor's RAJAHAMSA_EXECUTIVE pattern - the one class
+//     on each that does carry real numbers - ever stops at Murudeshwara. So
+//     across all 35 feeds, Murudeshwara has no real, reservable working: not
+//     a stand this generator forgot, a town Tatak itself never sourced a
+//     sellable coach to.
+//   - `ka-bng-mys` (Mysuru, Mandya): every real number on this corridor is on
+//     its KARNATAKA_SARIGE group; RAJAHAMSA_EXECUTIVE, AIRAVAT and
+//     AIRAVAT_CLUB_CLASS here are all-inferred placeholders with zero real
+//     numbers. The direct Bengaluru-Mysuru road contributes nothing; Mandya's
+//     real coverage comes entirely from `ka-gen-nh275`, already read.
+//   - `ka-mys-mdk` (Mysuru, Madikeri): same shape - only KARNATAKA_SARIGE
+//     carries real numbers here. Madikeri's real coverage is, again, entirely
+//     `ka-gen-nh275`'s.
+//   - `ka-gen-nh73`, `ka-gen-sh25`, `ka-gen-nh50` (Mangaluru / Hosapete via
+//     other roads): checked route-direction group by group; no sellable
+//     class carries a real number on any of them.
+//   - `ka-bng-bdm`, `ka-bng-bjp` (Hosapete via Badami / Bijapur): real numbers
+//     exist here, but only on NON_AC_SLEEPER, KALYANA_RATHA, AMOGHAVARSHA and
+//     KARNATAKA_SARIGE - none of which `CLASS_MAP` can sell (see its own
+//     note; adding a class this provider has never carried is out of scope
+//     for a coverage pass, same call as the existing NON_AC_SLEEPER /
+//     AC_SEATER_EXECUTIVE_CHAIR exclusion on `ka-bng-hmp` and `ka-bng-mng`).
+//
+// Extending this list further is still exactly the same operation it always
+// was: add a directory name and a fare-table id below, and (if it calls
+// anywhere `STAND_REGISTRY` does not already cover) add the new stand there
+// too. Nothing else in this file is corridor-specific.
 // -----------------------------------------------------------------------
 const CORRIDOR_DIRS: Array<{ dir: string; fareTableId: string }> = [
   { dir: "ka-bng-mng", fareTableId: "FT-BNGMNG" },
@@ -78,6 +160,11 @@ const CORRIDOR_DIRS: Array<{ dir: string; fareTableId: string }> = [
   { dir: "ka-coast", fareTableId: "FT-COAST" },
   { dir: "ka-gen-nh275", fareTableId: "FT-GENNH275" },
   { dir: "ka-gen-nh48", fareTableId: "FT-GENNH48" },
+  { dir: "ka-gen-nh66", fareTableId: "FT-GENNH66" },
+  { dir: "ka-gen-nh169", fareTableId: "FT-GENNH169" },
+  { dir: "ka-gen-nh67", fareTableId: "FT-GENNH67" },
+  { dir: "ka-gen-sh37", fareTableId: "FT-GENSH37" },
+  { dir: "ka-bng-bgk", fareTableId: "FT-BNGBGK" },
 ];
 
 // A handful of Tatak service numbers are assigned to a real trip on two
@@ -313,6 +400,94 @@ const STAND_REGISTRY: Record<string, StandDef> = {
     townName: "Gokarna",
     name: "Gokarna Bus Station",
     gps: { lat: 14.5461529, lon: 74.3191748 },
+  },
+
+  // -- New in this pass: the five corridors added above -----------------
+  //
+  // `KA-BP-UDUPI` is the one entry here that changes what this provider can
+  // sell rather than just how it sells something already sold: `ka-coast`
+  // has been read since the original three-corridor version of this script,
+  // and its RAJAHAMSA_EXECUTIVE pattern has always touched Udupi, but with
+  // no registry entry for the stand, every working on that pattern was
+  // capped at a single provider point (Mangaluru) and dropped for want of a
+  // second ("fewer than two of its pattern's stands have a provider
+  // counterpart yet"). Udupi joins the registry here for the same real stop
+  // `ka-coast`, `ka-gen-nh66` and `ka-gen-sh37` all cite under one shared id.
+  "KA-BP-UDUPI": {
+    boardingPointId: "BP-UDP-UDUPI",
+    townCode: "UDP",
+    townName: "Udupi",
+    name: "Udupi Service Bus Station",
+    gps: { lat: 13.3427023, lon: 74.7472121 },
+  },
+
+  // `KA-BP-HOSAPETE` already has a provider counterpart - `BP-HPT-HOSAPETE` -
+  // from the hand-authored Hampi/Hosapete fixture that predates this
+  // generator (`ka-bng-hmp` itself is deliberately NOT read here; see this
+  // file's own note above on why). It is reused rather than redefined, the
+  // same call already made for `KA-BP-BNG-MAJESTIC`: the loader in `main()`
+  // below only adds a boarding-points.json entry when the id is not already
+  // present, so this entry's own gps is never actually written anywhere; it
+  // is copied from Tatak's own stop record purely so this table stays honest
+  // about where the id points, not because it does any work. `ka-bng-bgk`'s
+  // own pattern reaches this same real stand.
+  "KA-BP-HOSAPETE": {
+    boardingPointId: "BP-HPT-HOSAPETE",
+    townCode: "HPT",
+    townName: "Hosapete",
+    name: "Hosapete Bus Stand",
+    gps: { lat: 15.2751874, lon: 76.3892617 },
+  },
+
+  // The JSW Vijayanagar terminal is a real, separate stand from the Hosapete
+  // Bus Stand above - Tatak's own `ka-gen-nh67` sources it under its own OSM
+  // way (140993444), about 2 km from the other terminal's own OSM node, and
+  // gives it its own `tatak_territory_corporation` (KKRTC rather than the
+  // unattributed corporation on the older stand). Two real KSRTC/KKRTC
+  // stands in the same town get two provider boarding points under the same
+  // town code, exactly like Majestic and Yeshwanthpur do for Bengaluru,
+  // rather than being folded into one on a name match.
+  "KA-BP-GEN-HOSAPETE-JSW-VIJAYAGANAR-BUS-TERMINAL": {
+    boardingPointId: "BP-HPT-JSW-VIJAYANAGAR",
+    townCode: "HPT",
+    townName: "Hosapete",
+    name: "Hosapete JSW Vijayaganar Bus Terminal",
+    gps: { lat: 15.275087639999999, lon: 76.38881015999999 },
+  },
+
+  // `ka-gen-nh67` never touches Bengaluru at all (it runs Ramanagara to
+  // Ballari via Dharwad, Gadag and Koppal), so Ballari is the other end this
+  // corridor's real RAJAHAMSA_EXECUTIVE workings need a second provider
+  // point to be sellable at all - the same role Hassan and Kunigal already
+  // play for `KA-BNG-MNG`.
+  "KA-BP-GEN-BALLARI-NEW-BUS-TERMINAL": {
+    boardingPointId: "BP-BLL-BALLARI",
+    townCode: "BLL",
+    townName: "Ballari",
+    name: "Ballari New Bus Terminal",
+    gps: { lat: 15.13750737999999, lon: 76.91858056 },
+  },
+
+  // `ka-gen-sh37`'s real RAJAHAMSA_EXECUTIVE workings run Bengaluru-Udupi via
+  // Dharmasthala and Subrahmanya; Karkala is this pattern's other stand with
+  // a provider counterpart, alongside Udupi above.
+  "KA-BP-GEN-KARKALA-BUS-STAND": {
+    boardingPointId: "BP-KRK-KARKALA",
+    townCode: "KRK",
+    townName: "Karkala",
+    name: "Karkala Bus Stand",
+    gps: { lat: 13.2128782, lon: 74.9985126 },
+  },
+
+  // `ka-gen-nh169` runs Shivamogga-Mangaluru via Sringeri and never touches
+  // Bengaluru either; Shivamogga is the second stand its one real
+  // RAJAHAMSA_EXECUTIVE working needs alongside Mangaluru.
+  "KA-BP-GEN-SHIVAMOGGA-SHIMOGA-KSRTC-BUS-STAND": {
+    boardingPointId: "BP-SHV-SHIVAMOGGA",
+    townCode: "SHV",
+    townName: "Shivamogga",
+    name: "Shivamogga Shimoga KSRTC Bus Stand",
+    gps: { lat: 13.9289881, lon: 75.5680645 },
   },
 };
 

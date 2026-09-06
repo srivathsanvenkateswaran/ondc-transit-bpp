@@ -9,6 +9,13 @@
     "fares": [
       {
         "fromBoardingPointId": "BP-MNG-MANGALURU",
+        "toBoardingPointId": "BP-UDP-UDUPI",
+        "serviceClass": "RAJAHAMSA",
+        "farePaise": 15000,
+        "sourcing": "S"
+      },
+      {
+        "fromBoardingPointId": "BP-MNG-MANGALURU",
         "toBoardingPointId": "BP-GKN-GOKARNA",
         "serviceClass": "RAJAHAMSA",
         "farePaise": 42500,
@@ -19,6 +26,20 @@
         "toBoardingPointId": "BP-ANK-ANKOLA",
         "serviceClass": "RAJAHAMSA",
         "farePaise": 45500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-UDP-UDUPI",
+        "toBoardingPointId": "BP-GKN-GOKARNA",
+        "serviceClass": "RAJAHAMSA",
+        "farePaise": 32000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-UDP-UDUPI",
+        "toBoardingPointId": "BP-ANK-ANKOLA",
+        "serviceClass": "RAJAHAMSA",
+        "farePaise": 35000,
         "sourcing": "I"
       },
       {

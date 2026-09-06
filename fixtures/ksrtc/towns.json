@@ -74,6 +74,22 @@
     {
       "code": "GKN",
       "name": "Gokarna"
+    },
+    {
+      "code": "UDP",
+      "name": "Udupi"
+    },
+    {
+      "code": "BLL",
+      "name": "Ballari"
+    },
+    {
+      "code": "KRK",
+      "name": "Karkala"
+    },
+    {
+      "code": "SHV",
+      "name": "Shivamogga"
     }
   ]
 }

@@ -6048,6 +6048,10 @@
           "reportingOffsetMinutes": -310
         },
         {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": -233
+        },
+        {
           "boardingPointId": "BP-GKN-GOKARNA",
           "reportingOffsetMinutes": -23
         },
@@ -6060,6 +6064,10 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": -310
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": -233
         },
         {
           "boardingPointId": "BP-GKN-GOKARNA",
@@ -7764,6 +7772,974 @@
         {
           "boardingPointId": "BP-HVR-HAVERI",
           "reportingOffsetMinutes": 435
+        }
+      ]
+    },
+    {
+      "serviceId": "1844CDPBNG",
+      "serviceNumber": "1844",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1124,
+      "runningMinutes": 186,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 56
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 143
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 56
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 143
+        }
+      ]
+    },
+    {
+      "serviceId": "1902BNGBKL",
+      "serviceNumber": "1902",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 182,
+      "runningMinutes": 120,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 87
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 87
+        }
+      ]
+    },
+    {
+      "serviceId": "1956CDPBNG",
+      "serviceNumber": "1956",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1196,
+      "runningMinutes": 185,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 56
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 143
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 56
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 143
+        }
+      ]
+    },
+    {
+      "serviceId": "2254BNGCDP",
+      "serviceNumber": "2254",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 330,
+      "runningMinutes": 89,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 87
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 87
+        }
+      ]
+    },
+    {
+      "serviceId": "1930CDPBNG",
+      "serviceNumber": "1930",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1170,
+      "runningMinutes": 175,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 56
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 143
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 56
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 143
+        }
+      ]
+    },
+    {
+      "serviceId": "2145BNGMNP",
+      "serviceNumber": "2145",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 330,
+      "runningMinutes": 75,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 87
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 87
+        }
+      ]
+    },
+    {
+      "serviceId": "2042BNGCDP",
+      "serviceNumber": "2042",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 242,
+      "runningMinutes": 60,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 87
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 87
+        }
+      ]
+    },
+    {
+      "serviceId": "2015MNPBNG",
+      "serviceNumber": "2015",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1245,
+      "runningMinutes": 105,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 87
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 87
+        }
+      ]
+    },
+    {
+      "serviceId": "2011BNGKMT",
+      "serviceNumber": "2011",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 326,
+      "runningMinutes": 45,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": -268
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": -181
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": -268
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": -181
+        }
+      ]
+    },
+    {
+      "serviceId": "1850BNGBKL",
+      "serviceNumber": "1850",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 318,
+      "runningMinutes": 92,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 183
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 270
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 183
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 270
+        }
+      ]
+    },
+    {
+      "serviceId": "2103BNGGKN",
+      "serviceNumber": "2103",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 438,
+      "runningMinutes": 42,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH66",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": -268
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": -181
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": -268
+        },
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": -181
+        }
+      ]
+    },
+    {
+      "serviceId": "2216BNGSRI",
+      "serviceNumber": "2216",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 276,
+      "runningMinutes": 190,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH169",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-SHV-SHIVAMOGGA",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 306
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-SHV-SHIVAMOGGA",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 306
+        }
+      ]
+    },
+    {
+      "serviceId": "1930SDTBNG",
+      "serviceNumber": "1930",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1265,
+      "runningMinutes": 55,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH67",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": 272
+        },
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": 375
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": 272
+        },
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": 375
+        }
+      ]
+    },
+    {
+      "serviceId": "2114BNGBLH",
+      "serviceNumber": "2114",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 300,
+      "runningMinutes": 45,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH67",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": -340
+        },
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": -238
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": -340
+        },
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": -238
+        }
+      ]
+    },
+    {
+      "serviceId": "2000BLHBNG",
+      "serviceNumber": "2000",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1290,
+      "runningMinutes": 55,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH67",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": 272
+        },
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": 375
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": 272
+        },
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": 375
+        }
+      ]
+    },
+    {
+      "serviceId": "2130BNGSDT",
+      "serviceNumber": "2130",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 315,
+      "runningMinutes": 45,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH67",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": -340
+        },
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": -238
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": -340
+        },
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": -238
+        }
+      ]
+    },
+    {
+      "serviceId": "1830GKKBNG",
+      "serviceNumber": "1830",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1260,
+      "runningMinutes": 45,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH67",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": 272
+        },
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": 375
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": 272
+        },
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": 375
+        }
+      ]
+    },
+    {
+      "serviceId": "2044BNGDND",
+      "serviceNumber": "2044",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 345,
+      "runningMinutes": 45,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH67",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": -340
+        },
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": -238
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": -340
+        },
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": -238
+        }
+      ]
+    },
+    {
+      "serviceId": "1900BGMBNG",
+      "serviceNumber": "1900",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1230,
+      "runningMinutes": 30,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH67",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": 272
+        },
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": 375
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": 272
+        },
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": 375
+        }
+      ]
+    },
+    {
+      "serviceId": "1933BNGBGM",
+      "serviceNumber": "1933",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 283,
+      "runningMinutes": 35,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH67",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": -340
+        },
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": -238
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLL-BALLARI",
+          "reportingOffsetMinutes": -340
+        },
+        {
+          "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+          "reportingOffsetMinutes": -238
+        }
+      ]
+    },
+    {
+      "serviceId": "1900UDPBNG",
+      "serviceNumber": "1900",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1140,
+      "runningMinutes": 75,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENSH37",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-KRK-KARKALA",
+          "reportingOffsetMinutes": 55
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-UDP-UDUPI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-KRK-KARKALA",
+          "reportingOffsetMinutes": 55
+        }
+      ]
+    },
+    {
+      "serviceId": "2100BNGBLI",
+      "serviceNumber": "2100",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1260,
+      "runningMinutes": 630,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGBGK",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 13
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 277
+        },
+        {
+          "boardingPointId": "BP-HPT-HOSAPETE",
+          "reportingOffsetMinutes": 443
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 13
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 277
+        },
+        {
+          "boardingPointId": "BP-HPT-HOSAPETE",
+          "reportingOffsetMinutes": 443
+        }
+      ]
+    },
+    {
+      "serviceId": "1913BLIBNG",
+      "serviceNumber": "1913",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1220,
+      "runningMinutes": 580,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGBGK",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HPT-HOSAPETE",
+          "reportingOffsetMinutes": 177
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 335
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 568
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 574
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 580
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HPT-HOSAPETE",
+          "reportingOffsetMinutes": 177
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 335
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 568
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 574
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 580
         }
       ]
     }
