@@ -35,20 +35,25 @@ async function catalogueBody() {
         { code: "HPT", name: "Hosapete" },
         { code: "HMP", name: "Hampi" },
         { code: "MAA", name: "Chennai" },
+        { code: "MNG", name: "Mangaluru" },
+        { code: "CKM", name: "Chikkamagaluru" },
+        { code: "MYS", name: "Mysuru" },
       ],
       boardingPoints: services.flatMap((service) => [
         ...service.boardingPoints,
         ...service.droppingPoints,
       ]),
       services,
-      seatMaps: [
-        (await fixture.seatMap("PALLAKKI-2P1-30"))!,
-        (await fixture.seatMap("AIRAVAT_CLUB-2P2-53"))!,
-      ],
-      fareTables: [
-        (await fixture.fareTable("FT-BNGHMP"))!,
-        (await fixture.fareTable("FT-BNGMAA"))!,
-      ],
+      seatMaps: await Promise.all(
+        [...new Set(services.map((service) => service.seatMapId))].map(
+          async (id) => (await fixture.seatMap(id))!,
+        ),
+      ),
+      fareTables: await Promise.all(
+        [...new Set(services.map((service) => service.fareTableId))].map(
+          async (id) => (await fixture.fareTable(id))!,
+        ),
+      ),
     },
   };
 }

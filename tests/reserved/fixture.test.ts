@@ -170,7 +170,7 @@ test("an unknown town pair returns nothing rather than the nearest thing", async
 test("seat maps and fare tables resolve by id, and an unknown id is undefined", async () => {
   const source = await FixtureReservedSource.load(fixtureRoot, "ksrtc");
   assert.ok(await source.seatMap("PALLAKKI-2P1-30"));
-  assert.equal(await source.seatMap("AMBAARI_UTSAV-2P1-30"), undefined);
+  assert.equal(await source.seatMap("NOT-A-REAL-SEAT-MAP"), undefined);
   const table = await source.fareTable("FT-BNGHMP");
   assert.ok(table);
   assert.equal(table.currency, "INR");

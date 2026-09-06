@@ -9,19 +9,28 @@
         "boardingPointId": "BP-BLR-MAJESTIC",
         "name": "Majestic (Kempegowda Bus Station)",
         "nameLocal": "ಮೆಜೆಸ್ಟಿಕ್ (ಕೆಂಪೇಗೌಡ ಬಸ್ ನಿಲ್ದಾಣ)",
-        "gps": { "lat": 12.9776, "lon": 77.5713 }
+        "gps": {
+          "lat": 12.9776,
+          "lon": 77.5713
+        }
       },
       {
         "boardingPointId": "BP-BLR-MADIWALA",
         "name": "Madiwala",
         "nameLocal": "ಮಡಿವಾಳ",
-        "gps": { "lat": 12.922, "lon": 77.6191 }
+        "gps": {
+          "lat": 12.922,
+          "lon": 77.6191
+        }
       },
       {
         "boardingPointId": "BP-BLR-ELECTRONIC-CITY",
         "name": "Electronic City",
         "nameLocal": "ಎಲೆಕ್ಟ್ರಾನಿಕ್ ಸಿಟಿ",
-        "gps": { "lat": 12.8452, "lon": 77.6602 }
+        "gps": {
+          "lat": 12.8452,
+          "lon": 77.6602
+        }
       }
     ],
     "HPT": [
@@ -29,7 +38,10 @@
         "boardingPointId": "BP-HPT-HOSAPETE",
         "name": "Hosapete Bus Stand",
         "nameLocal": "ಹೊಸಪೇಟೆ ಬಸ್ ನಿಲ್ದಾಣ",
-        "gps": { "lat": 15.2689, "lon": 76.3909 }
+        "gps": {
+          "lat": 15.2689,
+          "lon": 76.3909
+        }
       }
     ],
     "HMP": [
@@ -37,13 +49,61 @@
         "boardingPointId": "BP-HMP-HAMPI",
         "name": "Hampi",
         "nameLocal": "ಹಂಪೆ",
-        "gps": { "lat": 15.335, "lon": 76.46 }
+        "gps": {
+          "lat": 15.335,
+          "lon": 76.46
+        }
       }
     ],
     "MAA": [
-      { "boardingPointId": "BP-MAA-AMBATTUR", "name": "Ambattur", "nameLocal": "அம்பத்தூர்" },
-      { "boardingPointId": "BP-MAA-KOYAMBEDU", "name": "Koyambedu (CMBT)", "nameLocal": "கோயம்பேடு" },
-      { "boardingPointId": "BP-MAA-ADYAR", "name": "Adyar", "nameLocal": "அடையாறு" }
+      {
+        "boardingPointId": "BP-MAA-AMBATTUR",
+        "name": "Ambattur",
+        "nameLocal": "அம்பத்தூர்"
+      },
+      {
+        "boardingPointId": "BP-MAA-KOYAMBEDU",
+        "name": "Koyambedu (CMBT)",
+        "nameLocal": "கோயம்பேடு"
+      },
+      {
+        "boardingPointId": "BP-MAA-ADYAR",
+        "name": "Adyar",
+        "nameLocal": "அடையாறு"
+      }
+    ],
+    "MNG": [
+      {
+        "boardingPointId": "BP-MNG-MANGALURU",
+        "name": "Mangaluru KSRTC Bus Stand (Bejai)",
+        "nameLocal": "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ, ಮಂಗಳೂರು",
+        "gps": {
+          "lat": 12.8852444,
+          "lon": 74.8416769
+        }
+      }
+    ],
+    "CKM": [
+      {
+        "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "name": "Chikkamagaluru KSRTC Bus Station",
+        "nameLocal": "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ",
+        "gps": {
+          "lat": 13.3180039,
+          "lon": 75.7716607
+        }
+      }
+    ],
+    "MYS": [
+      {
+        "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+        "name": "Mysuru Central Bus Stand",
+        "nameLocal": "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ",
+        "gps": {
+          "lat": 12.312567,
+          "lon": 76.6584136
+        }
+      }
     ]
   }
 }

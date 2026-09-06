@@ -1,0 +1,355 @@
+{
+  "sourcing": {
+    "note": "Same 2+1, 30-berth layout as PALLAKKI-2P1-30 (five rows per deck of a double plus a single, 5 x 3 x 2 = 30): docs/reserved-intercity.md section 5.2 groups PALLAKKI and AMBAARI_UTSAV together as one 2+1 two-deck sleeper pattern and section 16 names this exact file (\"AMBAARI_UTSAV-2P1-30.json\") in the fixture tree it specifies, but only PALLAKKI carries its own secondary capacity citation. The berth count, numbering and geometry here are this generator's own scaffolding, carried over from the PALLAKKI map rather than independently sourced for this class, which is why documentedCapacity is left null rather than asserted at 30.",
+    "label": "S"
+  },
+  "seatMap": {
+    "seatMapId": "AMBAARI_UTSAV-2P1-30",
+    "serviceClass": "AMBAARI_UTSAV",
+    "kind": "SLEEPER",
+    "decks": 2,
+    "documentedCapacity": null,
+    "seats": [
+      {
+        "seatId": "L1A",
+        "deck": 1,
+        "row": 1,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "L1B",
+        "adjacentSeatIds": [
+          "L1B"
+        ]
+      },
+      {
+        "seatId": "L1B",
+        "deck": 1,
+        "row": 1,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "L1A",
+        "adjacentSeatIds": [
+          "L1A"
+        ]
+      },
+      {
+        "seatId": "L1C",
+        "deck": 1,
+        "row": 1,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "L2A",
+        "deck": 1,
+        "row": 2,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "L2B",
+        "adjacentSeatIds": [
+          "L2B"
+        ]
+      },
+      {
+        "seatId": "L2B",
+        "deck": 1,
+        "row": 2,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "L2A",
+        "adjacentSeatIds": [
+          "L2A"
+        ]
+      },
+      {
+        "seatId": "L2C",
+        "deck": 1,
+        "row": 2,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "L3A",
+        "deck": 1,
+        "row": 3,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "L3B",
+        "adjacentSeatIds": [
+          "L3B"
+        ]
+      },
+      {
+        "seatId": "L3B",
+        "deck": 1,
+        "row": 3,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "L3A",
+        "adjacentSeatIds": [
+          "L3A"
+        ]
+      },
+      {
+        "seatId": "L3C",
+        "deck": 1,
+        "row": 3,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "L4A",
+        "deck": 1,
+        "row": 4,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "L4B",
+        "adjacentSeatIds": [
+          "L4B"
+        ]
+      },
+      {
+        "seatId": "L4B",
+        "deck": 1,
+        "row": 4,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "L4A",
+        "adjacentSeatIds": [
+          "L4A"
+        ]
+      },
+      {
+        "seatId": "L4C",
+        "deck": 1,
+        "row": 4,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "L5A",
+        "deck": 1,
+        "row": 5,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "L5B",
+        "adjacentSeatIds": [
+          "L5B"
+        ]
+      },
+      {
+        "seatId": "L5B",
+        "deck": 1,
+        "row": 5,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "L5A",
+        "adjacentSeatIds": [
+          "L5A"
+        ]
+      },
+      {
+        "seatId": "L5C",
+        "deck": 1,
+        "row": 5,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "U1A",
+        "deck": 2,
+        "row": 1,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "U1B",
+        "adjacentSeatIds": [
+          "U1B"
+        ]
+      },
+      {
+        "seatId": "U1B",
+        "deck": 2,
+        "row": 1,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "U1A",
+        "adjacentSeatIds": [
+          "U1A"
+        ]
+      },
+      {
+        "seatId": "U1C",
+        "deck": 2,
+        "row": 1,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "U2A",
+        "deck": 2,
+        "row": 2,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "U2B",
+        "adjacentSeatIds": [
+          "U2B"
+        ]
+      },
+      {
+        "seatId": "U2B",
+        "deck": 2,
+        "row": 2,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "U2A",
+        "adjacentSeatIds": [
+          "U2A"
+        ]
+      },
+      {
+        "seatId": "U2C",
+        "deck": 2,
+        "row": 2,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "U3A",
+        "deck": 2,
+        "row": 3,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "U3B",
+        "adjacentSeatIds": [
+          "U3B"
+        ]
+      },
+      {
+        "seatId": "U3B",
+        "deck": 2,
+        "row": 3,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "U3A",
+        "adjacentSeatIds": [
+          "U3A"
+        ]
+      },
+      {
+        "seatId": "U3C",
+        "deck": 2,
+        "row": 3,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "U4A",
+        "deck": 2,
+        "row": 4,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "U4B",
+        "adjacentSeatIds": [
+          "U4B"
+        ]
+      },
+      {
+        "seatId": "U4B",
+        "deck": 2,
+        "row": 4,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "U4A",
+        "adjacentSeatIds": [
+          "U4A"
+        ]
+      },
+      {
+        "seatId": "U4C",
+        "deck": 2,
+        "row": 4,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      },
+      {
+        "seatId": "U5A",
+        "deck": 2,
+        "row": 5,
+        "column": 1,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": "U5B",
+        "adjacentSeatIds": [
+          "U5B"
+        ]
+      },
+      {
+        "seatId": "U5B",
+        "deck": 2,
+        "row": 5,
+        "column": 2,
+        "kind": "BERTH",
+        "window": false,
+        "pairedSeatId": "U5A",
+        "adjacentSeatIds": [
+          "U5A"
+        ]
+      },
+      {
+        "seatId": "U5C",
+        "deck": 2,
+        "row": 5,
+        "column": 4,
+        "kind": "BERTH",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": []
+      }
+    ]
+  }
+}

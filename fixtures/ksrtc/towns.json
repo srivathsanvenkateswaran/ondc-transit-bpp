@@ -4,9 +4,40 @@
     "label": "V"
   },
   "towns": [
-    { "code": "BLR", "name": "Bengaluru", "nameLocal": "ಬೆಂಗಳೂರು" },
-    { "code": "HPT", "name": "Hosapete", "nameLocal": "ಹೊಸಪೇಟೆ" },
-    { "code": "HMP", "name": "Hampi", "nameLocal": "ಹಂಪೆ" },
-    { "code": "MAA", "name": "Chennai", "nameLocal": "சென்னை" }
+    {
+      "code": "BLR",
+      "name": "Bengaluru",
+      "nameLocal": "ಬೆಂಗಳೂರು"
+    },
+    {
+      "code": "HPT",
+      "name": "Hosapete",
+      "nameLocal": "ಹೊಸಪೇಟೆ"
+    },
+    {
+      "code": "HMP",
+      "name": "Hampi",
+      "nameLocal": "ಹಂಪೆ"
+    },
+    {
+      "code": "MAA",
+      "name": "Chennai",
+      "nameLocal": "சென்னை"
+    },
+    {
+      "code": "MNG",
+      "name": "Mangaluru",
+      "nameLocal": "ಮಂಗಳೂರು"
+    },
+    {
+      "code": "CKM",
+      "name": "Chikkamagaluru",
+      "nameLocal": "ಚಿಕ್ಕಮಗಳೂರು"
+    },
+    {
+      "code": "MYS",
+      "name": "Mysuru",
+      "nameLocal": "ಮೈಸೂರು"
+    }
   ]
 }

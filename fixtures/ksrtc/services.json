@@ -14,7 +14,9 @@
       "provenance": "inferred",
       "provenanceSourceCount": 1,
       "serviceClass": "PALLAKKI",
-      "operatingPattern": { "kind": "daily" },
+      "operatingPattern": {
+        "kind": "daily"
+      },
       "departureMinute": 1379,
       "runningMinutes": 451,
       "seatMapId": "PALLAKKI-2P1-30",
@@ -24,13 +26,28 @@
       "reservationFeePaise": 2000,
       "tollPaise": 2000,
       "boardingPoints": [
-        { "boardingPointId": "BP-BLR-MAJESTIC", "reportingOffsetMinutes": 0 },
-        { "boardingPointId": "BP-BLR-MADIWALA", "reportingOffsetMinutes": 32 },
-        { "boardingPointId": "BP-BLR-ELECTRONIC-CITY", "reportingOffsetMinutes": 52 }
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-MADIWALA",
+          "reportingOffsetMinutes": 32
+        },
+        {
+          "boardingPointId": "BP-BLR-ELECTRONIC-CITY",
+          "reportingOffsetMinutes": 52
+        }
       ],
       "droppingPoints": [
-        { "boardingPointId": "BP-HPT-HOSAPETE", "reportingOffsetMinutes": 421 },
-        { "boardingPointId": "BP-HMP-HAMPI", "reportingOffsetMinutes": 451 }
+        {
+          "boardingPointId": "BP-HPT-HOSAPETE",
+          "reportingOffsetMinutes": 421
+        },
+        {
+          "boardingPointId": "BP-HMP-HAMPI",
+          "reportingOffsetMinutes": 451
+        }
       ]
     },
     {
@@ -42,7 +59,9 @@
       "provenance": "inferred",
       "provenanceSourceCount": 1,
       "serviceClass": "PALLAKKI",
-      "operatingPattern": { "kind": "daily" },
+      "operatingPattern": {
+        "kind": "daily"
+      },
       "departureMinute": 1200,
       "runningMinutes": 510,
       "seatMapId": "PALLAKKI-2P1-30",
@@ -51,11 +70,20 @@
       "reservationFeePaise": 2000,
       "tollPaise": 2000,
       "boardingPoints": [
-        { "boardingPointId": "BP-HMP-HAMPI", "reportingOffsetMinutes": 0 },
-        { "boardingPointId": "BP-HPT-HOSAPETE", "reportingOffsetMinutes": 30 }
+        {
+          "boardingPointId": "BP-HMP-HAMPI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HPT-HOSAPETE",
+          "reportingOffsetMinutes": 30
+        }
       ],
       "droppingPoints": [
-        { "boardingPointId": "BP-BLR-MAJESTIC", "reportingOffsetMinutes": 510 }
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 510
+        }
       ]
     },
     {
@@ -67,7 +95,17 @@
       "provenance": "inferred",
       "provenanceSourceCount": 1,
       "serviceClass": "AIRAVAT_CLUB",
-      "operatingPattern": { "kind": "daysOfWeek", "days": [0, 1, 2, 3, 4, 5] },
+      "operatingPattern": {
+        "kind": "daysOfWeek",
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
       "operatingPatternNote": "Six days rather than seven, so that the fixture set contains a date on which a corridor genuinely does not run. A rider asking about a Saturday gets no item for it, and no roll-forward to the Sunday. Nothing in the research says this service does not run on Saturdays.",
       "departureMinute": 600,
       "runningMinutes": 510,
@@ -77,14 +115,2496 @@
       "reservationFeePaise": 2000,
       "tollPaise": 4000,
       "boardingPoints": [
-        { "boardingPointId": "BP-BLR-MAJESTIC", "reportingOffsetMinutes": 0 },
-        { "boardingPointId": "BP-BLR-MADIWALA", "reportingOffsetMinutes": 30 },
-        { "boardingPointId": "BP-BLR-ELECTRONIC-CITY", "reportingOffsetMinutes": 50 }
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-MADIWALA",
+          "reportingOffsetMinutes": 30
+        },
+        {
+          "boardingPointId": "BP-BLR-ELECTRONIC-CITY",
+          "reportingOffsetMinutes": 50
+        }
       ],
       "droppingPoints": [
-        { "boardingPointId": "BP-MAA-AMBATTUR", "reportingOffsetMinutes": 465 },
-        { "boardingPointId": "BP-MAA-KOYAMBEDU", "reportingOffsetMinutes": 480 },
-        { "boardingPointId": "BP-MAA-ADYAR", "reportingOffsetMinutes": 510 }
+        {
+          "boardingPointId": "BP-MAA-AMBATTUR",
+          "reportingOffsetMinutes": 465
+        },
+        {
+          "boardingPointId": "BP-MAA-KOYAMBEDU",
+          "reportingOffsetMinutes": 480
+        },
+        {
+          "boardingPointId": "BP-MAA-ADYAR",
+          "reportingOffsetMinutes": 510
+        }
+      ]
+    },
+    {
+      "serviceId": "0700BNGMNG",
+      "serviceNumber": "0700",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 420,
+      "runningMinutes": 450,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
+        }
+      ]
+    },
+    {
+      "serviceId": "0702BNGMNG",
+      "serviceNumber": "0702",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 422,
+      "runningMinutes": 508,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 508
+        }
+      ]
+    },
+    {
+      "serviceId": "0815BNGMNG",
+      "serviceNumber": "0815",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 495,
+      "runningMinutes": 465,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 465
+        }
+      ]
+    },
+    {
+      "serviceId": "0901BNGMNG",
+      "serviceNumber": "0901",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 541,
+      "runningMinutes": 539,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 539
+        }
+      ]
+    },
+    {
+      "serviceId": "0906BNGMNG",
+      "serviceNumber": "0906",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 546,
+      "runningMinutes": 504,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 504
+        }
+      ]
+    },
+    {
+      "serviceId": "0930BNGMNG",
+      "serviceNumber": "0930",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 570,
+      "runningMinutes": 510,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 510
+        }
+      ]
+    },
+    {
+      "serviceId": "1003BNGMNG",
+      "serviceNumber": "1003",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 603,
+      "runningMinutes": 537,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 537
+        }
+      ]
+    },
+    {
+      "serviceId": "1031BNGMNG",
+      "serviceNumber": "1031",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 631,
+      "runningMinutes": 509,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 509
+        }
+      ]
+    },
+    {
+      "serviceId": "1100BNGMNG",
+      "serviceNumber": "1100",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 660,
+      "runningMinutes": 540,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 540
+        }
+      ]
+    },
+    {
+      "serviceId": "1102BNGMNG",
+      "serviceNumber": "1102",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 662,
+      "runningMinutes": 478,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 478
+        }
+      ]
+    },
+    {
+      "serviceId": "1130BNGMNG",
+      "serviceNumber": "1130",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 690,
+      "runningMinutes": 540,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 540
+        }
+      ]
+    },
+    {
+      "serviceId": "1200BNGMNG",
+      "serviceNumber": "1200",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 720,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "1300BNGMNG",
+      "serviceNumber": "1300",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 780,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "1400BNGMNG",
+      "serviceNumber": "1400",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 840,
+      "runningMinutes": 475,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 475
+        }
+      ]
+    },
+    {
+      "serviceId": "1500BNGMNG",
+      "serviceNumber": "1500",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 900,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "1600BNGMNG",
+      "serviceNumber": "1600",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 960,
+      "runningMinutes": 479,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 479
+        }
+      ]
+    },
+    {
+      "serviceId": "2112BNGMNG",
+      "serviceNumber": "2112",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1272,
+      "runningMinutes": 468,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 468
+        }
+      ]
+    },
+    {
+      "serviceId": "2116BNGMNG",
+      "serviceNumber": "2116",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1276,
+      "runningMinutes": 524,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 524
+        }
+      ]
+    },
+    {
+      "serviceId": "2125BNGMNG",
+      "serviceNumber": "2125",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1285,
+      "runningMinutes": 485,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 485
+        }
+      ]
+    },
+    {
+      "serviceId": "2131BNGMNG",
+      "serviceNumber": "2131",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AMBAARI_UTSAV",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1291,
+      "runningMinutes": 539,
+      "seatMapId": "AMBAARI_UTSAV-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 539
+        }
+      ]
+    },
+    {
+      "serviceId": "2201BNGMNG",
+      "serviceNumber": "2201",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AMBAARI_UTSAV",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1321,
+      "runningMinutes": 419,
+      "seatMapId": "AMBAARI_UTSAV-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 419
+        }
+      ]
+    },
+    {
+      "serviceId": "2224BNGMNG",
+      "serviceNumber": "2224",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1344,
+      "runningMinutes": 486,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 486
+        }
+      ]
+    },
+    {
+      "serviceId": "2229BNGMNG",
+      "serviceNumber": "2229",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1349,
+      "runningMinutes": 451,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 451
+        }
+      ]
+    },
+    {
+      "serviceId": "2230BNGMNG",
+      "serviceNumber": "2230",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1350,
+      "runningMinutes": 540,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 540
+        }
+      ]
+    },
+    {
+      "serviceId": "2235BNGMNG",
+      "serviceNumber": "2235",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1355,
+      "runningMinutes": 445,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 445
+        }
+      ]
+    },
+    {
+      "serviceId": "2301BNGMNG",
+      "serviceNumber": "2301",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AMBAARI_UTSAV",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1381,
+      "runningMinutes": 479,
+      "seatMapId": "AMBAARI_UTSAV-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 479
+        }
+      ]
+    },
+    {
+      "serviceId": "2324BNGMNG",
+      "serviceNumber": "2324",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1404,
+      "runningMinutes": 456,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 456
+        }
+      ]
+    },
+    {
+      "serviceId": "2350BNGMNG",
+      "serviceNumber": "2350",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1430,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "1300MNGBNG",
+      "serviceNumber": "1300",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AMBAARI_UTSAV",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 780,
+      "runningMinutes": 480,
+      "seatMapId": "AMBAARI_UTSAV-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "2130MNGBNG",
+      "serviceNumber": "2130",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AMBAARI_UTSAV",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1290,
+      "runningMinutes": 510,
+      "seatMapId": "AMBAARI_UTSAV-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 510
+        }
+      ]
+    },
+    {
+      "serviceId": "2215MNGBNG",
+      "serviceNumber": "2215",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AMBAARI_UTSAV",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1335,
+      "runningMinutes": 465,
+      "seatMapId": "AMBAARI_UTSAV-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ]
+    },
+    {
+      "serviceId": "2229MNGBNG",
+      "serviceNumber": "2229",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AMBAARI_UTSAV",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1349,
+      "runningMinutes": 451,
+      "seatMapId": "AMBAARI_UTSAV-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 451
+        }
+      ]
+    },
+    {
+      "serviceId": "0601MNGBNG",
+      "serviceNumber": "0601",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 361,
+      "runningMinutes": 479,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 479
+        }
+      ]
+    },
+    {
+      "serviceId": "0659MNGBNG",
+      "serviceNumber": "0659",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 419,
+      "runningMinutes": 481,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 481
+        }
+      ]
+    },
+    {
+      "serviceId": "0800MNGBNG",
+      "serviceNumber": "0800",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 480,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "0830MNGBNG",
+      "serviceNumber": "0830",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 510,
+      "runningMinutes": 600,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 600
+        }
+      ]
+    },
+    {
+      "serviceId": "0902MNGBNG",
+      "serviceNumber": "0902",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 542,
+      "runningMinutes": 478,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 478
+        }
+      ]
+    },
+    {
+      "serviceId": "1002MNGBNG",
+      "serviceNumber": "1002",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 602,
+      "runningMinutes": 553,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 553
+        }
+      ]
+    },
+    {
+      "serviceId": "1100MNGBNG",
+      "serviceNumber": "1100",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 660,
+      "runningMinutes": 493,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 493
+        }
+      ]
+    },
+    {
+      "serviceId": "1201MNGBNG",
+      "serviceNumber": "1201",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 721,
+      "runningMinutes": 479,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 479
+        }
+      ]
+    },
+    {
+      "serviceId": "1302MNGBNG",
+      "serviceNumber": "1302",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 782,
+      "runningMinutes": 538,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 538
+        }
+      ]
+    },
+    {
+      "serviceId": "1400MNGBNG",
+      "serviceNumber": "1400",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 840,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "1405MNGBNG",
+      "serviceNumber": "1405",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 845,
+      "runningMinutes": 535,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 535
+        }
+      ]
+    },
+    {
+      "serviceId": "1503MNGBNG",
+      "serviceNumber": "1503",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 903,
+      "runningMinutes": 477,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 477
+        }
+      ]
+    },
+    {
+      "serviceId": "1600MNGBNG",
+      "serviceNumber": "1600",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 960,
+      "runningMinutes": 465,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ]
+    },
+    {
+      "serviceId": "1701MNGBNG",
+      "serviceNumber": "1701",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1021,
+      "runningMinutes": 465,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ]
+    },
+    {
+      "serviceId": "1935MNGBNG",
+      "serviceNumber": "1935",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1175,
+      "runningMinutes": 565,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 565
+        }
+      ]
+    },
+    {
+      "serviceId": "2043MNGBNG",
+      "serviceNumber": "2043",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1243,
+      "runningMinutes": 497,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 497
+        }
+      ]
+    },
+    {
+      "serviceId": "2145MNGBNG",
+      "serviceNumber": "2145",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1305,
+      "runningMinutes": 435,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 435
+        }
+      ]
+    },
+    {
+      "serviceId": "2212MNGBNG",
+      "serviceNumber": "2212",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1332,
+      "runningMinutes": 468,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 468
+        }
+      ]
+    },
+    {
+      "serviceId": "2300MNGBNG",
+      "serviceNumber": "2300",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1380,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "1200MNGBNG",
+      "serviceNumber": "1200",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 720,
+      "runningMinutes": 535,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 535
+        }
+      ]
+    },
+    {
+      "serviceId": "2000MNGBNG",
+      "serviceNumber": "2000",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1200,
+      "runningMinutes": 540,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 540
+        }
+      ]
+    },
+    {
+      "serviceId": "2055MNGBNG",
+      "serviceNumber": "2055",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1255,
+      "runningMinutes": 500,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 500
+        }
+      ]
+    },
+    {
+      "serviceId": "2210MNGBNG",
+      "serviceNumber": "2210",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1330,
+      "runningMinutes": 500,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 500
+        }
+      ]
+    },
+    {
+      "serviceId": "0745MNGBNG",
+      "serviceNumber": "0745",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 465,
+      "runningMinutes": 495,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 495
+        }
+      ]
+    },
+    {
+      "serviceId": "0929MNGBNG",
+      "serviceNumber": "0929",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 569,
+      "runningMinutes": 511,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 511
+        }
+      ]
+    },
+    {
+      "serviceId": "2131MNGBNG",
+      "serviceNumber": "2131",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1291,
+      "runningMinutes": 509,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 509
+        }
+      ]
+    },
+    {
+      "serviceId": "0830BNGCKM",
+      "serviceNumber": "0830",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 510,
+      "runningMinutes": 315,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 315
+        }
+      ]
+    },
+    {
+      "serviceId": "0930BNGCKM",
+      "serviceNumber": "0930",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 570,
+      "runningMinutes": 315,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 315
+        }
+      ]
+    },
+    {
+      "serviceId": "1315BNGCKM",
+      "serviceNumber": "1315",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 795,
+      "runningMinutes": 330,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 330
+        }
+      ]
+    },
+    {
+      "serviceId": "1600BNGCKM",
+      "serviceNumber": "1600",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 960,
+      "runningMinutes": 315,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 315
+        }
+      ]
+    },
+    {
+      "serviceId": "1900BNGCKM",
+      "serviceNumber": "1900",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1140,
+      "runningMinutes": 270,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 270
+        }
+      ]
+    },
+    {
+      "serviceId": "1101BNGCKM",
+      "serviceNumber": "1101",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 661,
+      "runningMinutes": 360,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 360
+        }
+      ]
+    },
+    {
+      "serviceId": "2229BNGCKM",
+      "serviceNumber": "2229",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1349,
+      "runningMinutes": 360,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 360
+        }
+      ]
+    },
+    {
+      "serviceId": "2259BNGCKM",
+      "serviceNumber": "2259",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1379,
+      "runningMinutes": 360,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 360
+        }
+      ]
+    },
+    {
+      "serviceId": "2330BNGCKM",
+      "serviceNumber": "2330",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1410,
+      "runningMinutes": 360,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 360
+        }
+      ]
+    },
+    {
+      "serviceId": "0601CKMBNG",
+      "serviceNumber": "0601",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 361,
+      "runningMinutes": 305,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 305
+        }
+      ]
+    },
+    {
+      "serviceId": "0731CKMBNG",
+      "serviceNumber": "0731",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 451,
+      "runningMinutes": 254,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 254
+        }
+      ]
+    },
+    {
+      "serviceId": "1650CKMBNG",
+      "serviceNumber": "1650",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1010,
+      "runningMinutes": 305,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 305
+        }
+      ]
+    },
+    {
+      "serviceId": "1730CKMBNG",
+      "serviceNumber": "1730",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1050,
+      "runningMinutes": 290,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 290
+        }
+      ]
+    },
+    {
+      "serviceId": "2306CKMBNG",
+      "serviceNumber": "2306",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1386,
+      "runningMinutes": 324,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 324
+        }
+      ]
+    },
+    {
+      "serviceId": "1130CKMBNG",
+      "serviceNumber": "1130",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 690,
+      "runningMinutes": 315,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 315
+        }
+      ]
+    },
+    {
+      "serviceId": "1400CKMBNG",
+      "serviceNumber": "1400",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 840,
+      "runningMinutes": 315,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 315
+        }
+      ]
+    },
+    {
+      "serviceId": "1500CKMBNG",
+      "serviceNumber": "1500",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 900,
+      "runningMinutes": 315,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 315
+        }
+      ]
+    },
+    {
+      "serviceId": "2335CKMBNG",
+      "serviceNumber": "2335",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1415,
+      "runningMinutes": 325,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-BNGCKM",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 325
+        }
+      ]
+    },
+    {
+      "serviceId": "1003MNGBNG",
+      "serviceNumber": "1003",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 603,
+      "runningMinutes": 381,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-MYSMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 381
+        }
       ]
     }
   ]
