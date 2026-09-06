@@ -38,6 +38,42 @@
       "code": "MYS",
       "name": "Mysuru",
       "nameLocal": "ಮೈಸೂರು"
+    },
+    {
+      "code": "HSN",
+      "name": "Hassan"
+    },
+    {
+      "code": "KNG",
+      "name": "Kunigal"
+    },
+    {
+      "code": "CTD",
+      "name": "Chitradurga"
+    },
+    {
+      "code": "HVR",
+      "name": "Haveri"
+    },
+    {
+      "code": "HBL",
+      "name": "Hubballi"
+    },
+    {
+      "code": "MDK",
+      "name": "Madikeri"
+    },
+    {
+      "code": "MND",
+      "name": "Mandya"
+    },
+    {
+      "code": "ANK",
+      "name": "Ankola"
+    },
+    {
+      "code": "GKN",
+      "name": "Gokarna"
     }
   ]
 }

@@ -31,6 +31,22 @@
           "lat": 12.8452,
           "lon": 77.6602
         }
+      },
+      {
+        "boardingPointId": "BP-BLR-YESHWANTHPUR",
+        "name": "Yeshwanthpur TTMC",
+        "gps": {
+          "lat": 13.01878,
+          "lon": 77.55758
+        }
+      },
+      {
+        "boardingPointId": "BP-BLR-PEENYA",
+        "name": "Peenya Satellite Bus Station",
+        "gps": {
+          "lat": 13.04409,
+          "lon": 77.52554
+        }
       }
     ],
     "HPT": [
@@ -102,6 +118,96 @@
         "gps": {
           "lat": 12.312567,
           "lon": 76.6584136
+        }
+      }
+    ],
+    "HSN": [
+      {
+        "boardingPointId": "BP-HSN-HASSAN",
+        "name": "Hassan Bus Station",
+        "gps": {
+          "lat": 12.9981795,
+          "lon": 76.1046362
+        }
+      }
+    ],
+    "KNG": [
+      {
+        "boardingPointId": "BP-KNG-KUNIGAL",
+        "name": "Kunigal KSRTC Bus Stand",
+        "gps": {
+          "lat": 13.0251811,
+          "lon": 77.0293837
+        }
+      }
+    ],
+    "CTD": [
+      {
+        "boardingPointId": "BP-CTD-CHITRADURGA",
+        "name": "Chitradurga KSRTC Bus Station",
+        "gps": {
+          "lat": 14.2268023,
+          "lon": 76.3960352
+        }
+      }
+    ],
+    "HVR": [
+      {
+        "boardingPointId": "BP-HVR-HAVERI",
+        "name": "Haveri Bus Stand",
+        "gps": {
+          "lat": 14.788137,
+          "lon": 75.3978506
+        }
+      }
+    ],
+    "HBL": [
+      {
+        "boardingPointId": "BP-HBL-HUBBALLI",
+        "name": "Hubballi New Bus Station",
+        "gps": {
+          "lat": 15.3493019,
+          "lon": 75.1164175
+        }
+      }
+    ],
+    "MDK": [
+      {
+        "boardingPointId": "BP-MDK-MADIKERI",
+        "name": "Madikeri KSRTC Bus Stand",
+        "gps": {
+          "lat": 12.4233982,
+          "lon": 75.7378564
+        }
+      }
+    ],
+    "MND": [
+      {
+        "boardingPointId": "BP-MND-MANDYA-RURAL",
+        "name": "Mandya Rural Bus Stand",
+        "gps": {
+          "lat": 12.52857344,
+          "lon": 76.9012659
+        }
+      }
+    ],
+    "ANK": [
+      {
+        "boardingPointId": "BP-ANK-ANKOLA",
+        "name": "Ankola Bus Stand",
+        "gps": {
+          "lat": 14.6600753,
+          "lon": 74.3069664
+        }
+      }
+    ],
+    "GKN": [
+      {
+        "boardingPointId": "BP-GKN-GOKARNA",
+        "name": "Gokarna Bus Station",
+        "gps": {
+          "lat": 14.5461529,
+          "lon": 74.3191748
         }
       }
     ]

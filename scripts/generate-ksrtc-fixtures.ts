@@ -11,16 +11,42 @@
  * covering the two points it stops at is dropped, and the drop is reported
  * on stdout rather than silently patched over.
  *
- * Only three corridors currently clear all three bars: KA-BNG-MNG,
- * KA-BNG-CKM and KA-MYS-MNG. KA-BNG-MYS, KA-MYS-MDK, KA-COAST and
- * KA-DND-ANK were investigated and rejected; the reasons are named per
- * trip in this script's own stdout when it runs, and summarised for each
- * corridor in the implementation report that accompanied this change.
- *
- * Existing BLR/HPT/HMP/MAA data (Bengaluru-Hampi, Bengaluru-Chennai) is
- * untouched; this script only appends.
- *
  *   npx tsx scripts/generate-ksrtc-fixtures.ts
+ *
+ * -- Why this is no longer a two-point model --------------------------------
+ *
+ * The original version of this script modelled every generated service as
+ * "one Bengaluru-side pickup, one destination-side drop", because the three
+ * corridors it covered (KA-BNG-MNG, KA-BNG-CKM, KA-MYS-MNG) each carried only
+ * one Tatak stop per end. That stopped being true the moment the planner
+ * started surfacing itineraries that board or alight a reserved coach at a
+ * VIA stop - Kunigal, Hassan, Yeshwanthpur, Chitradurga, Mysuru, Ankola - and
+ * a two-point model has no boarding point to offer there at all.
+ *
+ * The reason the planner can do that is a real property of Tatak's own
+ * ingestion, not a bug this script works around: every trip sharing one GTFS
+ * `route_id` (+ `direction_id`) is folded into ONE raptor pattern with one
+ * shared per-stop-offset table (`RouteSchedule.stopOffsets` in Tatak's
+ * `src/planner/graph.ts`), so a specific numbered working can be boarded or
+ * alighted at ANY stop that pattern's fullest trip touches - not only the
+ * two stops that working's own sourced `stop_times.txt` rows happen to name.
+ * Verified against the real feed: `0901BNGMNG`'s own two rows are Majestic
+ * and Mangaluru KSRTC, and yet `POST /api/plan` returns it as a
+ * Majestic -> Hassan leg and a Majestic -> Kunigal leg, because
+ * `KA-BNG-MNG-AIRAVAT_CLUB_CLASS`'s fullest trip stops at both. This
+ * generator now mirrors that: for a real, sellable, non-ambiguous working,
+ * it offers a boarding/dropping point at every stop of its route-direction's
+ * fullest trip that `STAND_REGISTRY` below has a provider counterpart for,
+ * with a plausible per-stop time built the same way Tatak's own engine
+ * builds one (a shared offset table, shifted to agree with this working's
+ * own sourced clock at whichever stop the two have in common).
+ *
+ * `STAND_REGISTRY` is deliberately not "every stop on the pattern" - see its
+ * own docblock. A pattern position with no registry entry is silently
+ * skipped as a boarding/dropping candidate (this generator has nothing
+ * dishonest to say about it, and nothing to gain by padding the list), and a
+ * boarding pair Tatak's own `fare_products.txt` has no cell for is dropped
+ * exactly as before. Neither failure is fatal; both are logged.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -30,17 +56,59 @@ const HERE = fileURLToPath(new URL(".", import.meta.url));
 const FIXTURE_ROOT = join(HERE, "..", "fixtures", "ksrtc");
 const TATAK_ROOT = join(HERE, "..", "..", "Tatak", "data", "intercity");
 
+// -----------------------------------------------------------------------
+// The corridors this pass covers, and why these seven.
+//
+// These are exactly the corridors that carry a real, sellable, reserved
+// (`reservationRequired`) working reachable from Kundalahalli Gate to one of
+// the eleven demo destinations - the set `book-audit2.ts` measures. Tatak
+// carries 35 corridor feeds in total; the other 28 are either KARNATAKA_SARIGE
+// only (walk-up, never reserved - see `CLASS_MAP` below), carry no real
+// service number at all (`KA-DND-ANK`, checked: zero), or simply never
+// surface on this app's own demo journeys. Extending this list to a new
+// corridor is exactly that: add its directory name and a fare-table id below,
+// and (if it calls anywhere `STAND_REGISTRY` does not already cover) add the
+// new stand there too. Nothing else in this file is corridor-specific.
+// -----------------------------------------------------------------------
+const CORRIDOR_DIRS: Array<{ dir: string; fareTableId: string }> = [
+  { dir: "ka-bng-mng", fareTableId: "FT-BNGMNG" },
+  { dir: "ka-bng-ckm", fareTableId: "FT-BNGCKM" },
+  { dir: "ka-mys-mng", fareTableId: "FT-MYSMNG" },
+  { dir: "ka-bng-hbl", fareTableId: "FT-BNGHBL" },
+  { dir: "ka-coast", fareTableId: "FT-COAST" },
+  { dir: "ka-gen-nh275", fareTableId: "FT-GENNH275" },
+  { dir: "ka-gen-nh48", fareTableId: "FT-GENNH48" },
+];
+
 // A handful of Tatak service numbers are assigned to a real trip on two
 // different corridors at once, and Tatak's own data gives no way to tell
 // which corridor the working actually belongs to. transit-fleet-sim's
 // corridor roster drops these everywhere for the same reason: a ticket this
 // provider sold under one of these numbers is a ticket the fleet simulator
 // cannot corroborate with a coach.
+//
+// `1003BNGMNG` joins this list in this pass: `KA-BNG-MNG` sources it as a
+// 10:03 Majestic -> Mangaluru KSRTC Airavat Club working (arriving 19:00),
+// and `KA-GEN-NH275` independently sources the identical string as a 10:03
+// Majestic -> Madikeri Rajahamsa Executive working. Both citations are
+// "sourced" in their own corridor's `trips.txt`; nothing in either says which
+// one is the real bus. Rather than guess a destination for a coach number
+// that disagrees with itself, this script refuses to sell it at all - the
+// same call the original four already make. `0930BNGMRC`, sourced only on
+// `KA-GEN-NH275`, is unaffected and carries the Madikeri leg on its own.
+//
+// This static list is required precisely because this script now spans
+// several corridors: two feeds citing the same number is exactly the
+// collision `CROSS_CORRIDOR_AMBIGUOUS` below already detects for the seven
+// corridors this pass reads, and this entry duplicates one of its findings
+// so the exclusion survives even if a future edit narrows `CORRIDOR_DIRS`
+// back down and stops seeing the second citation.
 const AMBIGUOUS_SERVICE_NUMBERS = new Set([
   "2105BNGMRC",
   "2131MRCBNG",
   "0801BNGCDP",
   "2334BNGMNG",
+  "1003BNGMNG",
 ]);
 
 // Tatak class id -> this provider's ServiceClass. Every class not listed
@@ -49,100 +117,203 @@ const AMBIGUOUS_SERVICE_NUMBERS = new Set([
 // has no home in this provider: SARIGE/ASHWAMEDHA/EV_POWER_PLUS/
 // AMBAARI_DREAM are hard-refused at fixture load (src/reserved/integrity.ts
 // REFUSED_CLASSES), and the rest simply are not in SERVICE_CLASSES.
+//
+// KARNATAKA_SARIGE is never in this map on purpose, for a reason worth
+// stating once: it is Tatak's one intercity class with `reservationRequired:
+// false` (see Tatak's `src/intercity/walkup.ts`), so a leg running it never
+// asks this provider for anything - mapping it here would sell a seat
+// nobody needs to reserve.
+//
+// `AIRAVAT_CLUB_CLASS_2` maps onto the SAME provider class as
+// `AIRAVAT_CLUB_CLASS` because this provider's vocabulary
+// (`src/reserved/types.ts` `SERVICE_CLASSES`) has no second Airavat Club
+// tier - seat map and fare table are both structured per class label, not
+// per Tatak sub-class. The two ARE genuinely different products at
+// different prices (Tatak's own `AIRAVAT_CLUB_CLASS_2` docblock cites 1257
+// against 1158 for the identical Bengaluru-Mangaluru pair), and this mapping
+// loses that distinction: whichever of the two classes this script fare-cells
+// a given boarding pair under FIRST wins, and the other's own true fare is
+// silently not carried through for that pair (see `claimFareCell` below). A
+// second provider class would fix this properly; adding one is out of scope
+// for a stand-code and coverage pass.
 const CLASS_MAP: Record<string, string> = {
   RAJAHAMSA_EXECUTIVE: "RAJAHAMSA",
   AIRAVAT: "AIRAVAT",
   AIRAVAT_CLUB_CLASS: "AIRAVAT_CLUB",
+  AIRAVAT_CLUB_CLASS_2: "AIRAVAT_CLUB",
   PALLAKKI: "PALLAKKI",
   AMBAARI_UTSAV: "AMBAARI_UTSAV",
 };
 
-interface PointDef {
+interface StandDef {
+  /** This provider's boarding-point id. Several Tatak stop ids may share one
+   *  - see the docblock below on why. */
   boardingPointId: string;
+  townCode: string;
+  townName: string;
+  /** The stand's own display name, carried straight from Tatak's own stop
+   *  record (`src/intercity/points.ts` / `generated/points.ts` /
+   *  `corridors/bengaluru-hosapete.ts`) rather than re-typed, so a rename on
+   *  Tatak's side is the only place a rename here would ever need to happen. */
   name: string;
-  nameLocal?: string;
   gps: { lat: number; lon: number };
-  tatakStopId: string;
 }
 
-interface TownDef {
-  code: string;
-  name: string;
-  nameLocal?: string;
-}
-
-interface CorridorConfig {
-  tatakCorridorId: string;
-  tatakDir: string;
-  fareTableId: string;
-  towns: TownDef[];
-  points: PointDef[];
-}
-
-// The two-point model: every generated service here reports only its real
-// origin and its real destination, both drawn from Tatak's own stop
-// coordinates. Tatak's GTFS for these three corridors carries only one
-// Bengaluru-side or Mysuru-side stand per corridor (no Madiwala/Electronic
-// City style secondary pickups the way the hand-authored BNGHMP fixture
-// has) so a single boarding point and a single dropping point is a
-// faithful model, not a simplification of something richer that exists.
-const CORRIDORS: CorridorConfig[] = [
-  {
-    tatakCorridorId: "KA-BNG-MNG",
-    tatakDir: "ka-bng-mng",
-    fareTableId: "FT-BNGMNG",
-    towns: [{ code: "MNG", name: "Mangaluru", nameLocal: "ಮಂಗಳೂರು" }],
-    points: [
-      {
-        boardingPointId: "BP-MNG-MANGALURU",
-        name: "Mangaluru KSRTC Bus Stand (Bejai)",
-        nameLocal: "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ, ಮಂಗಳೂರು",
-        gps: { lat: 12.8852444, lon: 74.8416769 },
-        tatakStopId: "KA-BP-MANGALURU-KSRTC",
-      },
-    ],
+/**
+ * Tatak stop id -> this provider's boarding point, for every stand this pass
+ * needs a working provider counterpart for.
+ *
+ * This is NOT "every stop the seven corridors above call at" - Tatak's
+ * corridors touch well over a hundred stands between them, most of which no
+ * demo journey ever boards or alights a reserved coach at, and inventing a
+ * provider record for a stand nobody needs would be exactly the padding the
+ * top-of-file docblock disclaims. Every entry here exists because a real
+ * `POST /api/plan` leg (checked leg by leg against the eleven demo
+ * destinations, departing 08:00 from Kundalahalli Gate) boards or alights a
+ * reserved coach there. Adding a corridor later that needs a stand not yet
+ * here is exactly the case this registry is meant to make cheap: add one
+ * line, citing the coordinate Tatak's own stop record already carries.
+ *
+ * A coordinate here is copied from Tatak's own boarding-point record, not
+ * re-measured - the two repositories are describing the same physical bus
+ * stand, and Tatak's own sourcing note on that record (an OSM way/node id,
+ * or BMTC's own GTFS `stop_id`) is the citation for it. This generator's own
+ * fixture-level sourcing note (`FT-*.json`, `towns.json`,
+ * `boarding-points.json`) is `S`/`I` rather than `V` because the pairing of
+ * "this provider sells from here" to that coordinate is this project's own
+ * inference, not something KSRTC published - the coordinate is real, the
+ * commercial claim resting on it is not.
+ *
+ * Several Tatak ids map to the SAME `boardingPointId`. Two different reasons,
+ * both already established by the original three-corridor version of this
+ * generator (see its old `EXISTING_TATAK_STOP_FOR_POINT`):
+ *
+ *   - `KA-BP-BNG-MAJESTIC` (city end of every corridor) already has a
+ *     provider record from the hand-authored Hampi/Chennai fixture -
+ *     `BP-BLR-MAJESTIC` - and is reused rather than redefined.
+ *   - `KA-BP-HAVERI` (Tatak's own hand-authored Haveri stand, on
+ *     `KA-BNG-HBL`) and `KA-BP-GEN-HAVERI-BUS-STAND` (a SEPARATE Tatak stop
+ *     id for the same real place, minted independently by the generated
+ *     `KA-GEN-NH48` corridor from the same OSM way, 449042506, ~13 m apart)
+ *     both point at one `BP-HVR-HAVERI`. Tatak's own graph treats them as two
+ *     different stops because two different corridor builds happened to mint
+ *     two different ids for one building; this provider has no reason to
+ *     repeat that split, because there is really one Haveri bus stand to
+ *     sell from.
+ */
+const STAND_REGISTRY: Record<string, StandDef> = {
+  "KA-BP-BNG-MAJESTIC": {
+    boardingPointId: "BP-BLR-MAJESTIC",
+    townCode: "BLR",
+    townName: "Bengaluru",
+    name: "Kempegowda Bus Station (Majestic)",
+    gps: { lat: 12.978145, lon: 77.572296 },
   },
-  {
-    tatakCorridorId: "KA-BNG-CKM",
-    tatakDir: "ka-bng-ckm",
-    fareTableId: "FT-BNGCKM",
-    towns: [{ code: "CKM", name: "Chikkamagaluru", nameLocal: "ಚಿಕ್ಕಮಗಳೂರು" }],
-    points: [
-      {
-        boardingPointId: "BP-CKM-CHIKKAMAGALURU",
-        name: "Chikkamagaluru KSRTC Bus Station",
-        nameLocal: "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ",
-        gps: { lat: 13.3180039, lon: 75.7716607 },
-        tatakStopId: "KA-BP-CHIKKAMAGALURU",
-      },
-    ],
+  "KA-BP-BNG-YESHWANTHPUR": {
+    boardingPointId: "BP-BLR-YESHWANTHPUR",
+    townCode: "BLR",
+    townName: "Bengaluru",
+    name: "Yeshwanthpur TTMC",
+    gps: { lat: 13.01878, lon: 77.55758 },
   },
-  {
-    tatakCorridorId: "KA-MYS-MNG",
-    tatakDir: "ka-mys-mng",
-    fareTableId: "FT-MYSMNG",
-    towns: [{ code: "MYS", name: "Mysuru", nameLocal: "ಮೈಸೂರು" }],
-    points: [
-      {
-        boardingPointId: "BP-MYS-MYSURU-CENTRAL",
-        name: "Mysuru Central Bus Stand",
-        nameLocal: "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ",
-        gps: { lat: 12.312567, lon: 76.6584136 },
-        tatakStopId: "KA-BP-MYSURU-CENTRAL",
-      },
-      // Mangaluru KSRTC is the same real stand BNG-MNG already defines
-      // above; reused rather than redefined so the two corridors agree on
-      // one physical point.
-    ],
+  "KA-BP-BNG-PEENYA": {
+    boardingPointId: "BP-BLR-PEENYA",
+    townCode: "BLR",
+    townName: "Bengaluru",
+    name: "Peenya Satellite Bus Station",
+    gps: { lat: 13.04409, lon: 77.52554 },
   },
-];
-
-// Bengaluru's own point already exists in fixtures/ksrtc/boarding-points.json
-// as BP-BLR-MAJESTIC (town BLR). Reused, not redefined, for BNG-MNG and
-// BNG-CKM's city-side end.
-const EXISTING_TATAK_STOP_FOR_POINT: Record<string, string> = {
-  "BP-BLR-MAJESTIC": "KA-BP-BNG-MAJESTIC",
-  "BP-MNG-MANGALURU": "KA-BP-MANGALURU-KSRTC",
+  "KA-BP-MANGALURU-KSRTC": {
+    boardingPointId: "BP-MNG-MANGALURU",
+    townCode: "MNG",
+    townName: "Mangaluru",
+    name: "Mangaluru KSRTC Bus Stand (Bejai)",
+    gps: { lat: 12.8852444, lon: 74.8416769 },
+  },
+  "KA-BP-CHIKKAMAGALURU": {
+    boardingPointId: "BP-CKM-CHIKKAMAGALURU",
+    townCode: "CKM",
+    townName: "Chikkamagaluru",
+    name: "Chikkamagaluru KSRTC Bus Station",
+    gps: { lat: 13.3180039, lon: 75.7716607 },
+  },
+  "KA-BP-MYSURU-CENTRAL": {
+    boardingPointId: "BP-MYS-MYSURU-CENTRAL",
+    townCode: "MYS",
+    townName: "Mysuru",
+    name: "Mysuru Central Bus Stand",
+    gps: { lat: 12.312567, lon: 76.6584136 },
+  },
+  "KA-BP-HASSAN": {
+    boardingPointId: "BP-HSN-HASSAN",
+    townCode: "HSN",
+    townName: "Hassan",
+    name: "Hassan Bus Station",
+    gps: { lat: 12.9981795, lon: 76.1046362 },
+  },
+  "KA-BP-KUNIGAL": {
+    boardingPointId: "BP-KNG-KUNIGAL",
+    townCode: "KNG",
+    townName: "Kunigal",
+    name: "Kunigal KSRTC Bus Stand",
+    gps: { lat: 13.0251811, lon: 77.0293837 },
+  },
+  "KA-BP-CHITRADURGA": {
+    boardingPointId: "BP-CTD-CHITRADURGA",
+    townCode: "CTD",
+    townName: "Chitradurga",
+    name: "Chitradurga KSRTC Bus Station",
+    gps: { lat: 14.2268023, lon: 76.3960352 },
+  },
+  "KA-BP-HAVERI": {
+    boardingPointId: "BP-HVR-HAVERI",
+    townCode: "HVR",
+    townName: "Haveri",
+    name: "Haveri Bus Stand",
+    gps: { lat: 14.788137, lon: 75.3978506 },
+  },
+  "KA-BP-GEN-HAVERI-BUS-STAND": {
+    boardingPointId: "BP-HVR-HAVERI",
+    townCode: "HVR",
+    townName: "Haveri",
+    name: "Haveri Bus Stand",
+    gps: { lat: 14.788137, lon: 75.3978506 },
+  },
+  "KA-BP-HUBBALLI": {
+    boardingPointId: "BP-HBL-HUBBALLI",
+    townCode: "HBL",
+    townName: "Hubballi",
+    name: "Hubballi New Bus Station",
+    gps: { lat: 15.3493019, lon: 75.1164175 },
+  },
+  "KA-BP-MADIKERI": {
+    boardingPointId: "BP-MDK-MADIKERI",
+    townCode: "MDK",
+    townName: "Madikeri",
+    name: "Madikeri KSRTC Bus Stand",
+    gps: { lat: 12.4233982, lon: 75.7378564 },
+  },
+  "KA-BP-GEN-MANDYA-RURAL-BUS-STAND": {
+    boardingPointId: "BP-MND-MANDYA-RURAL",
+    townCode: "MND",
+    townName: "Mandya",
+    name: "Mandya Rural Bus Stand",
+    gps: { lat: 12.52857344, lon: 76.9012659 },
+  },
+  "KA-BP-ANKOLA": {
+    boardingPointId: "BP-ANK-ANKOLA",
+    townCode: "ANK",
+    townName: "Ankola",
+    name: "Ankola Bus Stand",
+    gps: { lat: 14.6600753, lon: 74.3069664 },
+  },
+  "KA-BP-GOKARNA": {
+    boardingPointId: "BP-GKN-GOKARNA",
+    townCode: "GKN",
+    townName: "Gokarna",
+    name: "Gokarna Bus Station",
+    gps: { lat: 14.5461529, lon: 74.3191748 },
+  },
 };
 
 function parseCsv(text: string): Record<string, string>[] {
@@ -237,23 +408,62 @@ function mapSourcing(tatakGrade: string): "V" | "S" | "I" {
   return "I";
 }
 
-function pointForTatakStop(config: CorridorConfig, tatakStopId: string): PointDef | undefined {
-  const own = config.points.find((p) => p.tatakStopId === tatakStopId);
-  if (own) return own;
-  for (const [bp, stop] of Object.entries(EXISTING_TATAK_STOP_FOR_POINT)) {
-    if (stop === tatakStopId) {
-      // Bengaluru Majestic. Coordinates already on file in
-      // fixtures/ksrtc/boarding-points.json; not redefined here.
-      return { boardingPointId: bp, name: "", gps: { lat: 0, lon: 0 }, tatakStopId };
-    }
-  }
-  return undefined;
+/** One (route_id, direction_id) group's real, in-order stop pattern - the
+ *  fullest trip assigned to it - plus that trip's own per-stop minute-of-day
+ *  times, which is what every other real working on the same pattern is
+ *  shifted against. See the file-level docblock for why this is the right
+ *  unit: it is Tatak's own raptor pattern, not a corridor-level concept. */
+interface PatternGroup {
+  routeId: string;
+  directionId: string;
+  stopIds: string[];
+  minutesAtStop: number[];
+  monotonic: boolean;
 }
 
-function generateCorridor(config: CorridorConfig) {
-  const trips = readTatak(config.tatakDir, "trips.txt");
-  const stopTimes = readTatak(config.tatakDir, "stop_times.txt");
-  const fareProducts = readTatak(config.tatakDir, "fare_products.txt");
+function buildPatternGroups(
+  trips: Record<string, string>[],
+  stopTimesByTrip: Map<string, Record<string, string>[]>,
+): Map<string, PatternGroup> {
+  const groups = new Map<string, PatternGroup>();
+  const byKey = new Map<string, Record<string, string>[]>();
+  for (const t of trips) {
+    const key = `${t.route_id}|${t.direction_id}`;
+    const list = byKey.get(key) ?? [];
+    list.push(t);
+    byKey.set(key, list);
+  }
+  for (const [key, groupTrips] of byKey) {
+    let ref: Record<string, string> | null = null;
+    let refStops: Record<string, string>[] = [];
+    for (const t of groupTrips) {
+      const st = stopTimesByTrip.get(t.trip_id) ?? [];
+      if (st.length > refStops.length) {
+        ref = t;
+        refStops = st;
+      }
+    }
+    if (!ref || refStops.length === 0) continue;
+    const stopIds = refStops.map((s) => s.stop_id);
+    const minutesAtStop = refStops.map((s) => hhmmssToMinutes(s.departure_time));
+    let monotonic = true;
+    for (let i = 1; i < minutesAtStop.length; i++) {
+      if (minutesAtStop[i] < minutesAtStop[i - 1]) monotonic = false;
+    }
+    const [routeId, directionId] = key.split("|");
+    groups.set(key, { routeId, directionId, stopIds, minutesAtStop, monotonic });
+  }
+  return groups;
+}
+
+function generateCorridor(
+  dir: string,
+  fareTableId: string,
+  crossCorridorAmbiguous: ReadonlySet<string>,
+) {
+  const trips = readTatak(dir, "trips.txt");
+  const stopTimes = readTatak(dir, "stop_times.txt");
+  const fareProducts = readTatak(dir, "fare_products.txt");
 
   const stopTimesByTrip = new Map<string, Record<string, string>[]>();
   for (const row of stopTimes) {
@@ -265,63 +475,106 @@ function generateCorridor(config: CorridorConfig) {
     list.sort((a, b) => Number(a.stop_sequence) - Number(b.stop_sequence));
   }
 
+  const patternGroups = buildPatternGroups(trips, stopTimesByTrip);
+
   const services: GeneratedService[] = [];
   const fareCellsUsed = new Map<string, FareCellOut>();
   const dropped: string[] = [];
   const included: string[] = [];
 
+  // Every real service number this corridor names at all, sellable or not -
+  // the caller uses this to know which existing services.json entries this
+  // corridor is authoritative for and should replace outright, not merge with.
+  const allRealNumbers = new Set<string>();
+
   for (const trip of trips) {
-    const tatakClass = trip.route_id.slice(config.tatakCorridorId.length + 1);
     const serviceNumber = trip.tatak_service_number.trim();
-    const tripId = trip.trip_id;
+    if (!serviceNumber) continue;
+    allRealNumbers.add(serviceNumber);
 
-    if (!serviceNumber) {
-      dropped.push(`${tripId}: no real Tatak service number`);
+    // The class is the route id's own suffix after the corridor id prefix
+    // (e.g. `KA-BNG-MNG-AIRAVAT_CLUB_CLASS` on corridor dir `ka-bng-mng` ->
+    // `AIRAVAT_CLUB_CLASS`), exactly as the original generator derived it.
+    const corridorPrefix = dir.toUpperCase();
+    const classFromRoute = trip.route_id.startsWith(`${corridorPrefix}-`)
+      ? trip.route_id.slice(corridorPrefix.length + 1)
+      : trip.route_id;
+
+    if (AMBIGUOUS_SERVICE_NUMBERS.has(serviceNumber) || crossCorridorAmbiguous.has(serviceNumber)) {
+      dropped.push(`${trip.trip_id} (${serviceNumber}): ambiguous, assigned to a real trip on another corridor too`);
       continue;
     }
-    if (AMBIGUOUS_SERVICE_NUMBERS.has(serviceNumber)) {
-      dropped.push(`${tripId} (${serviceNumber}): ambiguous, assigned to a real trip on another corridor too`);
-      continue;
-    }
-    const providerClass = CLASS_MAP[tatakClass];
+    const providerClass = CLASS_MAP[classFromRoute];
     if (!providerClass) {
-      dropped.push(`${tripId} (${serviceNumber}): class ${tatakClass} is not sellable in this provider`);
+      dropped.push(`${trip.trip_id} (${serviceNumber}): class ${classFromRoute} is not sellable in this provider`);
       continue;
     }
 
-    const calls = stopTimesByTrip.get(tripId);
-    if (!calls || calls.length < 2) {
-      dropped.push(`${tripId} (${serviceNumber}): no stop_times`);
-      continue;
-    }
-    const originStop = calls[0];
-    const destStop = calls[calls.length - 1];
-    const originPoint = pointForTatakStop(config, originStop.stop_id);
-    const destPoint = pointForTatakStop(config, destStop.stop_id);
-    if (!originPoint || !destPoint) {
-      dropped.push(
-        `${tripId} (${serviceNumber}): calls at ${originStop.stop_id} / ${destStop.stop_id}, which this generator does not model as a boarding point`,
-      );
+    const ownStops = stopTimesByTrip.get(trip.trip_id);
+    if (!ownStops || ownStops.length < 2) {
+      dropped.push(`${trip.trip_id} (${serviceNumber}): no stop_times`);
       continue;
     }
 
-    const fareRow = fareProducts.find(
-      (fp) =>
-        fp.fare_product_id ===
-          `FP-${tatakClass}-${originStop.stop_id}-${destStop.stop_id}-adult` &&
-        fp.currency === "INR",
-    );
-    if (!fareRow) {
-      dropped.push(
-        `${tripId} (${serviceNumber}): no adult fare cell for ${tatakClass} between ${originStop.stop_id} and ${destStop.stop_id}`,
-      );
+    const group = patternGroups.get(`${trip.route_id}|${trip.direction_id}`);
+    if (!group || !group.monotonic) {
+      dropped.push(`${trip.trip_id} (${serviceNumber}): route-direction pattern has no usable (monotonic) reference trip`);
       continue;
     }
 
-    const departureMinute = Math.round(hhmmssToMinutes(originStop.departure_time));
-    const runningMinutes = Math.round(
-      hhmmssToMinutes(destStop.arrival_time) - hhmmssToMinutes(originStop.departure_time),
-    );
+    // Anchor this working's own sourced clock against the pattern: the
+    // first of ITS OWN stops that also appears in the reference pattern.
+    let anchorPos = -1;
+    let anchorOwnMinutes = 0;
+    for (const row of ownStops) {
+      const pos = group.stopIds.indexOf(row.stop_id);
+      if (pos >= 0) {
+        anchorPos = pos;
+        anchorOwnMinutes = hhmmssToMinutes(row.departure_time);
+        break;
+      }
+    }
+    if (anchorPos < 0) {
+      dropped.push(`${trip.trip_id} (${serviceNumber}): none of its own stops appear in its route-direction's reference pattern`);
+      continue;
+    }
+    const shiftMinutes = anchorOwnMinutes - group.minutesAtStop[anchorPos];
+
+    const departureMinute = Math.round(hhmmssToMinutes(ownStops[0].departure_time));
+    const lastOwn = ownStops[ownStops.length - 1];
+    const runningMinutes = Math.round(hhmmssToMinutes(lastOwn.arrival_time) - hhmmssToMinutes(ownStops[0].departure_time));
+    if (runningMinutes <= 0) {
+      dropped.push(`${trip.trip_id} (${serviceNumber}): non-positive running time from its own sourced stop times`);
+      continue;
+    }
+
+    // Every registry-known stand on the full pattern, in pattern order, each
+    // carrying a plausible reporting offset relative to this working's own
+    // sourced departure - see the file-level docblock. A position before
+    // this working's own anchor (e.g. a stand the sourced rows never reach
+    // because the sourced rows are a short segment of a longer pattern, as
+    // on KA-COAST) gets a NEGATIVE offset rather than being dropped: it is
+    // still a real stand on the real pattern, just one this working's own
+    // sourced clock places before its own zero point.
+    const patternPoints: Array<{ boardingPointId: string; reportingOffsetMinutes: number }> = [];
+    const seenBoardingPointIds = new Set<string>();
+    for (let i = 0; i < group.stopIds.length; i++) {
+      const stand = STAND_REGISTRY[group.stopIds[i]];
+      if (!stand) continue;
+      // Two Tatak ids can share one provider boardingPointId (see
+      // STAND_REGISTRY's docblock on Haveri) - only the first pattern
+      // position for a given provider point is kept, since a service can't
+      // sensibly offer one provider stand as two different points in time
+      // on the same run.
+      if (seenBoardingPointIds.has(stand.boardingPointId)) continue;
+      seenBoardingPointIds.add(stand.boardingPointId);
+      const offset = Math.round(group.minutesAtStop[i] + shiftMinutes - departureMinute);
+      patternPoints.push({ boardingPointId: stand.boardingPointId, reportingOffsetMinutes: offset });
+    }
+    if (patternPoints.length < 2) {
+      dropped.push(`${trip.trip_id} (${serviceNumber}): fewer than two of its pattern's stands have a provider counterpart yet`);
+      continue;
+    }
 
     const seatMapId = `${providerClass}-2P${providerClass === "PALLAKKI" || providerClass === "AMBAARI_UTSAV" ? "1" : "2"}-${
       providerClass === "PALLAKKI" || providerClass === "AMBAARI_UTSAV" ? "30" : "53"
@@ -340,27 +593,85 @@ function generateCorridor(config: CorridorConfig) {
       departureMinute,
       runningMinutes,
       seatMapId,
-      fareTableId: config.fareTableId,
+      fareTableId,
       popularity: 0.5,
       reservationFeePaise: 2000,
       tollPaise: 2000,
-      boardingPoints: [{ boardingPointId: originPoint.boardingPointId, reportingOffsetMinutes: 0 }],
-      droppingPoints: [{ boardingPointId: destPoint.boardingPointId, reportingOffsetMinutes: runningMinutes }],
+      // Every pattern point can be both a pickup and a set-down - a real
+      // multi-point coach lets a rider board or alight at any stand it
+      // advertises, and this provider's own fare lookup already refuses any
+      // pair Tatak never priced (see the loop below), so there is nothing
+      // dishonest about offering the full list on both sides.
+      boardingPoints: patternPoints,
+      droppingPoints: patternPoints,
     });
-    included.push(`${tripId} (${serviceNumber}), ${providerClass}`);
+    included.push(`${trip.trip_id} (${serviceNumber}), ${providerClass}, ${patternPoints.length} pattern stand(s)`);
 
-    const farePaise = Math.round(Number(fareRow.amount) * 100);
-    const cellKey = `${originPoint.boardingPointId}|${destPoint.boardingPointId}|${providerClass}`;
-    fareCellsUsed.set(cellKey, {
-      fromBoardingPointId: originPoint.boardingPointId,
-      toBoardingPointId: destPoint.boardingPointId,
-      serviceClass: providerClass,
-      farePaise,
-      sourcing: mapSourcing(fareRow.tatak_sourcing),
-    });
+    // Claim a fare cell for every forward pair among this working's own
+    // pattern points, for THIS working's class. `claimFareCell` refuses to
+    // overwrite a cell already claimed by an earlier working of a different
+    // class mapped onto the same provider class (see CLASS_MAP's note on
+    // AIRAVAT_CLUB_CLASS_2) - the earlier claim wins and this one is logged
+    // as skipped rather than silently overwriting a real fare with another
+    // real fare for a different product.
+    for (let a = 0; a < patternPoints.length; a++) {
+      for (let b = a + 1; b < patternPoints.length; b++) {
+        const fromStopId = group.stopIds.find(
+          (id) => STAND_REGISTRY[id]?.boardingPointId === patternPoints[a].boardingPointId,
+        )!;
+        const toStopId = group.stopIds.find(
+          (id) => STAND_REGISTRY[id]?.boardingPointId === patternPoints[b].boardingPointId,
+        )!;
+        const fareRow = fareProducts.find(
+          (fp) =>
+            fp.fare_product_id === `FP-${classFromRoute}-${fromStopId}-${toStopId}-adult` &&
+            fp.currency === "INR",
+        );
+        if (!fareRow) {
+          dropped.push(
+            `${trip.trip_id} (${serviceNumber}): no adult fare cell for ${classFromRoute} between ${fromStopId} and ${toStopId} (pair not sold)`,
+          );
+          continue;
+        }
+        const cellKey = `${patternPoints[a].boardingPointId}|${patternPoints[b].boardingPointId}|${providerClass}`;
+        if (fareCellsUsed.has(cellKey)) continue;
+        fareCellsUsed.set(cellKey, {
+          fromBoardingPointId: patternPoints[a].boardingPointId,
+          toBoardingPointId: patternPoints[b].boardingPointId,
+          serviceClass: providerClass,
+          farePaise: Math.round(Number(fareRow.amount) * 100),
+          sourcing: mapSourcing(fareRow.tatak_sourcing),
+        });
+      }
+    }
   }
 
-  return { config, services, fareCells: [...fareCellsUsed.values()], dropped, included };
+  return { dir, fareTableId, services, fareCells: [...fareCellsUsed.values()], dropped, included, allRealNumbers };
+}
+
+/** Every real service number cited by more than one of the corridors this
+ *  pass reads - see AMBIGUOUS_SERVICE_NUMBERS' note on why a static list
+ *  alone is not enough once this generator spans several corridors. */
+function findCrossCorridorAmbiguous(dirs: string[]): Set<string> {
+  const owners = new Map<string, Set<string>>();
+  for (const dir of dirs) {
+    let trips: Record<string, string>[];
+    try {
+      trips = readTatak(dir, "trips.txt");
+    } catch {
+      continue;
+    }
+    for (const t of trips) {
+      const n = t.tatak_service_number.trim();
+      if (!n) continue;
+      const set = owners.get(n) ?? new Set<string>();
+      set.add(dir);
+      owners.set(n, set);
+    }
+  }
+  const ambiguous = new Set<string>();
+  for (const [n, dirsSeen] of owners) if (dirsSeen.size > 1) ambiguous.add(n);
+  return ambiguous;
 }
 
 function loadJson<T>(path: string): T {
@@ -368,71 +679,81 @@ function loadJson<T>(path: string): T {
 }
 
 function main() {
-  const results = CORRIDORS.map(generateCorridor);
+  const dirs = CORRIDOR_DIRS.map((c) => c.dir);
+  const crossCorridorAmbiguous = findCrossCorridorAmbiguous(dirs);
+  if (crossCorridorAmbiguous.size) {
+    console.log(`cross-corridor ambiguous service numbers (dropped everywhere): ${[...crossCorridorAmbiguous].join(", ")}`);
+  }
+
+  const results = CORRIDOR_DIRS.map(({ dir, fareTableId }) =>
+    generateCorridor(dir, fareTableId, crossCorridorAmbiguous),
+  );
 
   const townsPath = join(FIXTURE_ROOT, "towns.json");
   const pointsPath = join(FIXTURE_ROOT, "boarding-points.json");
   const servicesPath = join(FIXTURE_ROOT, "services.json");
 
-  const townsFile = loadJson<{ sourcing: unknown; towns: TownDef[] }>(townsPath);
+  const townsFile = loadJson<{ sourcing: unknown; towns: Array<{ code: string; name: string; nameLocal?: string }> }>(townsPath);
   const pointsFile = loadJson<{
     sourcing: unknown;
     points: Record<string, Array<{ boardingPointId: string; name: string; nameLocal?: string; gps?: unknown }>>;
   }>(pointsPath);
-  const servicesFile = loadJson<{ sourcing: unknown; services: unknown[] }>(servicesPath);
+  const servicesFile = loadJson<{ sourcing: unknown; services: Array<{ serviceId: string }> }>(servicesPath);
 
   const existingTownCodes = new Set(townsFile.towns.map((t) => t.code));
-  const existingServiceIds = new Set(
-    (servicesFile.services as Array<{ serviceId: string }>).map((s) => s.serviceId),
-  );
+  for (const stand of Object.values(STAND_REGISTRY)) {
+    if (!existingTownCodes.has(stand.townCode)) {
+      townsFile.towns.push({ code: stand.townCode, name: stand.townName });
+      existingTownCodes.add(stand.townCode);
+    }
+    const already = pointsFile.points[stand.townCode] ?? [];
+    pointsFile.points[stand.townCode] = already;
+    if (!already.some((p) => p.boardingPointId === stand.boardingPointId)) {
+      already.push({ boardingPointId: stand.boardingPointId, name: stand.name, gps: stand.gps });
+    }
+  }
 
-  for (const { config, services, fareCells, dropped, included } of results) {
-    console.log(`\n=== ${config.tatakCorridorId} ===`);
+  // Every real service number any of these seven corridors names, sellable
+  // or not, ambiguous or not - this run is authoritative for all of them, so
+  // any existing services.json entry under one of these ids is replaced
+  // outright rather than left stale beside a freshly generated one (or, for
+  // a number that has newly become ambiguous like `1003BNGMNG`, simply
+  // dropped rather than left behind under its old, now-contested meaning).
+  const authoritativeFor = new Set<string>();
+  for (const r of results) for (const n of r.allRealNumbers) authoritativeFor.add(n);
+
+  const keptExisting = (servicesFile.services as Array<{ serviceId: string }>).filter(
+    (s) => !authoritativeFor.has(s.serviceId),
+  );
+  const removedCount = servicesFile.services.length - keptExisting.length;
+  servicesFile.services = keptExisting;
+
+  let addedCount = 0;
+  for (const { dir, fareTableId, services, fareCells, dropped, included } of results) {
+    console.log(`\n=== ${dir} ===`);
     console.log(`included: ${included.length}`);
     included.forEach((line) => console.log(`  + ${line}`));
     console.log(`dropped: ${dropped.length}`);
     dropped.forEach((line) => console.log(`  - ${line}`));
 
     if (services.length === 0) {
-      console.log(`no bookable service found; nothing written for ${config.tatakCorridorId}`);
+      console.log(`no bookable service found; nothing written for ${dir}`);
       continue;
     }
 
-    for (const town of config.towns) {
-      if (!existingTownCodes.has(town.code)) {
-        townsFile.towns.push(town);
-        existingTownCodes.add(town.code);
-      }
-    }
-
-    for (const point of config.points) {
-      const townCode = config.towns[0].code;
-      pointsFile.points[townCode] = pointsFile.points[townCode] ?? [];
-      if (!pointsFile.points[townCode].some((p) => p.boardingPointId === point.boardingPointId)) {
-        pointsFile.points[townCode].push({
-          boardingPointId: point.boardingPointId,
-          name: point.name,
-          nameLocal: point.nameLocal,
-          gps: point.gps,
-        });
-      }
-    }
-
     for (const service of services) {
-      if (!existingServiceIds.has(service.serviceId)) {
-        (servicesFile.services as unknown[]).push(service);
-        existingServiceIds.add(service.serviceId);
-      }
+      (servicesFile.services as unknown[]).push(service);
+      addedCount++;
     }
 
-    const fareTablePath = join(FIXTURE_ROOT, "fares", `${config.fareTableId}.json`);
+    const fareTablePath = join(FIXTURE_ROOT, "fares", `${fareTableId}.json`);
     const fareTable = {
       sourcing: {
-        note: `Every cell here is the boarding-pair x class fare Tatak's own generated GTFS for ${config.tatakCorridorId} carries for the real, non-ambiguous service numbers this file's services.json entries use. Generated by scripts/generate-ksrtc-fixtures.ts from ../Tatak/data/intercity/${config.tatakDir}/fare_products.txt; a cell's own sourcing label (V, S or I) is carried through from Tatak's tatak_sourcing column, with a Tatak V (operator's own published page) kept as V, and a Tatak P (the project owner's own paid receipt) downgraded to S since it is not the operator's own price list. No cell here was interpolated or invented by this generator; a boarding pair with no Tatak fare cell for a class has no cell here either, and that class's service is simply not generated (see the drop log printed when this script runs).`,
+        note: `Every cell here is the boarding-pair x class fare Tatak's own generated GTFS for ${dir} carries for the real, non-ambiguous service numbers this file's services.json entries use. Generated by scripts/generate-ksrtc-fixtures.ts from ../Tatak/data/intercity/${dir}/fare_products.txt; a cell's own sourcing label (V, S or I) is carried through from Tatak's tatak_sourcing column, with a Tatak V (operator's own published page) kept as V, and a Tatak P (the project owner's own paid receipt) downgraded to S since it is not the operator's own price list. No cell here was interpolated or invented by this generator; a boarding pair with no Tatak fare cell for a class has no cell here either, and that class's service is simply not offered for that pair (see the drop log printed when this script runs).`,
         label: "S" as const,
       },
       fareTable: {
-        fareTableId: config.fareTableId,
+        fareTableId,
         currency: "INR",
         fares: fareCells,
       },
@@ -444,7 +765,7 @@ function main() {
   writeFileSync(townsPath, `${JSON.stringify(townsFile, null, 2)}\n`);
   writeFileSync(pointsPath, `${JSON.stringify(pointsFile, null, 2)}\n`);
   writeFileSync(servicesPath, `${JSON.stringify(servicesFile, null, 2)}\n`);
-  console.log("\nwrote towns.json, boarding-points.json, services.json");
+  console.log(`\nwrote towns.json, boarding-points.json, services.json (${addedCount} services written, ${removedCount} stale entries replaced)`);
 }
 
 main();

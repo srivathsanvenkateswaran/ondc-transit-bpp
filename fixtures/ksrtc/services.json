@@ -144,6 +144,70 @@
       ]
     },
     {
+      "serviceId": "0605BNGMNG",
+      "serviceNumber": "0605",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 365,
+      "runningMinutes": 430,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 87
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 430
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 87
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 430
+        }
+      ]
+    },
+    {
       "serviceId": "0700BNGMNG",
       "serviceNumber": "0700",
       "brand": "KSRTC",
@@ -166,44 +230,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
-        }
-      ],
-      "droppingPoints": [
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 450
         }
-      ]
-    },
-    {
-      "serviceId": "0702BNGMNG",
-      "serviceNumber": "0702",
-      "brand": "KSRTC",
-      "operatingCorporation": null,
-      "operatingCorporationBasis": "none",
-      "provenance": "inferred",
-      "provenanceSourceCount": 1,
-      "serviceClass": "AIRAVAT",
-      "operatingPattern": {
-        "kind": "daily"
-      },
-      "departureMinute": 422,
-      "runningMinutes": 508,
-      "seatMapId": "AIRAVAT-2P2-53",
-      "fareTableId": "FT-BNGMNG",
-      "popularity": 0.5,
-      "reservationFeePaise": 2000,
-      "tollPaise": 2000,
-      "boardingPoints": [
-        {
-          "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 0
-        }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 508
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -230,12 +294,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 465
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -262,12 +358,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 539
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -294,12 +422,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 504
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -326,9 +486,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 510
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 510
@@ -336,8 +528,8 @@
       ]
     },
     {
-      "serviceId": "1003BNGMNG",
-      "serviceNumber": "1003",
+      "serviceId": "1004BNGMNG",
+      "serviceNumber": "1004",
       "brand": "KSRTC",
       "operatingCorporation": null,
       "operatingCorporationBasis": "none",
@@ -347,8 +539,8 @@
       "operatingPattern": {
         "kind": "daily"
       },
-      "departureMinute": 603,
-      "runningMinutes": 537,
+      "departureMinute": 604,
+      "runningMinutes": 506,
       "seatMapId": "AIRAVAT_CLUB-2P2-53",
       "fareTableId": "FT-BNGMNG",
       "popularity": 0.5,
@@ -358,12 +550,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 87
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 430
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 87
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 537
+          "reportingOffsetMinutes": 430
         }
       ]
     },
@@ -390,12 +614,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 510
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 509
+          "reportingOffsetMinutes": 510
         }
       ]
     },
@@ -422,12 +678,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 540
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -454,12 +742,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 478
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -486,12 +806,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 540
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -518,12 +870,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 480
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -550,12 +934,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 480
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -582,12 +998,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 475
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -614,12 +1062,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 480
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -646,12 +1126,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 479
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -678,9 +1190,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 94
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 254
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 468
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 94
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 254
+        },
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 468
@@ -710,12 +1254,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 524
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -742,12 +1318,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 94
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 254
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 468
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 94
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 254
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 485
+          "reportingOffsetMinutes": 468
         }
       ]
     },
@@ -774,12 +1382,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 84
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 229
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 419
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 84
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 229
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 539
+          "reportingOffsetMinutes": 419
         }
       ]
     },
@@ -806,12 +1446,108 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 84
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 229
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 419
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 84
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 229
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 419
+        }
+      ]
+    },
+    {
+      "serviceId": "2210BNGMNG",
+      "serviceNumber": "2210",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1330,
+      "runningMinutes": 470,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 87
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 430
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 87
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 430
         }
       ]
     },
@@ -838,12 +1574,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 486
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -870,12 +1638,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 451
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -902,12 +1702,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 540
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -934,12 +1766,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 510
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 445
+          "reportingOffsetMinutes": 510
         }
       ]
     },
@@ -966,12 +1830,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 84
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 229
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 419
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 84
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 229
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 479
+          "reportingOffsetMinutes": 419
         }
       ]
     },
@@ -998,12 +1894,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 94
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 254
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 468
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 94
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 254
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 456
+          "reportingOffsetMinutes": 468
         }
       ]
     },
@@ -1030,12 +1958,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 91
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 245
+        },
+        {
           "boardingPointId": "BP-MNG-MANGALURU",
-          "reportingOffsetMinutes": 480
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -1062,12 +2022,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 214
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 359
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 443
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 214
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 359
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 443
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 480
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -1094,12 +2086,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 214
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 359
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 443
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 214
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 359
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 443
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 510
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -1126,12 +2150,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 214
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 359
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 443
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 214
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 359
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 443
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 465
+          "reportingOffsetMinutes": 450
         }
       ]
     },
@@ -1158,12 +2214,236 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 214
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 359
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 443
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 450
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 214
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 359
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 443
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 451
+          "reportingOffsetMinutes": 450
+        }
+      ]
+    },
+    {
+      "serviceId": "1000MNGBNG",
+      "serviceNumber": "1000",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 600,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "2051MNGBNG",
+      "serviceNumber": "2051",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1251,
+      "runningMinutes": 490,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "2129MNGBNG",
+      "serviceNumber": "2129",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1289,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGMNG",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1190,12 +2470,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 479
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1222,12 +2534,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 481
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1254,9 +2598,41 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 480
@@ -1286,12 +2662,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 600
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1318,12 +2726,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 478
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1350,12 +2790,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 553
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1382,12 +2854,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 493
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1414,12 +2918,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 479
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1446,12 +2982,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 538
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1478,9 +3046,41 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 480
@@ -1510,12 +3110,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 535
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1542,12 +3174,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 477
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1574,12 +3238,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 465
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1606,12 +3302,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 465
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1638,12 +3366,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 565
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1670,12 +3430,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 497
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1702,12 +3494,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 435
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1734,12 +3558,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 468
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1766,9 +3622,41 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 383
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 480
@@ -1798,12 +3686,36 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 231
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 231
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 473
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 535
+          "reportingOffsetMinutes": 480
         }
       ]
     },
@@ -1830,9 +3742,41 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 255
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 431
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 532
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 540
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 255
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 431
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 532
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 540
@@ -1862,12 +3806,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 255
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 431
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 532
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 540
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 255
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 431
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 532
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 500
+          "reportingOffsetMinutes": 540
         }
       ]
     },
@@ -1894,12 +3870,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 255
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 431
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 532
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 540
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 255
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 431
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 532
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 500
+          "reportingOffsetMinutes": 540
         }
       ]
     },
@@ -1926,9 +3934,41 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 395
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 488
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 495
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 395
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 488
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 495
@@ -1958,12 +3998,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 395
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 488
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 495
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 395
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 488
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 511
+          "reportingOffsetMinutes": 495
         }
       ]
     },
@@ -1990,12 +4062,44 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 395
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 488
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 495
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 235
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 395
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 488
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 509
+          "reportingOffsetMinutes": 495
         }
       ]
     },
@@ -2022,9 +4126,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 315
@@ -2054,9 +4190,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 315
@@ -2086,12 +4254,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
+        {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
-          "reportingOffsetMinutes": 330
+          "reportingOffsetMinutes": 315
         }
       ]
     },
@@ -2118,9 +4318,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 315
@@ -2150,12 +4382,44 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 7
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 90
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 243
+        },
+        {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
-          "reportingOffsetMinutes": 270
+          "reportingOffsetMinutes": 315
         }
       ]
     },
@@ -2182,9 +4446,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 360
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 360
@@ -2214,9 +4510,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 360
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 360
@@ -2246,9 +4574,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 360
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 360
@@ -2278,9 +4638,41 @@
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 360
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 8
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 103
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 276
+        },
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 360
@@ -2310,9 +4702,41 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 305
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 305
@@ -2342,12 +4766,44 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 305
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 254
+          "reportingOffsetMinutes": 305
         }
       ]
     },
@@ -2374,9 +4830,41 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 305
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 305
@@ -2406,12 +4894,44 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 305
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 290
+          "reportingOffsetMinutes": 305
         }
       ]
     },
@@ -2438,12 +4958,44 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 305
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 79
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 218
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 299
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 324
+          "reportingOffsetMinutes": 305
         }
       ]
     },
@@ -2470,9 +5022,41 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 225
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 308
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 225
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 308
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 315
@@ -2502,9 +5086,41 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 225
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 308
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 225
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 308
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 315
@@ -2534,9 +5150,41 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 225
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 308
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
+        {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 225
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 308
+        },
         {
           "boardingPointId": "BP-BLR-MAJESTIC",
           "reportingOffsetMinutes": 315
@@ -2566,12 +5214,44 @@
         {
           "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 225
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 308
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 315
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-KNG-KUNIGAL",
+          "reportingOffsetMinutes": 225
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 308
+        },
+        {
           "boardingPointId": "BP-BLR-MAJESTIC",
-          "reportingOffsetMinutes": 325
+          "reportingOffsetMinutes": 315
         }
       ]
     },
@@ -2598,12 +5278,2492 @@
         {
           "boardingPointId": "BP-MNG-MANGALURU",
           "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 375
         }
       ],
       "droppingPoints": [
         {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HSN-HASSAN",
+          "reportingOffsetMinutes": 228
+        },
+        {
           "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
-          "reportingOffsetMinutes": 381
+          "reportingOffsetMinutes": 375
+        }
+      ]
+    },
+    {
+      "serviceId": "0830BNGHBL",
+      "serviceNumber": "0830",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 510,
+      "runningMinutes": 480,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 244
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 396
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 480
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 244
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 396
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "1500BNGHBL",
+      "serviceNumber": "1500",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 900,
+      "runningMinutes": 390,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 244
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 396
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 480
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 244
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 396
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "2245BNGHBL",
+      "serviceNumber": "2245",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1365,
+      "runningMinutes": 435,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 244
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 396
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 480
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 244
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 396
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "2320BNGHBL",
+      "serviceNumber": "2320",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1400,
+      "runningMinutes": 414,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 244
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 396
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 480
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 244
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 396
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "2231BNGHBL",
+      "serviceNumber": "2231",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1351,
+      "runningMinutes": 479,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 243
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 395
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 479
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 6
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 11
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 243
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 395
+        },
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 479
+        }
+      ]
+    },
+    {
+      "serviceId": "1245HBLBNG",
+      "serviceNumber": "1245",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 765,
+      "runningMinutes": 465,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 240
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 454
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 459
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 240
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 454
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 459
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ]
+    },
+    {
+      "serviceId": "1500HBLBNG",
+      "serviceNumber": "1500",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 900,
+      "runningMinutes": 390,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 240
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 454
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 459
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 240
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 454
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 459
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ]
+    },
+    {
+      "serviceId": "1700HBLBNG",
+      "serviceNumber": "1700",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1020,
+      "runningMinutes": 450,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 240
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 454
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 459
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 240
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 454
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 459
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ]
+    },
+    {
+      "serviceId": "2215HBLBNG",
+      "serviceNumber": "2215",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT_CLUB",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1335,
+      "runningMinutes": 420,
+      "seatMapId": "AIRAVAT_CLUB-2P2-53",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 240
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 454
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 459
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 81
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 240
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 454
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 459
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 465
+        }
+      ]
+    },
+    {
+      "serviceId": "2200HBLBNG",
+      "serviceNumber": "2200",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1320,
+      "runningMinutes": 480,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-BNGHBL",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 84
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 247
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 469
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 474
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HBL-HUBBALLI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 84
+        },
+        {
+          "boardingPointId": "BP-CTD-CHITRADURGA",
+          "reportingOffsetMinutes": 247
+        },
+        {
+          "boardingPointId": "BP-BLR-PEENYA",
+          "reportingOffsetMinutes": 469
+        },
+        {
+          "boardingPointId": "BP-BLR-YESHWANTHPUR",
+          "reportingOffsetMinutes": 474
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 480
+        }
+      ]
+    },
+    {
+      "serviceId": "1901BNGKWR",
+      "serviceNumber": "1901",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 361,
+      "runningMinutes": 60,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-COAST",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": -310
+        },
+        {
+          "boardingPointId": "BP-GKN-GOKARNA",
+          "reportingOffsetMinutes": -23
+        },
+        {
+          "boardingPointId": "BP-ANK-ANKOLA",
+          "reportingOffsetMinutes": 0
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MNG-MANGALURU",
+          "reportingOffsetMinutes": -310
+        },
+        {
+          "boardingPointId": "BP-GKN-GOKARNA",
+          "reportingOffsetMinutes": -23
+        },
+        {
+          "boardingPointId": "BP-ANK-ANKOLA",
+          "reportingOffsetMinutes": 0
+        }
+      ]
+    },
+    {
+      "serviceId": "2102MRCBNG",
+      "serviceNumber": "2102",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1262,
+      "runningMinutes": 433,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "0832BNGMRC",
+      "serviceNumber": "0832",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 512,
+      "runningMinutes": 423,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "1401MRCBNG",
+      "serviceNumber": "1401",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 841,
+      "runningMinutes": 420,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "2131BNGMRC",
+      "serviceNumber": "2131",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1291,
+      "runningMinutes": 400,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "1000MRCBNG",
+      "serviceNumber": "1000",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 600,
+      "runningMinutes": 405,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "2355BNGMRC",
+      "serviceNumber": "2355",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1435,
+      "runningMinutes": 400,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "1230MRCBNG",
+      "serviceNumber": "1230",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 750,
+      "runningMinutes": 405,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "0930BNGMRC",
+      "serviceNumber": "0930",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 570,
+      "runningMinutes": 390,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "2300MRCBNG",
+      "serviceNumber": "2300",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1380,
+      "runningMinutes": 390,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 168
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 227
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "2300BNGMRC",
+      "serviceNumber": "2300",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1380,
+      "runningMinutes": 390,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 137
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 197
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 364
+        }
+      ]
+    },
+    {
+      "serviceId": "1831MYSCHN",
+      "serviceNumber": "1831",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1111,
+      "runningMinutes": 261,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": -142
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 50
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 175
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": -142
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 50
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 175
+        }
+      ]
+    },
+    {
+      "serviceId": "1905MYSHYD",
+      "serviceNumber": "1905",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1145,
+      "runningMinutes": 240,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": -142
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 50
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 175
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": -142
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 50
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 175
+        }
+      ]
+    },
+    {
+      "serviceId": "0910MYSBNG",
+      "serviceNumber": "0910",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 550,
+      "runningMinutes": 180,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": -142
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 50
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 175
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": -142
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 50
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 175
+        }
+      ]
+    },
+    {
+      "serviceId": "2312BNGMNG",
+      "serviceNumber": "2312",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1392,
+      "runningMinutes": 303,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 125
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 175
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 317
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 125
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 175
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 317
+        }
+      ]
+    },
+    {
+      "serviceId": "2116PTRBNG",
+      "serviceNumber": "2116",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 181,
+      "runningMinutes": 170,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": -142
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 50
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 175
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": -142
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 50
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 175
+        }
+      ]
+    },
+    {
+      "serviceId": "2152BNGPTR",
+      "serviceNumber": "2152",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1312,
+      "runningMinutes": 376,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-GENNH275",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 125
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 175
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 317
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-MND-MANDYA-RURAL",
+          "reportingOffsetMinutes": 125
+        },
+        {
+          "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+          "reportingOffsetMinutes": 175
+        },
+        {
+          "boardingPointId": "BP-MDK-MADIKERI",
+          "reportingOffsetMinutes": 317
+        }
+      ]
+    },
+    {
+      "serviceId": "2245DVGBNG",
+      "serviceNumber": "2245",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1435,
+      "runningMinutes": 275,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -195
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 303
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -195
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 303
+        }
+      ]
+    },
+    {
+      "serviceId": "2122BNGRON",
+      "serviceNumber": "2122",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1282,
+      "runningMinutes": 458,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ]
+    },
+    {
+      "serviceId": "0630BNGDVG",
+      "serviceNumber": "0630",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 390,
+      "runningMinutes": 255,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ]
+    },
+    {
+      "serviceId": "1800CDPBNG",
+      "serviceNumber": "1800",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 210,
+      "runningMinutes": 120,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -395
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 103
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -395
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 103
+        }
+      ]
+    },
+    {
+      "serviceId": "0600BNGHSD",
+      "serviceNumber": "0600",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 360,
+      "runningMinutes": 90,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ]
+    },
+    {
+      "serviceId": "1801KMTBNG",
+      "serviceNumber": "1801",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 241,
+      "runningMinutes": 104,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -395
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 103
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -395
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 103
+        }
+      ]
+    },
+    {
+      "serviceId": "1115BNGHSD",
+      "serviceNumber": "1115",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 675,
+      "runningMinutes": 90,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ]
+    },
+    {
+      "serviceId": "1951LGSBNG",
+      "serviceNumber": "1951",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 331,
+      "runningMinutes": 95,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -395
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 103
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -395
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 103
+        }
+      ]
+    },
+    {
+      "serviceId": "1730BNGHSD",
+      "serviceNumber": "1730",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "RAJAHAMSA",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1050,
+      "runningMinutes": 90,
+      "seatMapId": "RAJAHAMSA-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 498
+        }
+      ]
+    },
+    {
+      "serviceId": "1130DVGBNG",
+      "serviceNumber": "1130",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 750,
+      "runningMinutes": 245,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -172
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 263
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -172
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 263
+        }
+      ]
+    },
+    {
+      "serviceId": "1230BNGDVG",
+      "serviceNumber": "1230",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 750,
+      "runningMinutes": 255,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ]
+    },
+    {
+      "serviceId": "1730DVGBNG",
+      "serviceNumber": "1730",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1110,
+      "runningMinutes": 240,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -172
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 263
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -172
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 263
+        }
+      ]
+    },
+    {
+      "serviceId": "0655BNGDVG",
+      "serviceNumber": "0655",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 415,
+      "runningMinutes": 240,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ]
+    },
+    {
+      "serviceId": "0602DVGBNG",
+      "serviceNumber": "0602",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 427,
+      "runningMinutes": 230,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -172
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 263
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -172
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 263
+        }
+      ]
+    },
+    {
+      "serviceId": "1830BNGDVG",
+      "serviceNumber": "1830",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "AIRAVAT",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1110,
+      "runningMinutes": 240,
+      "seatMapId": "AIRAVAT-2P2-53",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ]
+    },
+    {
+      "serviceId": "2132GVTBNG",
+      "serviceNumber": "2132",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 235,
+      "runningMinutes": 97,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -345
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 90
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -345
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 90
+        }
+      ]
+    },
+    {
+      "serviceId": "2205BNGSRS",
+      "serviceNumber": "2205",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1325,
+      "runningMinutes": 415,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ]
+    },
+    {
+      "serviceId": "2159BLRBNG",
+      "serviceNumber": "2159",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 229,
+      "runningMinutes": 70,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -345
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 90
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": -345
+        },
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 90
+        }
+      ]
+    },
+    {
+      "serviceId": "2112BNGCDP",
+      "serviceNumber": "2112",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1272,
+      "runningMinutes": 167,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ]
+    },
+    {
+      "serviceId": "2131BNGUDP",
+      "serviceNumber": "2131",
+      "brand": "KSRTC",
+      "operatingCorporation": null,
+      "operatingCorporationBasis": "none",
+      "provenance": "inferred",
+      "provenanceSourceCount": 1,
+      "serviceClass": "PALLAKKI",
+      "operatingPattern": {
+        "kind": "daily"
+      },
+      "departureMinute": 1291,
+      "runningMinutes": 112,
+      "seatMapId": "PALLAKKI-2P1-30",
+      "fareTableId": "FT-GENNH48",
+      "popularity": 0.5,
+      "reservationFeePaise": 2000,
+      "tollPaise": 2000,
+      "boardingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
+        }
+      ],
+      "droppingPoints": [
+        {
+          "boardingPointId": "BP-BLR-MAJESTIC",
+          "reportingOffsetMinutes": 0
+        },
+        {
+          "boardingPointId": "BP-HVR-HAVERI",
+          "reportingOffsetMinutes": 435
         }
       ]
     }

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -18,6 +19,24 @@ const responseSchemaPath = fileURLToPath(
 );
 const fixture = await FixtureReservedSource.load(fixtureRoot, "ksrtc");
 
+// Read straight off the same towns.json the fixture itself loaded, rather
+// than a hand-copied list of the seven town codes the ksrtc fixture used to
+// carry. That copy was already stale the day `generate-ksrtc-fixtures.ts`
+// grew past the three original generated corridors: a synthetic catalogue
+// naming a boarding point's town but not the town itself fails
+// `validateReservedCatalogue`'s own "names unknown town" check before any
+// test's own deliberate mutation is ever reached, which is what happened
+// here once boarding points under HSN/KNG/CTD/HVR/HBL/MDK/MND/ANK/GKN
+// existed and this list did not know about them. Reading the real file
+// keeps this synthetic catalogue's town list unable to drift from the one
+// `fixture.allServices()` actually stops at, the same way `boardingPoints`
+// below is built from the real services rather than a hand list of those.
+const towns = (
+  JSON.parse(
+    await readFile(new URL("../../fixtures/ksrtc/towns.json", import.meta.url), "utf8"),
+  ) as { towns: Array<{ code: string; name: string }> }
+).towns.map((town) => ({ code: town.code, name: town.name }));
+
 const QUERY = {
   fromTownCode: "BLR",
   toTownCode: "HMP",
@@ -30,15 +49,7 @@ async function catalogueBody() {
   return {
     catalogue: {
       operator: fixture.operator,
-      towns: [
-        { code: "BLR", name: "Bengaluru" },
-        { code: "HPT", name: "Hosapete" },
-        { code: "HMP", name: "Hampi" },
-        { code: "MAA", name: "Chennai" },
-        { code: "MNG", name: "Mangaluru" },
-        { code: "CKM", name: "Chikkamagaluru" },
-        { code: "MYS", name: "Mysuru" },
-      ],
+      towns,
       boardingPoints: services.flatMap((service) => [
         ...service.boardingPoints,
         ...service.droppingPoints,
