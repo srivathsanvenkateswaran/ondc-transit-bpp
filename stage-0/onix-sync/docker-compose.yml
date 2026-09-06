@@ -151,6 +151,12 @@ services:
       # in the registry and subscribed this seller under it. See
       # deploy/seed-registry.sh.
       RESERVED_ENABLED: ${RESERVED_ENABLED:-false}
+      # Reserved has no gateway in front of it in this deployment - Tatak
+      # dials this provider directly on KSRTC_BPP_URI's port rather than
+      # through bap-network/bap-client - so it answers each action inline
+      # instead of acking it and posting the answer to KSRTC_CALLBACK_URL
+      # afterwards. See AppConfig.reservedSyncResponses in src/config.ts.
+      RESERVED_SYNC_RESPONSES: ${RESERVED_SYNC_RESPONSES:-true}
       RESERVED_SCHEMA_ROOT: ${RESERVED_SCHEMA_ROOT:-/app/schemas/transit_local_intercity/0.1.0}
       KSRTC_BPP_ID: ${KSRTC_BPP_ID:-ksrtc.bpp.transit.localhost}
       KSRTC_BPP_URI: ${KSRTC_BPP_URI:-http://ksrtc-bpp-network:6202}

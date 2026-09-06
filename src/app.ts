@@ -292,6 +292,7 @@ export async function createApp(
       contextTtl: config.contextTtl,
       callbackTimeoutMs: config.callbackTimeoutMs,
       logEvent: eventLogger,
+      syncResponses: config.reservedSyncResponses ?? false,
       ...(reservedOverrides.now ? { now: reservedOverrides.now } : {}),
     });
   }

@@ -23,6 +23,12 @@ import type { ReservedValidator } from "./schema.js";
  * the pinned protocol server exposes one webhook per seller rather than one
  * per action.
  *
+ * A deployment with no gateway in front of reserved can turn
+ * `dependencies.syncResponses` on and get the same answer back on the open
+ * connection instead - see `answerActionSync` below and
+ * `AppConfig.reservedSyncResponses` in `src/config.ts` for why that is safe
+ * for this category specifically.
+ *
  * A domain refusal arrives as an `error` on the callback with no
  * `message.order`. Two refusals carry a payload beside them, and neither of
  * them puts it on an order: a seat somebody else took comes back with the
@@ -60,6 +66,13 @@ export interface ReservedHandlerDependencies {
   callbackTimeoutMs: number;
   logEvent: (fields: Record<string, unknown>) => void;
   now?: () => Date;
+  /**
+   * Return the built `on_<action>` payload as the HTTP response to the action
+   * itself, instead of acking the request and posting the payload to
+   * `runtime.callbackUrl` afterwards. See `AppConfig.reservedSyncResponses`
+   * for why this exists and when it is safe to turn on.
+   */
+  syncResponses?: boolean;
 }
 
 interface RequestContext {
@@ -267,73 +280,99 @@ export function createReservedHandler(dependencies: ReservedHandlerDependencies)
     };
   }
 
-  async function answerAction(
+  /**
+   * Build the `on_<action>` payload and make sure it is one this provider is
+   * willing to publish, falling back to `lastResort` if it is not.
+   *
+   * Shared by the ack-then-callback path and the synchronous-response path:
+   * both need exactly this, and differ only in what they do with the result -
+   * post it to `runtime.callbackUrl` after a delay, or hand it straight back
+   * as the HTTP response.
+   */
+  async function resolveCallback(
     action: ReservedAction,
     request: ReservedProtocolRequest,
-  ): Promise<void> {
+  ): Promise<{ onAction: ReservedCallbackAction; callback: Record<string, unknown> }> {
     const onAction = `on_${action}` as ReservedCallbackAction;
-    try {
-      let callback = await buildCallback(action, request);
-      const validation = callbackValidation(
-        dependencies.validator,
-        onAction,
-        callback,
-      );
-      if (!validation.valid) {
-        // This used to throw, which meant the callback was never sent and the
-        // client waited out its own timeout against silence. A provider that
-        // cannot say what happened must still say that much: an unanswerable
-        // request is answered with the code for it, and the schema failure is
-        // logged beside it rather than instead of it.
-        //
-        // The refusal itself is validated too. If even that will not pass, the
-        // catch below logs and nothing is sent, which is the one case where
-        // silence is the only thing left.
-        dependencies.logEvent({
-          transaction_id: request.context.transaction_id,
-          message_id: request.context.message_id,
-          action: onAction,
-          subscriber_id: dependencies.runtime.subscriberId,
-          operator: "ksrtc",
-          outcome: "SCHEMA_ERROR",
-          error: `Generated ${onAction} failed schema validation: ${JSON.stringify(
-            validation.errors,
-          )}`,
-        });
-        callback = lastResort(request, onAction);
-        const fallbackValidation = callbackValidation(
-          dependencies.validator,
-          onAction,
-          callback,
-        );
-        if (!fallbackValidation.valid) {
-          throw new Error(
-            `Generated ${onAction} and its refusal both failed schema validation: ${JSON.stringify(
-              fallbackValidation.errors,
-            )}`,
-          );
-        }
-      }
-      await sleep(dependencies.runtime.callbackDelayMs);
-      await dispatchCallback(
-        callbackUrlFor(dependencies.runtime.callbackUrl, onAction),
-        callback,
-        dependencies.callbackTimeoutMs,
-      );
-      const error = (callback as { error?: { code: string } }).error;
-      const orderId = (
-        callback as { message?: { order?: { id?: string } } }
-      ).message?.order?.id;
+    let callback = await buildCallback(action, request);
+    const validation = callbackValidation(
+      dependencies.validator,
+      onAction,
+      callback,
+    );
+    if (!validation.valid) {
+      // This used to throw, which meant the callback was never sent and the
+      // client waited out its own timeout against silence. A provider that
+      // cannot say what happened must still say that much: an unanswerable
+      // request is answered with the code for it, and the schema failure is
+      // logged beside it rather than instead of it.
+      //
+      // The refusal itself is validated too. If even that will not pass, the
+      // caller's own catch logs and nothing is sent, which is the one case
+      // where silence is the only thing left.
       dependencies.logEvent({
         transaction_id: request.context.transaction_id,
         message_id: request.context.message_id,
         action: onAction,
         subscriber_id: dependencies.runtime.subscriberId,
         operator: "ksrtc",
-        outcome: error ? "ERROR" : "ACK",
-        ...(orderId ? { order_id: orderId } : {}),
-        ...(error ? { error } : {}),
+        outcome: "SCHEMA_ERROR",
+        error: `Generated ${onAction} failed schema validation: ${JSON.stringify(
+          validation.errors,
+        )}`,
       });
+      callback = lastResort(request, onAction);
+      const fallbackValidation = callbackValidation(
+        dependencies.validator,
+        onAction,
+        callback,
+      );
+      if (!fallbackValidation.valid) {
+        throw new Error(
+          `Generated ${onAction} and its refusal both failed schema validation: ${JSON.stringify(
+            fallbackValidation.errors,
+          )}`,
+        );
+      }
+    }
+    return { onAction, callback };
+  }
+
+  function logResolution(
+    request: ReservedProtocolRequest,
+    onAction: ReservedCallbackAction,
+    callback: Record<string, unknown>,
+  ): void {
+    const error = (callback as { error?: { code: string } }).error;
+    const orderId = (
+      callback as { message?: { order?: { id?: string } } }
+    ).message?.order?.id;
+    dependencies.logEvent({
+      transaction_id: request.context.transaction_id,
+      message_id: request.context.message_id,
+      action: onAction,
+      subscriber_id: dependencies.runtime.subscriberId,
+      operator: "ksrtc",
+      outcome: error ? "ERROR" : "ACK",
+      ...(orderId ? { order_id: orderId } : {}),
+      ...(error ? { error } : {}),
+    });
+  }
+
+  async function answerAction(
+    action: ReservedAction,
+    request: ReservedProtocolRequest,
+  ): Promise<void> {
+    const onAction = `on_${action}` as ReservedCallbackAction;
+    try {
+      const resolved = await resolveCallback(action, request);
+      await sleep(dependencies.runtime.callbackDelayMs);
+      await dispatchCallback(
+        callbackUrlFor(dependencies.runtime.callbackUrl, onAction),
+        resolved.callback,
+        dependencies.callbackTimeoutMs,
+      );
+      logResolution(request, resolved.onAction, resolved.callback);
     } catch (error) {
       dependencies.logEvent({
         transaction_id: request.context.transaction_id,
@@ -343,6 +382,47 @@ export function createReservedHandler(dependencies: ReservedHandlerDependencies)
         operator: "ksrtc",
         outcome: "ERROR",
         error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * The synchronous twin of `answerAction`: same resolution, handed back on
+   * the open connection instead of posted to a callback URL.
+   *
+   * There is no ack-then-timeout window here, so the internal-error case that
+   * `answerAction` can leave to silence (both the real callback and its own
+   * refusal fail schema validation) has to answer something: the rider's
+   * request is this connection, and closing it with nothing is the exact
+   * defect this whole feature exists to remove.
+   */
+  async function answerActionSync(
+    action: ReservedAction,
+    request: ReservedProtocolRequest,
+    respond: (status: number, payload: unknown) => void,
+  ): Promise<void> {
+    const onAction = `on_${action}` as ReservedCallbackAction;
+    try {
+      const resolved = await resolveCallback(action, request);
+      logResolution(request, resolved.onAction, resolved.callback);
+      respond(200, resolved.callback);
+    } catch (error) {
+      dependencies.logEvent({
+        transaction_id: request.context.transaction_id,
+        message_id: request.context.message_id,
+        action: onAction,
+        subscriber_id: dependencies.runtime.subscriberId,
+        operator: "ksrtc",
+        outcome: "ERROR",
+        error: error instanceof Error ? error.message : String(error),
+      });
+      respond(500, {
+        context: callbackContext(request, onAction),
+        message: {},
+        error: {
+          code: RESERVED_INTERNAL_ERROR,
+          message: "Provider could not process the request",
+        },
       });
     }
   }
@@ -379,6 +459,10 @@ export function createReservedHandler(dependencies: ReservedHandlerDependencies)
         return;
       }
       const request = body as ReservedProtocolRequest;
+      if (dependencies.syncResponses) {
+        await answerActionSync(action, request, respond);
+        return;
+      }
       respond(202, ack);
       dependencies.logEvent({
         transaction_id: request.context.transaction_id,

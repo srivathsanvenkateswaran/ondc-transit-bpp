@@ -101,6 +101,27 @@ export interface AppConfig {
   reservedSourceUrl?: string;
   reservedSourceResponseSchema: string;
   reservedOperators?: Record<ReservedOperatorKey, OperatorRuntimeConfig>;
+  /**
+   * Answer a reserved action in the same HTTP response instead of ack-then-
+   * callback.
+   *
+   * The reserved category's own actions never call out to anything slow: the
+   * catalogue is a loaded dataset, not a live query, and a hold or a booking
+   * is a local database write. `runAction` already returns the full answer
+   * before `answerAction` does anything else with it; the ack-then-callback
+   * shape exists because the two categories beside this one speak over the
+   * wider beckn network, where a gateway fans one search out to several
+   * sellers and cannot hold a connection open for the slowest of them.
+   * Reserved has no gateway in front of it in this deployment - a buyer app
+   * dials this provider directly - so there is nothing that shape buys here,
+   * and the dial-in client is written against a normal request/response
+   * contract, not a webhook it would need its own inbound route to receive.
+   *
+   * Off by default so the two existing categories, and any deployment that
+   * does put a gateway in front of reserved later, keep the callback
+   * contract unchanged.
+   */
+  reservedSyncResponses?: boolean;
   reservation: ReservationConfig;
   /**
    * Where a confirm or a cancellation pushes the seat count that changed -
@@ -223,6 +244,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     parseHttpUrl(journeySourceUrl, "JOURNEY_SOURCE_URL");
   }
   const reservedEnabled = (env.RESERVED_ENABLED?.trim() || "false") === "true";
+  const reservedSyncResponses =
+    (env.RESERVED_SYNC_RESPONSES?.trim() || "false") === "true";
   const reservedSource = env.RESERVED_SOURCE?.trim() || "fixture";
   if (reservedSource !== "fixture" && reservedSource !== "http") {
     throw new Error(`Unsupported RESERVED_SOURCE ${reservedSource}`);
@@ -286,6 +309,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       },
     },
     reservedEnabled,
+    reservedSyncResponses,
     reservedSchemaRoot:
       env.RESERVED_SCHEMA_ROOT ??
       join(process.cwd(), "schemas", "transit_local_intercity", "0.1.0"),
