@@ -27,15 +27,21 @@ import {
 const REFUSED_CLASSES: Record<string, string> = {
   SARIGE:
     "an unreserved, walk-up, standing-room-permitted ordinary bus, which belongs on the single-journey path if it is modelled at all",
-  ASHWAMEDHA:
-    "an unreserved, walk-up, standing-room-permitted ordinary bus, which belongs on the single-journey path if it is modelled at all",
-  EV_POWER_PLUS: "a class with no confirmed seat layout or route scale",
-  AMBAARI_DREAM: "a class with no confirmed seat layout or route scale",
   CORONA:
     "not a currently-marketed class name; it survives only as the historic chassis name of the original 2015 sleeper, and no active product under it was found",
   CORONA_CLUB_CLASS:
     "not a currently-marketed class name; it survives only as the historic chassis name of the original 2015 sleeper, and no active product under it was found",
 };
+
+// `ASHWAMEDHA` was refused here until this pass, on the mistaken belief that
+// a class priced at the ordinary floor must be an unreserved ordinary bus
+// like `SARIGE`. Tatak's own `src/intercity/classes.ts` marks it
+// `reservationRequired: true`; it is a genuinely reserved, express-tier
+// product that happens to price low, not `SARIGE` under a different name.
+// `EV_POWER_PLUS` and `AMBAARI_DREAM_CLASS` were refused as classes with no
+// confirmed seat layout; Tatak's own domain research has since resolved a
+// layout for both. All three are now in `SERVICE_CLASSES` - see that
+// constant's own note in `types.ts` for the full reasoning.
 
 function fail(sourceDescription: string, message: string): never {
   throw new Error(`${sourceDescription}: ${message}`);

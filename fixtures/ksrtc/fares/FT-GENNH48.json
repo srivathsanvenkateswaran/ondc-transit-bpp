@@ -10,14 +10,14 @@
       {
         "fromBoardingPointId": "BP-HVR-HAVERI",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 62500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-HVR-HAVERI",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 62500,
         "sourcing": "I"
       },

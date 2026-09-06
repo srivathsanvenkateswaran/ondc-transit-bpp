@@ -10,281 +10,631 @@
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 7000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-KNG-KUNIGAL",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 26500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-HSN-HASSAN",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 60000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 67600,
         "sourcing": "V"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-KNG-KUNIGAL",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 25000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-HSN-HASSAN",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 58500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 75000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-KNG-KUNIGAL",
         "toBoardingPointId": "BP-HSN-HASSAN",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 39000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-KNG-KUNIGAL",
         "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 55500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HSN-HASSAN",
         "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 22000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 5500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 22000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 50000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 66000,
+        "sourcing": "V"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 20500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 48500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 62500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 32500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 46500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 18500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 6000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 24000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 54500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 60100,
+        "sourcing": "V"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 22500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 53000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 68000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 35500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 50500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 20000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 4000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-KNG-KUNIGAL",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 15500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-HSN-HASSAN",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 35000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 40700,
         "sourcing": "V"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-KNG-KUNIGAL",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 14500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-HSN-HASSAN",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 34500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 44000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-KNG-KUNIGAL",
         "toBoardingPointId": "BP-HSN-HASSAN",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 23000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-KNG-KUNIGAL",
         "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 32500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HSN-HASSAN",
         "toBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 13000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
         "toBoardingPointId": "BP-HSN-HASSAN",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 22000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
         "toBoardingPointId": "BP-KNG-KUNIGAL",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 55500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 75000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 67600,
         "sourcing": "V"
       },
       {
         "fromBoardingPointId": "BP-HSN-HASSAN",
         "toBoardingPointId": "BP-KNG-KUNIGAL",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 39000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HSN-HASSAN",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 58500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HSN-HASSAN",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 60000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-KNG-KUNIGAL",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 25000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-KNG-KUNIGAL",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 26500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 7000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
         "toBoardingPointId": "BP-HSN-HASSAN",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 18500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 46500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 62500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 66000,
+        "sourcing": "V"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 32500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 48500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 50000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 20500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 22000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "EV_POWER_PLUS",
+        "farePaise": 5500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 20000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 50500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 68000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 60100,
+        "sourcing": "V"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 35500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 53000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 54500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 22500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 24000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 6000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 13000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
         "toBoardingPointId": "BP-KNG-KUNIGAL",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 32500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 44000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 40700,
         "sourcing": "V"
       },
       {
         "fromBoardingPointId": "BP-HSN-HASSAN",
         "toBoardingPointId": "BP-KNG-KUNIGAL",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 23000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HSN-HASSAN",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 34500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HSN-HASSAN",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 35000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-KNG-KUNIGAL",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 14500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-KNG-KUNIGAL",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 15500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 4000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-HSN-HASSAN",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 9500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 24000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 32500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 34300,
+        "sourcing": "V"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-KNG-KUNIGAL",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 17000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 25500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HSN-HASSAN",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 26000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 11000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-KNG-KUNIGAL",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 11500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "ASHWAMEDHA",
+        "farePaise": 3000,
         "sourcing": "I"
       }
     ]

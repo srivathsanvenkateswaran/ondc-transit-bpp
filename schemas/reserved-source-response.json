@@ -37,13 +37,23 @@
       }
     },
     "serviceClass": {
-      "$comment": "Only classes that genuinely sell numbered seats. Unreserved walk-up classes are deliberately absent: gating on the corporation rather than the class would stop an ordinary intercity bus ever appearing as a walk-up option.",
+      "$comment": "Only classes that genuinely sell numbered seats - exactly the fifteen Tatak's own src/intercity/classes.ts marks reservationRequired: true. Unreserved walk-up classes (KARNATAKA_SARIGE) are deliberately absent: gating on the corporation rather than the class would stop an ordinary intercity bus ever appearing as a walk-up option. Every id here is copied verbatim from Tatak's own class id - see src/reserved/types.ts SERVICE_CLASSES for the naming decision this enum mirrors.",
       "enum": [
-        "RAJAHAMSA",
+        "RAJAHAMSA_EXECUTIVE",
         "AIRAVAT",
-        "AIRAVAT_CLUB",
+        "AIRAVAT_CLUB_CLASS",
         "PALLAKKI",
-        "AMBAARI_UTSAV"
+        "AMBAARI_UTSAV",
+        "ASHWAMEDHA",
+        "NON_AC_SLEEPER",
+        "AMBAARI_DREAM_CLASS",
+        "AIRAVAT_CLUB_CLASS_2",
+        "EV_POWER_PLUS",
+        "FLYBUS",
+        "KALYANA_RATHA",
+        "AMOGHAVARSHA",
+        "AC_SEATER_EXECUTIVE_CHAIR",
+        "AC_SLEEPER"
       ]
     },
     "corporation": { "enum": ["KSRTC", "NWKRTC", "KKRTC"] },

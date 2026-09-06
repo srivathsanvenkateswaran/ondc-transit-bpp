@@ -12,13 +12,17 @@ import type { ServiceClass } from "./types.js";
  * lower classes". That upper bound is precise and its lower reach is not: a
  * non-AC sleeper sits below an AC sleeper and above a seater by comfort, and
  * no source places it relative to Rajahamsa for concession purposes. So the
- * rate is published for the one class the source names and refused everywhere
- * else.
+ * rate is published for the two classes the source names directly -
+ * `RAJAHAMSA_EXECUTIVE` itself, and `ASHWAMEDHA`, which prices at the
+ * ordinary floor and is read as squarely inside "lower" - and refused
+ * everywhere else.
  *
  * **The free-travel scheme for women and gender minorities** covers ordinary
- * and express services and its own published exclusion list names every class
- * this category sells. That is a fact rather than a limitation: no path
- * exists, and a claim is refused.
+ * and express services, and its own published exclusion list names every
+ * class this category sells except one: `ASHWAMEDHA`, whose own name
+ * contains "EXPRESS" and which the scheme's carve-out therefore covers even
+ * as a reserved seat. For the other fourteen, that exclusion is a fact
+ * rather than a limitation: no path exists, and a claim is refused.
  *
  * **The child concession** is a range rather than a rate: 50 to 75% depending
  * on service class, with no per-class breakdown found. A midpoint would be an
@@ -34,8 +38,16 @@ import type { ServiceClass } from "./types.js";
 
 export type ConcessionClaim = "SENIOR" | "CHILD" | "STUDENT" | "SHAKTI";
 
+// Tatak's own `src/intercity/classes.ts` carries a `seniorDiscountPercent`
+// and a `seniorDiscountBasis` per class, and only two of the fifteen ever
+// reach `'published'`: RAJAHAMSA_EXECUTIVE and ASHWAMEDHA, both read against
+// the same source ("Rajahamsa and lower classes", 25%). Every other class is
+// `'unresolved'` or `'not-eligible'` there, and this table publishes a rate
+// for neither - the same refusal discipline `concessionRatePercent` below
+// already enforces for every class not listed here.
 const SENIOR_PERCENT_BY_CLASS: Partial<Record<ServiceClass, number>> = {
-  RAJAHAMSA: 25,
+  RAJAHAMSA_EXECUTIVE: 25,
+  ASHWAMEDHA: 25,
 };
 
 /**
@@ -94,12 +106,23 @@ export function concessionRatePercent(
       if (percent === undefined) {
         throw new ReservedLifecycleError(
           "CONCESSION-RATE-NOT-PUBLISHED",
-          `No SENIOR_CONCESSION_PERCENT rate is published for class ${serviceClass} on this service; this provider publishes a senior rate for RAJAHAMSA only`,
+          `No SENIOR_CONCESSION_PERCENT rate is published for class ${serviceClass} on this service; this provider publishes a senior rate for RAJAHAMSA_EXECUTIVE and ASHWAMEDHA only`,
         );
       }
       return percent;
     }
+    // `ASHWAMEDHA` is the one exception to "the exclusion list names every
+    // class this category sells", and it is a real one, not an oversight:
+    // Tatak's own `src/intercity/classes.ts` marks it `shaktiFreeTravel:
+    // true` on a direct textual reading of the scheme's own carve-out
+    // ("ordinary and express services only") against the class's own name,
+    // which contains "EXPRESS". A reserved, numbered seat on it is still
+    // free under the scheme by that same published rule, unusual as a
+    // reserved product being in scope at all is. 100 is a full discount, not
+    // a special case in the arithmetic below - `concessionDiscountPaise`
+    // treats it exactly like any other percentage.
     case "SHAKTI":
+      if (serviceClass === "ASHWAMEDHA") return 100;
       throw new ReservedLifecycleError(
         "CONCESSION-NOT-APPLICABLE",
         `The free-travel scheme covers ordinary and express services and its published exclusion list names class ${serviceClass}; it never applies to a reserved seat`,

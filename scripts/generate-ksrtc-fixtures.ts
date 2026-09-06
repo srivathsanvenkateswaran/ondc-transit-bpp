@@ -52,6 +52,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { SERVICE_CLASSES } from "../src/reserved/types.js";
+
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const FIXTURE_ROOT = join(HERE, "..", "fixtures", "ksrtc");
 const TATAK_ROOT = join(HERE, "..", "..", "Tatak", "data", "intercity");
@@ -140,12 +142,21 @@ const TATAK_ROOT = join(HERE, "..", "..", "Tatak", "data", "intercity");
 //   - `ka-gen-nh73`, `ka-gen-sh25`, `ka-gen-nh50` (Mangaluru / Hosapete via
 //     other roads): checked route-direction group by group; no sellable
 //     class carries a real number on any of them.
-//   - `ka-bng-bdm`, `ka-bng-bjp` (Hosapete via Badami / Bijapur): real numbers
-//     exist here, but only on NON_AC_SLEEPER, KALYANA_RATHA, AMOGHAVARSHA and
-//     KARNATAKA_SARIGE - none of which `CLASS_MAP` can sell (see its own
-//     note; adding a class this provider has never carried is out of scope
-//     for a coverage pass, same call as the existing NON_AC_SLEEPER /
-//     AC_SEATER_EXECUTIVE_CHAIR exclusion on `ka-bng-hmp` and `ka-bng-mng`).
+//   - `ka-bng-bdm`, `ka-bng-bjp` (Hosapete via Badami / Bijapur): excluded in
+//     the pass that wrote this paragraph because their real numbers sat only
+//     on NON_AC_SLEEPER, KALYANA_RATHA, AMOGHAVARSHA and KARNATAKA_SARIGE,
+//     and `CLASS_MAP` could sell none of them. A LATER pass added all fifteen
+//     of Tatak's reserved classes to `SERVICE_CLASSES` (see that constant's
+//     own note in `src/reserved/types.ts`), and both directories are read
+//     below now: `ka-bng-bjp` carries `2205BNGBJP`, the real KALYANA_RATHA
+//     working that pass exists to fix, and `ka-bng-bdm` carries a real
+//     NON_AC_SLEEPER pair. `ka-bng-hmp` remains excluded for the separate,
+//     still-current reason given above (the hand-authored Hampi/Hosapete
+//     fixture other test suites default to); its own real
+//     AC_SEATER_EXECUTIVE_CHAIR numbers are sold instead as a small
+//     hand-authored addition to that existing fixture - see
+//     `fixtures/ksrtc/services.json`'s own two entries for it and
+//     `fixtures/ksrtc/fares/FT-BNGHMP.json`'s own added cells.
 //
 // Extending this list further is still exactly the same operation it always
 // was: add a directory name and a fare-table id below, and (if it calls
@@ -165,6 +176,22 @@ const CORRIDOR_DIRS: Array<{ dir: string; fareTableId: string }> = [
   { dir: "ka-gen-nh67", fareTableId: "FT-GENNH67" },
   { dir: "ka-gen-sh37", fareTableId: "FT-GENSH37" },
   { dir: "ka-bng-bgk", fareTableId: "FT-BNGBGK" },
+  // Added in this pass, alongside the ten classes this generator did not
+  // know how to sell before it: `ka-bng-bdm` and `ka-bng-bjp` were both
+  // excluded outright in the previous pass ("real numbers exist here, but
+  // only on NON_AC_SLEEPER, KALYANA_RATHA, AMOGHAVARSHA and
+  // KARNATAKA_SARIGE - none of which CLASS_MAP can sell"). All three of the
+  // reserved classes named there are in `CLASS_MAP` now, so the reason for
+  // the exclusion is gone.
+  //
+  // `ka-bng-bjp` (Bengaluru-Vijayapura via Hosapete) is the corridor behind
+  // this pass's own reproduction case: `2205BNGBJP`, a real, sourced
+  // KALYANA_RATHA working whose own stop_times name `KA-BP-HOSAPETE`
+  // directly (not a fallback via its route-direction's reference pattern),
+  // so it needs no new STAND_REGISTRY entry to become sellable
+  // Bengaluru-Hosapete.
+  { dir: "ka-bng-bdm", fareTableId: "FT-BNGBDM" },
+  { dir: "ka-bng-bjp", fareTableId: "FT-BNGBJP" },
 ];
 
 // A handful of Tatak service numbers are assigned to a real trip on two
@@ -198,38 +225,60 @@ const AMBIGUOUS_SERVICE_NUMBERS = new Set([
   "1003BNGMNG",
 ]);
 
-// Tatak class id -> this provider's ServiceClass. Every class not listed
-// here (KARNATAKA_SARIGE, ASHWAMEDHA, EV_POWER_PLUS, NON_AC_SLEEPER,
-// AC_SEATER_EXECUTIVE_CHAIR, AMBAARI_DREAM_CLASS, AIRAVAT_CLUB_CLASS_2, ...)
-// has no home in this provider: SARIGE/ASHWAMEDHA/EV_POWER_PLUS/
-// AMBAARI_DREAM are hard-refused at fixture load (src/reserved/integrity.ts
-// REFUSED_CLASSES), and the rest simply are not in SERVICE_CLASSES.
+// Tatak class id -> this provider's ServiceClass, imported from the one
+// place that declares which of Tatak's classes this provider can sell at
+// all (`src/reserved/types.ts` `SERVICE_CLASSES` - see that constant's own
+// note on the naming decision this map now just mirrors).
 //
-// KARNATAKA_SARIGE is never in this map on purpose, for a reason worth
-// stating once: it is Tatak's one intercity class with `reservationRequired:
-// false` (see Tatak's `src/intercity/walkup.ts`), so a leg running it never
-// asks this provider for anything - mapping it here would sell a seat
-// nobody needs to reserve.
+// Every entry here is the identity function, because this provider's own
+// ids ARE Tatak's ids as of this pass - there is no longer a second
+// spelling to translate between. The map still exists, rather than being
+// replaced by "is this id in SERVICE_CLASSES", for one reason: it is what
+// makes `KARNATAKA_SARIGE` absence deliberate rather than incidental. Tatak
+// names sixteen reserved-or-not classes in total; `SERVICE_CLASSES` (and
+// therefore this map) carries the fifteen with `reservationRequired: true`
+// and leaves `KARNATAKA_SARIGE` out on purpose - it is Tatak's one
+// intercity class with `reservationRequired: false` (see Tatak's
+// `src/intercity/walkup.ts`), so a leg running it never asks this provider
+// for anything, and mapping it here would sell a seat nobody needs to
+// reserve.
 //
-// `AIRAVAT_CLUB_CLASS_2` maps onto the SAME provider class as
-// `AIRAVAT_CLUB_CLASS` because this provider's vocabulary
-// (`src/reserved/types.ts` `SERVICE_CLASSES`) has no second Airavat Club
-// tier - seat map and fare table are both structured per class label, not
-// per Tatak sub-class. The two ARE genuinely different products at
-// different prices (Tatak's own `AIRAVAT_CLUB_CLASS_2` docblock cites 1257
-// against 1158 for the identical Bengaluru-Mangaluru pair), and this mapping
-// loses that distinction: whichever of the two classes this script fare-cells
-// a given boarding pair under FIRST wins, and the other's own true fare is
-// silently not carried through for that pair (see `claimFareCell` below). A
-// second provider class would fix this properly; adding one is out of scope
-// for a stand-code and coverage pass.
-const CLASS_MAP: Record<string, string> = {
-  RAJAHAMSA_EXECUTIVE: "RAJAHAMSA",
-  AIRAVAT: "AIRAVAT",
-  AIRAVAT_CLUB_CLASS: "AIRAVAT_CLUB",
-  AIRAVAT_CLUB_CLASS_2: "AIRAVAT_CLUB",
-  PALLAKKI: "PALLAKKI",
-  AMBAARI_UTSAV: "AMBAARI_UTSAV",
+// `AIRAVAT_CLUB_CLASS_2` now maps onto its OWN provider class rather than
+// being squeezed onto `AIRAVAT_CLUB_CLASS`'s id. Before this pass this
+// provider's vocabulary had no second Airavat Club tier, so both Tatak
+// classes shared one id, and whichever of the two claimed a fare cell for a
+// boarding pair first silently kept the other's real, different fare from
+// ever being sold (Tatak's own docblock on `AIRAVAT_CLUB_CLASS_2` cites 1257
+// against 1158 for the identical Bengaluru-Mangaluru pair). With its own id,
+// each tier now claims its own fare cells independently.
+const CLASS_MAP: Record<string, string> = Object.fromEntries(
+  SERVICE_CLASSES.map((id) => [id, id]),
+);
+
+// The seat map this generator assigns a service of a given class, keyed by
+// the same provider ServiceClass this file's own CLASS_MAP produces. One
+// map per class, authored under `fixtures/ksrtc/seatmaps/<seatMapId>.json`
+// to match what Tatak's own `src/intercity/classes.ts` says the coach
+// actually is - a 2+2 seater, a 2+1 sleeper and a 3+2 seater are different
+// shapes and different seat counts, and this table is what stops every
+// class from being drawn as a copy of whichever map happened to exist
+// first.
+const SEAT_MAP_ID_BY_CLASS: Record<string, string> = {
+  RAJAHAMSA_EXECUTIVE: "RAJAHAMSA_EXECUTIVE-2P2-53",
+  AIRAVAT: "AIRAVAT-2P2-53",
+  AIRAVAT_CLUB_CLASS: "AIRAVAT_CLUB_CLASS-2P2-53",
+  PALLAKKI: "PALLAKKI-2P1-30",
+  AMBAARI_UTSAV: "AMBAARI_UTSAV-2P1-40",
+  ASHWAMEDHA: "ASHWAMEDHA-3P2-60",
+  NON_AC_SLEEPER: "NON_AC_SLEEPER-2P1-30",
+  AMBAARI_DREAM_CLASS: "AMBAARI_DREAM_CLASS-2P1-36",
+  AIRAVAT_CLUB_CLASS_2: "AIRAVAT_CLUB_CLASS_2-2P2-53",
+  EV_POWER_PLUS: "EV_POWER_PLUS-2P2-53",
+  FLYBUS: "FLYBUS-2P2-53",
+  KALYANA_RATHA: "KALYANA_RATHA-2P1-30",
+  AMOGHAVARSHA: "AMOGHAVARSHA-2P1-30",
+  AC_SEATER_EXECUTIVE_CHAIR: "AC_SEATER_EXECUTIVE_CHAIR-2P2-53",
+  AC_SLEEPER: "AC_SLEEPER-2P1-30",
 };
 
 interface StandDef {
@@ -488,6 +537,47 @@ const STAND_REGISTRY: Record<string, StandDef> = {
     townName: "Shivamogga",
     name: "Shivamogga Shimoga KSRTC Bus Stand",
     gps: { lat: 13.9289881, lon: 75.5680645 },
+  },
+
+  // -- New in this pass: `ka-bng-bdm` and `ka-bng-bjp`, the two corridors
+  // that finally make NON_AC_SLEEPER and KALYANA_RATHA sellable ----------
+  //
+  // `2205BNGBJP` (the reproduction case this whole pass exists to fix) is a
+  // real KALYANA_RATHA working whose own sourced stop_times name
+  // `KA-BP-TUMAKURU` and `KA-BP-HOSAPETE` directly, alongside the three
+  // Bengaluru-side stands already registered above. Coordinates are copied
+  // from Tatak's own point records - `KA-BP-TUMAKURU`
+  // (`src/intercity/corridors/bengaluru-hosapete.ts`), `KA-BP-BADAMI`,
+  // `KA-BP-BAGALKOT` and `KA-BP-VIJAYAPURA` (all three in
+  // `src/intercity/points.ts`) - the same sourcing discipline every other
+  // entry in this table already follows.
+  "KA-BP-TUMAKURU": {
+    boardingPointId: "BP-TMK-TUMAKURU",
+    townCode: "TMK",
+    townName: "Tumakuru",
+    name: "Tumakuru KSRTC Bus Stand",
+    gps: { lat: 13.3411568, lon: 77.1025164 },
+  },
+  "KA-BP-BADAMI": {
+    boardingPointId: "BP-BDM-BADAMI",
+    townCode: "BDM",
+    townName: "Badami",
+    name: "Badami Bus Station",
+    gps: { lat: 15.9234183, lon: 75.6784662 },
+  },
+  "KA-BP-BAGALKOT": {
+    boardingPointId: "BP-BGK-BAGALKOT",
+    townCode: "BGK",
+    townName: "Bagalkot",
+    name: "Bagalkot Bus Station",
+    gps: { lat: 16.1840641, lon: 75.7022663 },
+  },
+  "KA-BP-VIJAYAPURA": {
+    boardingPointId: "BP-BJP-VIJAYAPURA",
+    townCode: "BJP",
+    townName: "Vijayapura",
+    name: "Vijayapura Central Bus Station",
+    gps: { lat: 16.8249461, lon: 75.7153973 },
   },
 };
 
@@ -751,9 +841,11 @@ function generateCorridor(
       continue;
     }
 
-    const seatMapId = `${providerClass}-2P${providerClass === "PALLAKKI" || providerClass === "AMBAARI_UTSAV" ? "1" : "2"}-${
-      providerClass === "PALLAKKI" || providerClass === "AMBAARI_UTSAV" ? "30" : "53"
-    }`;
+    const seatMapId = SEAT_MAP_ID_BY_CLASS[providerClass];
+    if (!seatMapId) {
+      dropped.push(`${trip.trip_id} (${serviceNumber}): class ${providerClass} has no seat map registered in SEAT_MAP_ID_BY_CLASS`);
+      continue;
+    }
 
     services.push({
       serviceId: serviceNumber,
@@ -783,12 +875,15 @@ function generateCorridor(
     included.push(`${trip.trip_id} (${serviceNumber}), ${providerClass}, ${patternPoints.length} pattern stand(s)`);
 
     // Claim a fare cell for every forward pair among this working's own
-    // pattern points, for THIS working's class. `claimFareCell` refuses to
-    // overwrite a cell already claimed by an earlier working of a different
-    // class mapped onto the same provider class (see CLASS_MAP's note on
-    // AIRAVAT_CLUB_CLASS_2) - the earlier claim wins and this one is logged
-    // as skipped rather than silently overwriting a real fare with another
-    // real fare for a different product.
+    // pattern points, for THIS working's class. The dedup below (`if
+    // (fareCellsUsed.has(cellKey)) continue`) now only ever fires within one
+    // class - a boarding pair a second working of the SAME class also
+    // reaches - because every Tatak class this generator sells now has its
+    // own provider ServiceClass id (see CLASS_MAP's note above). Before this
+    // pass, `AIRAVAT_CLUB_CLASS` and `AIRAVAT_CLUB_CLASS_2` shared one
+    // provider id and this same dedup silently kept whichever of the two
+    // claimed a pair first, discarding the other's real, different fare for
+    // it; that failure mode is gone along with the shared id.
     for (let a = 0; a < patternPoints.length; a++) {
       for (let b = a + 1; b < patternPoints.length; b++) {
         const fromStopId = group.stopIds.find(

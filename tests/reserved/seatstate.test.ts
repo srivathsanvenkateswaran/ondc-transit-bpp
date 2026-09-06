@@ -32,7 +32,7 @@ const sleeperService = services.find(
   (service) => service.serviceId === "2259BNGHMP",
 )!;
 const sleeper = (await source.seatMap(sleeperService.seatMapId))!;
-const seater = (await source.seatMap("AIRAVAT_CLUB-2P2-53"))!;
+const seater = (await source.seatMap("AIRAVAT_CLUB_CLASS-2P2-53"))!;
 
 const SEED = 20_260_905;
 

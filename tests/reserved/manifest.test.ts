@@ -208,21 +208,22 @@ test("a stop pair the service does not run is refused", () => {
  * Concessions
  * ------------------------------------------------------------------ */
 
-test("the senior rate is published for the one class the source names", () => {
-  assert.equal(concessionRatePercent("SENIOR", "RAJAHAMSA"), 25);
+test("the senior rate is published for the two classes the source names", () => {
+  assert.equal(concessionRatePercent("SENIOR", "RAJAHAMSA_EXECUTIVE"), 25);
+  assert.equal(concessionRatePercent("SENIOR", "ASHWAMEDHA"), 25);
   assert.equal(concessionDiscountPaise(55_000, 25), 13_750);
 });
 
 test("a senior claim on a class with no published rate is refused, not estimated", () => {
   const refusal = refusalFrom(() => concessionRatePercent("SENIOR", "PALLAKKI"));
   assert.equal(refusal.code, "CONCESSION-RATE-NOT-PUBLISHED");
-  assert.match(refusal.message, /RAJAHAMSA only/);
+  assert.match(refusal.message, /RAJAHAMSA_EXECUTIVE and ASHWAMEDHA only/);
 });
 
 test("the free-travel scheme never applies to a reserved seat", () => {
   // Its own published exclusion list names every class this category sells, so
   // this is a fact about the scheme rather than a gap in this provider.
-  const refusal = refusalFrom(() => concessionRatePercent("SHAKTI", "AIRAVAT_CLUB"));
+  const refusal = refusalFrom(() => concessionRatePercent("SHAKTI", "AIRAVAT_CLUB_CLASS"));
   assert.equal(refusal.code, "CONCESSION-NOT-APPLICABLE");
 });
 

@@ -10,7 +10,7 @@
       {
         "fromBoardingPointId": "BP-SHV-SHIVAMOGGA",
         "toBoardingPointId": "BP-MNG-MANGALURU",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 40000,
         "sourcing": "I"
       }

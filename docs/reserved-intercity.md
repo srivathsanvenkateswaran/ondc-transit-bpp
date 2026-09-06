@@ -285,32 +285,63 @@ naming scheme with each corporation contributing its own buses to shared route
 brands [V - Wikipedia infoboxes, `kkrtc.karnataka.gov.in`]. The class taxonomy
 that matters here:
 
+This table was written when the fixture set carried five of these classes and
+called `ASHWAMEDHA` an unreserved bus alongside `SARIGE`. Both claims are
+stale as of the pass that widened `SERVICE_CLASSES` to all fifteen classes
+Tatak's own `src/intercity/classes.ts` marks `reservationRequired: true` -
+see that constant's own note in `src/reserved/types.ts` for the full
+reasoning, including why `ASHWAMEDHA`'s exclusion was a mistake rather than a
+policy. The table below is corrected to match.
+
 | Class code | Name | AC | Berth or seat | Layout | Sold here |
 |---|---|---|---|---|---|
 | `SARIGE` | Karnataka Sarige | No | Seat | 3+2 non-reclining | **No** |
-| `ASHWAMEDHA` | Ashwamedha Classic | No | Seat | 3+2 non-reclining | **No** |
-| `RAJAHAMSA` | Rajahamsa Executive | No | Seat | 2+2 | Yes |
+| `RAJAHAMSA_EXECUTIVE` | Rajahamsa Executive | No | Seat | 2+2 | Yes |
 | `AIRAVAT` | Airavat | Yes | Seat / semi-sleeper | 2+2 | Yes |
-| `AIRAVAT_CLUB` | Airavat Club Class | Yes | Semi-sleeper | 2+2, 53 seats reported [S] | Yes |
+| `AIRAVAT_CLUB_CLASS` | Airavat Club Class | Yes | Semi-sleeper | 2+2, 53 seats reported [S] | Yes |
+| `AIRAVAT_CLUB_CLASS_2` | Airavat Club Class 2.0 | Yes | Semi-sleeper | 2+2, layout inherited from `AIRAVAT_CLUB_CLASS` | Yes |
 | `PALLAKKI` | Pallakki (non-AC sleeper) | No | Berth | 2+1, 30 berths | Yes |
-| `AMBAARI_UTSAV` | Ambaari Utsav | Yes | Berth | 2+1 | Yes |
+| `AMBAARI_UTSAV` | Ambaari Utsav | Yes | Berth | 2+1, 40 berths [V - Wikipedia] | Yes |
+| `AMBAARI_DREAM_CLASS` | Ambaari Dream Class | Yes | Berth | 2+1, multi-axle (Volvo B11R) | Yes |
+| `ASHWAMEDHA` | Ashwamedha (Point to Point Express) | No | Seat | 3+2 non-reclining | Yes |
+| `NON_AC_SLEEPER` | Non-AC Sleeper | No | Berth | 2+1, layout inherited from `PALLAKKI` | Yes |
+| `EV_POWER_PLUS` | EV Power Plus | Yes | Seat | 2+2, battery-electric | Yes |
+| `FLYBUS` | Flybus | Yes | Seat | 2+2, multi-axle, on-board urinals | Yes (no real corridor currently reaches its endpoints) |
+| `KALYANA_RATHA` | Kalyana Ratha (AC Sleeper) | Yes | Berth | 2+1, multi-axle (Volvo) | Yes |
+| `AMOGHAVARSHA` | Amoghavarsha (Non-AC Sleeper) | No | Berth | 2+1, layout inherited from `NON_AC_SLEEPER` | Yes |
+| `AC_SEATER_EXECUTIVE_CHAIR` | AC Seater Executive Chair | Yes | Seat | 2+2, reclining | Yes |
+| `AC_SLEEPER` | AC Sleeper | Yes | Berth | 2+1 | Yes (no real numbered working currently sourced) |
 
-`SARIGE` and `ASHWAMEDHA` are unreserved, walk-up, standing-room-permitted
-ordinary buses run by the same corporations [V]. **They are deliberately not in
-this category**: gating on the corporation rather than the class would block a
+`SARIGE` is the one unreserved, walk-up, standing-room-permitted ordinary bus
+run by the same corporations [V]. **It is deliberately not in this
+category**: gating on the corporation rather than the class would block a
 plain KSRTC mofussil bus from ever appearing as a walk-up option. Tatak's spec
 makes exactly this argument from the router side and lands `reservationRequired`
 on the route record rather than on the operator (section 4). This provider is the
 other half of that: it publishes only classes that genuinely sell numbered
 seats, and an ordinary intercity bus is a `TICKET`-category product that belongs
-on the existing `SJT` path if it is ever modelled at all.
+on the existing `SJT` path if it is ever modelled at all. `ASHWAMEDHA` reads as
+the same kind of product on price alone - it sells at the ordinary floor - but
+Tatak's own data marks it `reservationRequired: true` and it is not on the
+Shakti exclusion list's absence list either way; it is a genuinely reserved,
+express-tier product that happens to price low, and it is sold here.
 
-`EV_POWER_PLUS` and `AMBAARI_DREAM` exist in the research but with no confirmed
-seat layout or route scale [S], so they are not in the fixture set. `CORONA` and
-`CORONA_CLUB_CLASS` are not currently-marketed class names: "Corona" survives
-only as the historic chassis name for the original 2015 Ambaari sleeper, and no
-active product under that name was found [I - absence of evidence, not confirmed
-absence]. Nothing in this repository may publish either.
+`CORONA` and `CORONA_CLUB_CLASS` are not currently-marketed class names:
+"Corona" survives only as the historic chassis name for the original 2015
+Ambaari sleeper, and no active product under that name was found [I - absence
+of evidence, not confirmed absence]. Nothing in this repository may publish
+either.
+
+**Naming.** Every class id in this table is copied verbatim from Tatak's own
+`src/intercity/classes.ts` `id` field. Before the fifteen-class pass, two ids
+here (`RAJAHAMSA`, `AIRAVAT_CLUB`) were this provider's own shorter spellings
+rather than Tatak's (`RAJAHAMSA_EXECUTIVE`, `AIRAVAT_CLUB_CLASS`), and nothing
+reconciled the two vocabularies - a rider offered one of those two classes by
+Tatak's planner was told by this provider that no such class existed, on a
+class it was in fact selling under a different name. The fix was alignment,
+not a translation table: this provider's ids now ARE Tatak's ids, and
+`AIRAVAT_CLUB_CLASS_2` - previously squeezed onto the same slot as
+`AIRAVAT_CLUB_CLASS` for want of a second one - now has a slot of its own.
 
 **No fare multiplier between classes is encoded**, because none could be
 sourced. The research is explicit that every figure found was either a
@@ -424,9 +455,10 @@ like promotional floor prices rather than a fare table [S, weak]. Provenance:
 `inferred`, `SOURCE_COUNT: 1`.
 
 **Bengaluru to Chennai.** 347 km, about 8 hours [S]. Classes running include
-`AIRAVAT`, `AIRAVAT_CLUB` (Volvo AC multi-axle semi-sleeper, 2+2, 53 seats
-reported), `AMBAARI_UTSAV` (Volvo 9600S AC sleeper, 2+1), `RAJAHAMSA` (non-AC
-ultra-deluxe seater, 2+2) and non-AC sleeper [S]. This corridor is the one that
+`AIRAVAT`, `AIRAVAT_CLUB_CLASS` (Volvo AC multi-axle semi-sleeper, 2+2, 53
+seats reported), `AMBAARI_UTSAV` (Volvo 9600S AC sleeper, 2+1),
+`RAJAHAMSA_EXECUTIVE` (non-AC ultra-deluxe seater, 2+2) and non-AC sleeper
+[S]. This corridor is the one that
 proves the fare key, because the Chennai side genuinely has many distinct
 boarding and dropping points - Adambakkam, Adyar, Alandur, Ambattur, Anna Nagar,
 Anna University, Ashok Nagar and others [S] - each with its own time and,
@@ -631,9 +663,9 @@ export interface Seat {
 }
 ```
 
-### 5.1 A 2+2 seater: `AIRAVAT`, `AIRAVAT_CLUB`, `RAJAHAMSA`
+### 5.1 A 2+2 seater: `AIRAVAT`, `AIRAVAT_CLUB_CLASS`, `AIRAVAT_CLUB_CLASS_2`, `RAJAHAMSA_EXECUTIVE`, and the later 2+2 additions
 
-Two seats, aisle, two seats, repeated down the coach. `AIRAVAT_CLUB` on
+Two seats, aisle, two seats, repeated down the coach. `AIRAVAT_CLUB_CLASS` on
 Bengaluru-Chennai is reported at 53 seats [S], which is 12 full rows of four plus
 a rear row of five - the last row of an Indian coach is conventionally
 aisle-free. The fixture authors 12 rows of 4 and one rear row of 5.
@@ -641,8 +673,19 @@ aisle-free. The fixture authors 12 rows of 4 and one rear row of 5.
 This paragraph said 13 full rows for some time, which is 57 seats and not 53.
 The fixture was authored to the sourced capacity rather than to the sentence and
 has always been 12 plus 5; the sentence was simply never corrected, and its own
-`sourcing` note in `fixtures/ksrtc/seatmaps/AIRAVAT_CLUB-2P2-53.json` records the
-discrepancy. The number that carries the source is 53.
+`sourcing` note in `fixtures/ksrtc/seatmaps/AIRAVAT_CLUB_CLASS-2P2-53.json`
+records the discrepancy. The number that carries the source is 53.
+
+The same 12-plus-5, 53-seat shape is also authored, under its own seat map id,
+for every other class this provider sells with no documented seat count of its
+own but a 2+2 layout: `AIRAVAT_CLUB_CLASS_2` (inherited from
+`AIRAVAT_CLUB_CLASS`, per Tatak's own docblock on it), `EV_POWER_PLUS`,
+`FLYBUS` and `AC_SEATER_EXECUTIVE_CHAIR`. Reusing the geometry is not the same
+as reusing the fixture file: each class has its own `seatMapId` and its own
+JSON under `fixtures/ksrtc/seatmaps/`, because a fare and an occupancy curve
+are computed per seat map id and must not be shared across products Tatak
+prices separately. `ASHWAMEDHA` is not among them - it is a 3+2 layout, its
+own paragraph below the sleeper section.
 
 ```
         front
@@ -661,7 +704,7 @@ not adjacent for the purposes of section 7's gender rule. This matters: a woman
 in `1B` does not lock `1C`, because nobody sits shoulder to shoulder across an
 aisle. `pairedSeatId` is null throughout: a seater seat is one person's.
 
-### 5.2 A 2+1 two-deck sleeper: `PALLAKKI`, `AMBAARI_UTSAV`
+### 5.2 A 2+1 two-deck sleeper: `PALLAKKI` and its family
 
 Pallakki is 2+1 with 30 berths across upper and lower decks [S - Wikipedia,
 Team-BHP, AbhiBus]. 2+1 means a **double berth** on one side and a **single
@@ -716,6 +759,48 @@ rather than the interface [confirmed, consumer complaint]. This provider's part
 is to publish the state as a distinct enumerated value rather than folding it
 into `AVAILABLE` with a hint, which is what makes redundant encoding possible on
 the client at all.
+
+**`NON_AC_SLEEPER`, `KALYANA_RATHA`, `AMOGHAVARSHA` and `AC_SLEEPER`** share
+this same 5-row, 30-berth, double-plus-single shape, each under its own seat
+map id (`NON_AC_SLEEPER-2P1-30.json` and so on). Two of the four inherit it
+for a sourced reason rather than a convenient one: Tatak's own docblocks read
+`NON_AC_SLEEPER`'s coach as indistinguishable from `PALLAKKI`'s ("nothing on
+the page distinguishes their coach - not reservation, not layout"), and
+`AMOGHAVARSHA`'s as indistinguishable from `NON_AC_SLEEPER`'s in turn. The
+other two (`KALYANA_RATHA`, `AC_SLEEPER`) have no berth count published at
+all, and 30 is this fixture set's plausible baseline for an unsourced 2+1
+coach rather than a transcription of an operator seating chart -
+`documentedCapacity` is `null` on all four, never 30, because 30 is inherited
+or assumed rather than independently published for any of them.
+
+**`AMBAARI_DREAM_CLASS`** is also 2+1 but NOT this shape: six rows a deck
+(36 berths) rather than five, on the reasoning that a Volvo B11R multi-axle
+coach is longer than Pallakki's standard 2-axle one and Tatak's own research
+reads it as "comparable to/above" `AMBAARI_UTSAV`. `documentedCapacity` is
+`null` here too - the 36 is this fixture's own middle ground, not a sourced
+figure.
+
+**`AMBAARI_UTSAV` is 40 berths, not 30**, per Tatak's own
+`src/intercity/classes.ts` entry (Volvo 9600 multi-axle, launched 21 February
+2023 [V - Wikipedia]). The fixture that originally shipped this class reused
+`PALLAKKI`'s 30-berth map wholesale, which understated its documented
+capacity by ten berths - a different class drawn as a copy of somebody else's
+coach, exactly the failure mode this whole document's honesty discipline
+exists to catch. `AMBAARI_UTSAV-2P1-40.json` corrects it: seven rows on the
+lower deck, six on the upper, plus one single berth in a nook over the
+driver's cabin (`U7C`) to reach the documented 40. The 40 is sourced; that
+specific row-by-row split beneath it is this fixture's own realisation of it,
+the same status Pallakki's own row count already carries.
+
+**`ASHWAMEDHA` is a 3+2, non-reclining ordinary seater** - three seats, aisle,
+two seats, a genuinely different shape from every 2+2 and 2+1 class above it.
+Tatak's own layout note gives no seat count, so `documentedCapacity` is
+`null`; `ASHWAMEDHA-3P2-60.json` authors twelve rows of five (sixty seats) as
+a plausible realisation of an ordinary 3+2 coach, not a transcription of a
+seating chart. `AC_SEATER_EXECUTIVE_CHAIR` is NOT this shape despite also
+being an unbranded seater name - it is a reserved AC 2+2 recliner (section
+5.1), and the "Executive Chair" in its name describes the seat, not the aisle
+arrangement.
 
 ### 5.3 What a seat map is not
 
@@ -775,7 +860,7 @@ quo, and it is the thing being ruled against.
 
 **What this costs.** The layout is roughly six entries per seat against the one
 entry per seat the states already cost, so a `PALLAKKI` payload grows by about
-185 tag entries and an `AIRAVAT_CLUB` one by about 325. It is a constant
+185 tag entries and an `AIRAVAT_CLUB_CLASS` one by about 325. It is a constant
 multiple of something already sent rather than a new order of magnitude, and it
 is not on the catalogue, which is the message a rider waits on. The rule is one
 line and has no exceptions: **wherever `SEAT_MAP` goes, `SEAT_MAP_LAYOUT` goes**,
@@ -1692,19 +1777,32 @@ EV Power Plus [V - `bengaluruurban.nic.in`].
 
 ### What this provider publishes
 
-**Shakti never applies to anything in this category, and this is a fact rather
-than a limitation.** Every class this category sells is a seat-numbered premium
-class, and Shakti's own published exclusion list names every one of them. No
-Shakti tag exists, no Shakti path exists, and a request naming one is refused
-with `CONCESSION-NOT-APPLICABLE` - the same code and the same reasoning as a
-concession on a single-journey order (`src/trv11/concession.ts`).
+**Shakti applies to exactly one class in this category, and that is a fact
+rather than an oversight.** Fourteen of the fifteen classes this category
+sells are seat-numbered premium classes, and Shakti's own published exclusion
+list names every one of them. `ASHWAMEDHA` is the exception: Tatak's own
+`src/intercity/classes.ts` marks it `shaktiFreeTravel: true` on a direct
+textual reading of the scheme's own carve-out ("ordinary and express services
+only") against a class whose own name contains "EXPRESS" - a reserved,
+numbered seat on it is still free under the scheme by that published rule,
+unusual as a reserved product being in scope at all is. For the other
+fourteen, no Shakti tag exists, no Shakti path exists, and a request naming
+one is refused with `CONCESSION-NOT-APPLICABLE` - the same code and the same
+reasoning as a concession on a single-journey order
+(`src/trv11/concession.ts`). For `ASHWAMEDHA`, `concessionRatePercent`
+returns 100 - a full discount, not a special case in the arithmetic:
+`concessionDiscountPaise` treats it like any other percentage.
 
-**The senior concession is published on `RAJAHAMSA` only**, because "Rajahamsa
-and lower classes" is where the source stops. Where Pallakki sits in that
-ordering is not established: it is a non-AC sleeper, below AC sleeper and above
-seater by comfort, and no source places it relative to Rajahamsa for concession
-purposes. Airavat, Airavat Club and Ambaari Utsav are unambiguously above
-Rajahamsa and carry no senior rate.
+**The senior concession is published on `RAJAHAMSA_EXECUTIVE` and
+`ASHWAMEDHA` only**, because "Rajahamsa and lower classes" is where the
+source stops and `ASHWAMEDHA` - priced at the ordinary floor - reads as
+squarely inside "lower". Where Pallakki sits in that ordering is not
+established: it is a non-AC sleeper, below AC sleeper and above seater by
+comfort, and no source places it relative to Rajahamsa for concession
+purposes. Airavat, Airavat Club Class and Ambaari Utsav are unambiguously
+above Rajahamsa and carry no senior rate, and none of the ten classes added
+since carry one either - none is independently placed relative to Rajahamsa
+by any source this project has found.
 
 A concession claim naming a class with no published rate is refused with
 **`CONCESSION-RATE-NOT-PUBLISHED`**, the existing code, reusing the existing
@@ -1713,7 +1811,8 @@ message shape:
 ```
 CONCESSION-RATE-NOT-PUBLISHED
   No SENIOR_CONCESSION_PERCENT rate is published for class PALLAKKI on this
-  service; this provider publishes a senior rate for RAJAHAMSA only
+  service; this provider publishes a senior rate for RAJAHAMSA_EXECUTIVE and
+  ASHWAMEDHA only
 ```
 
 **The child concession is not implemented.** "50 to 75% depending on service
@@ -2606,19 +2705,35 @@ is exactly the thing nobody has.
 ```
 fixtures/ksrtc/
   operator.json          # OperatorProfile: id, name, vehicleCategory COACH, window
-  towns.json             # BLR, HMP, HPT, MYS, MDK, MAA - code, name, nameLocal
+  towns.json             # code, name, nameLocal - one entry per town this fixture set reaches
   boarding-points.json   # per town, with reportingOffsetMinutes and optional gps
-  services.json          # the three corridors of §3.4, each with its sourcing label
+  services.json          # every corridor this fixture set carries, each with its sourcing label
   seatmaps/
     AIRAVAT-2P2-53.json
-    AIRAVAT_CLUB-2P2-53.json
-    RAJAHAMSA-2P2-53.json
+    AIRAVAT_CLUB_CLASS-2P2-53.json
+    AIRAVAT_CLUB_CLASS_2-2P2-53.json
+    RAJAHAMSA_EXECUTIVE-2P2-53.json
     PALLAKKI-2P1-30.json
-    AMBAARI_UTSAV-2P1-30.json
+    AMBAARI_UTSAV-2P1-40.json
+    AMBAARI_DREAM_CLASS-2P1-36.json
+    NON_AC_SLEEPER-2P1-30.json
+    KALYANA_RATHA-2P1-30.json
+    AMOGHAVARSHA-2P1-30.json
+    AC_SLEEPER-2P1-30.json
+    ASHWAMEDHA-3P2-60.json
+    EV_POWER_PLUS-2P2-53.json
+    FLYBUS-2P2-53.json
+    AC_SEATER_EXECUTIVE_CHAIR-2P2-53.json
   fares/
     FT-BNGHMP.json       # per-cell sourcing: V | S | I
     FT-BNGMAA.json
     FT-MYSMDK.json
+    ...                  # one FT-*.json per corridor - see
+                          # scripts/generate-ksrtc-fixtures.ts CORRIDOR_DIRS
+                          # for the current list; this section predates the
+                          # multi-corridor generator and was never a complete
+                          # enumeration of the fixture set even before this
+                          # pass
 ```
 
 Every fixture file carries a top-level `sourcing` block naming what its figures
@@ -2963,8 +3078,9 @@ easily misread.
 - Refund arithmetic: each slab boundary at one second either side; the
   reservation fee never refunded; the toll always refunded; round-half-up on a
   figure that does not divide (the ₹4,505 at 25% case from section 12).
-- Concession: `RAJAHAMSA` prices a senior discount; `PALLAKKI` refuses with
-  `CONCESSION-RATE-NOT-PUBLISHED`; a Shakti claim refuses with
+- Concession: `RAJAHAMSA_EXECUTIVE` and `ASHWAMEDHA` price a senior discount;
+  `PALLAKKI` refuses with `CONCESSION-RATE-NOT-PUBLISHED`; a Shakti claim on
+  `ASHWAMEDHA` is a full discount, and on every other class refuses with
   `CONCESSION-NOT-APPLICABLE`.
 - Manifest: an unexpected code refuses and its *value* appears nowhere in the
   error message or the log line. This test asserts on the log, not only the

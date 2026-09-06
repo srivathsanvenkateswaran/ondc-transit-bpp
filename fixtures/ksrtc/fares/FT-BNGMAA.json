@@ -7,15 +7,69 @@
     "fareTableId": "FT-BNGMAA",
     "currency": "INR",
     "fares": [
-      { "fromBoardingPointId": "BP-BLR-MAJESTIC", "toBoardingPointId": "BP-MAA-AMBATTUR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 100000, "sourcing": "I" },
-      { "fromBoardingPointId": "BP-BLR-MAJESTIC", "toBoardingPointId": "BP-MAA-KOYAMBEDU", "serviceClass": "AIRAVAT_CLUB", "farePaise": 105000, "sourcing": "I" },
-      { "fromBoardingPointId": "BP-BLR-MAJESTIC", "toBoardingPointId": "BP-MAA-ADYAR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 110000, "sourcing": "I" },
-      { "fromBoardingPointId": "BP-BLR-MADIWALA", "toBoardingPointId": "BP-MAA-AMBATTUR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 97000, "sourcing": "I" },
-      { "fromBoardingPointId": "BP-BLR-MADIWALA", "toBoardingPointId": "BP-MAA-KOYAMBEDU", "serviceClass": "AIRAVAT_CLUB", "farePaise": 102000, "sourcing": "I" },
-      { "fromBoardingPointId": "BP-BLR-MADIWALA", "toBoardingPointId": "BP-MAA-ADYAR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 107000, "sourcing": "I" },
-      { "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY", "toBoardingPointId": "BP-MAA-AMBATTUR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 94000, "sourcing": "I" },
-      { "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY", "toBoardingPointId": "BP-MAA-KOYAMBEDU", "serviceClass": "AIRAVAT_CLUB", "farePaise": 99000, "sourcing": "I" },
-      { "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY", "toBoardingPointId": "BP-MAA-ADYAR", "serviceClass": "AIRAVAT_CLUB", "farePaise": 104000, "sourcing": "I" }
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-MAA-AMBATTUR",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 100000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-MAA-KOYAMBEDU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 105000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-MAA-ADYAR",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 110000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MADIWALA",
+        "toBoardingPointId": "BP-MAA-AMBATTUR",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 97000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MADIWALA",
+        "toBoardingPointId": "BP-MAA-KOYAMBEDU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 102000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MADIWALA",
+        "toBoardingPointId": "BP-MAA-ADYAR",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 107000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY",
+        "toBoardingPointId": "BP-MAA-AMBATTUR",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 94000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY",
+        "toBoardingPointId": "BP-MAA-KOYAMBEDU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 99000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY",
+        "toBoardingPointId": "BP-MAA-ADYAR",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 104000,
+        "sourcing": "I"
+      }
     ]
   }
 }

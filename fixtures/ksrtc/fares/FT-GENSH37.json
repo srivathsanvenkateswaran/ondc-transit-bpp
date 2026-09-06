@@ -10,7 +10,7 @@
       {
         "fromBoardingPointId": "BP-UDP-UDUPI",
         "toBoardingPointId": "BP-KRK-KARKALA",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 10500,
         "sourcing": "I"
       }

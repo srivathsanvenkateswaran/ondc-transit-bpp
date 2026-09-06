@@ -101,7 +101,7 @@ test("a class filter narrows the corridor rather than the corridor narrowing its
     fromTownCode: "BLR",
     toTownCode: "HMP",
     travelDate: "2026-09-25",
-    serviceClass: "AIRAVAT_CLUB",
+    serviceClass: "AIRAVAT_CLUB_CLASS",
     cityCode: "std:080",
   });
   assert.deepEqual(wrongClass, []);
@@ -195,7 +195,21 @@ test("no shipped corridor claims to be confirmed", async () => {
   const all = await source.allServices();
   assert.ok(all.length > 0);
   assert.ok(all.every((service) => service.provenance === "inferred"));
-  assert.ok(all.every((service) => service.provenanceSourceCount >= 1));
+
+  // Every Tatak-derived service, real or ambiguous, carries at least the one
+  // source that named it - `provenanceSourceCount` is never 0 for those. The
+  // one honest exception is the handful this fixture set invents outright
+  // (`GEN-` prefixed ids: FLYBUS, AMOGHAVARSHA, AC_SLEEPER have no real,
+  // numbered Tatak working on any corridor, and a rider must still be able to
+  // book them - see FT-INVENTED.json's own note). Zero sources is the
+  // truthful count for a service nothing corroborates at all, and it is a
+  // stricter claim than the 1 a real-but-uncorroborated Tatak number
+  // carries, not a laxer one.
+  const tatakDerived = all.filter((service) => !service.serviceId.startsWith("GEN-"));
+  const invented = all.filter((service) => service.serviceId.startsWith("GEN-"));
+  assert.ok(tatakDerived.length > 0);
+  assert.ok(tatakDerived.every((service) => service.provenanceSourceCount >= 1));
+  assert.ok(invented.every((service) => service.provenanceSourceCount === 0));
 });
 
 test("an unconfirmed operating corporation is absent rather than guessed", async () => {

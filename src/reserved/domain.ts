@@ -235,11 +235,21 @@ export function reservedItemId(
  *
  * Matched rather than split, because a service id is free to contain a hyphen
  * and neither the date nor the class code ever does.
+ *
+ * The class group is `[A-Z0-9_]+`, not `[A-Z_]+`. It was letters-and-
+ * underscore only until this provider's classes were realigned to Tatak's
+ * own ids (`src/reserved/types.ts` `SERVICE_CLASSES`), and one of Tatak's
+ * ids - `AIRAVAT_CLUB_CLASS_2` - ends in a digit. Every item minted for that
+ * class failed to parse back: the regex could not match a trailing `2`, so
+ * `select` refused every one of them with `SERVICE-NOT-FOUND` on a class the
+ * catalogue had just published seconds earlier. A silent format mismatch
+ * inside this provider's own round trip, the same shape of bug this whole
+ * pass exists to catch at the Tatak boundary.
  */
 export function parseReservedItemId(
   itemId: string,
 ): { serviceId: string; travelDate: string; serviceClass: string } | undefined {
-  const match = /^RSV-(.+)-(\d{4}-\d{2}-\d{2})-([A-Z_]+)$/.exec(itemId);
+  const match = /^RSV-(.+)-(\d{4}-\d{2}-\d{2})-([A-Z0-9_]+)$/.exec(itemId);
   if (!match) return undefined;
   return { serviceId: match[1], travelDate: match[2], serviceClass: match[3] };
 }

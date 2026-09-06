@@ -10,14 +10,14 @@
       {
         "fromBoardingPointId": "BP-UDP-UDUPI",
         "toBoardingPointId": "BP-MNG-MANGALURU",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 13500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-MNG-MANGALURU",
         "toBoardingPointId": "BP-UDP-UDUPI",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 13500,
         "sourcing": "I"
       }

@@ -51,7 +51,7 @@ test("the fill fraction is a consequence of the service and the date", () => {
 
 test("a cheaper class fills first at the same popularity", () => {
   const sleeperService = serviceNamed("2259BNGHMP");
-  const clubService = { ...sleeperService, serviceClass: "AIRAVAT_CLUB" as const };
+  const clubService = { ...sleeperService, serviceClass: "AIRAVAT_CLUB_CLASS" as const };
   assert.ok(
     fillFraction(clubService, "2026-09-25") <
       fillFraction(sleeperService, "2026-09-25"),

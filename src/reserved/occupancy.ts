@@ -49,12 +49,45 @@ const DAY_OF_WEEK_MULTIPLIER: readonly number[] = [
  * multiplier between classes is encoded anywhere in this repository, because
  * none could be sourced; this is a demand shape, not a price relationship.
  */
+// The ten classes added in this pass are banded onto the same 0.85-1.15
+// scale the original five already used, ordered against each class's own
+// `fareMultiplier` in Tatak's `src/intercity/classes.ts` (cheaper fills
+// faster). The original five's own figures are left exactly as they were
+// rather than recomputed from that ordering, because they are not a strict
+// function of fare either - `AMBAARI_UTSAV` (fare 3.14x) already sits above
+// `AIRAVAT_CLUB_CLASS` (2.3x) despite costing more, on the reasoning that an
+// overnight sleeper to a destination people travel to on purpose fills
+// better than its price alone would suggest. The new entries are placed
+// between the nearest existing anchors on either side of their own fare
+// tier; none of this is sourced, and none of it claims to be.
 const CLASS_MULTIPLIER: Record<ServiceClass, number> = {
-  RAJAHAMSA: 1.1,
+  RAJAHAMSA_EXECUTIVE: 1.1,
   PALLAKKI: 1.05,
   AIRAVAT: 1.0,
   AMBAARI_UTSAV: 0.92,
-  AIRAVAT_CLUB: 0.9,
+  AIRAVAT_CLUB_CLASS: 0.9,
+  // 1.0x fare, the cheapest class this provider sells - fills fastest.
+  ASHWAMEDHA: 1.15,
+  // 1.01x fare, an anomalous single sighting - banded beside RAJAHAMSA
+  // rather than at the very top, since its own fare is not trusted enough
+  // to anchor the fastest-filling slot.
+  AC_SLEEPER: 1.08,
+  // 1.69x fare, between RAJAHAMSA_EXECUTIVE (1.35x) and AMOGHAVARSHA (1.73x).
+  AC_SEATER_EXECUTIVE_CHAIR: 1.02,
+  // 1.73x fare, a non-AC sleeper priced just above ordinary.
+  AMOGHAVARSHA: 1.0,
+  // 1.92x fare, between AMOGHAVARSHA and AIRAVAT (2.0x).
+  EV_POWER_PLUS: 0.98,
+  // 2.09x fare, just above AIRAVAT.
+  NON_AC_SLEEPER: 0.98,
+  // 2.37x fare, the same tier as AIRAVAT_CLUB_CLASS (2.3x).
+  KALYANA_RATHA: 0.9,
+  // 2.62x fare, between AIRAVAT_CLUB_CLASS and the two priciest sleepers.
+  AIRAVAT_CLUB_CLASS_2: 0.88,
+  // 2.91x and 2.93x fare respectively, the two most expensive classes below
+  // AMBAARI_UTSAV.
+  FLYBUS: 0.87,
+  AMBAARI_DREAM_CLASS: 0.87,
 };
 
 /**

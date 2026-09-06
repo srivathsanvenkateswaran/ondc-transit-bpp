@@ -1,11 +1,11 @@
 {
   "sourcing": {
-    "note": "Same 2+2, 53-seat layout as AIRAVAT_CLUB-2P2-53 (12 full rows of four plus a rear row of five): docs/reserved-intercity.md section 5.1 groups AIRAVAT, AIRAVAT_CLUB and RAJAHAMSA together as one 2+2 seater pattern and section 16 names this exact file (\"RAJAHAMSA-2P2-53.json\") in the fixture tree it specifies, but only AIRAVAT_CLUB carries its own secondary capacity citation. The seat count and geometry here are this generator's own scaffolding, carried over from the AIRAVAT_CLUB map rather than independently sourced for this class, which is why documentedCapacity is left null rather than asserted at 53: an unsourced layout is not checked against a number nobody published for this specific class.",
-    "label": "S"
+    "note": "Tatak's src/intercity/classes.ts EV_POWER_PLUS entry: 'ELECTRIC BUS - AC SEATER', forty-four rows across five source pages, well-attested as a class but with no seat count published. documentedCapacity is null; the layout below reuses this provider's ordinary 2+2, twelve-row-plus-bench seater shape (53 seats), because nothing sourced says a battery-electric coach's passenger cabin is arranged any differently from a diesel one of the same class - only the chassis differs, which is a fact this fixture has nothing to draw beyond the class label carrying it.",
+    "label": "I"
   },
   "seatMap": {
-    "seatMapId": "RAJAHAMSA-2P2-53",
-    "serviceClass": "RAJAHAMSA",
+    "seatMapId": "EV_POWER_PLUS-2P2-53",
+    "serviceClass": "EV_POWER_PLUS",
     "kind": "SEATER",
     "decks": 1,
     "documentedCapacity": null,

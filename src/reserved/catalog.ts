@@ -42,13 +42,30 @@ import type {
  * client's, so the wire carries nothing that would encourage the dressing.
  */
 
-/** What a rider is told they are buying. */
+/**
+ * What a rider is told they are buying.
+ *
+ * Every name here is copied from Tatak's own `src/intercity/classes.ts`
+ * `name` field, the same alignment discipline `SERVICE_CLASSES` itself
+ * documents: the id and the display name both come from the one place that
+ * actually sources them, rather than being re-authored per side.
+ */
 const SERVICE_CLASS_NAMES: Record<ServiceClass, string> = {
-  RAJAHAMSA: "Rajahamsa Executive",
+  RAJAHAMSA_EXECUTIVE: "Rajahamsa Executive",
   AIRAVAT: "Airavat",
-  AIRAVAT_CLUB: "Airavat Club Class",
+  AIRAVAT_CLUB_CLASS: "Airavat Club Class",
   PALLAKKI: "Pallakki non-AC sleeper",
   AMBAARI_UTSAV: "Ambaari Utsav",
+  ASHWAMEDHA: "Ashwamedha (Point to Point Express)",
+  NON_AC_SLEEPER: "Non-AC Sleeper",
+  AMBAARI_DREAM_CLASS: "Ambaari Dream Class",
+  AIRAVAT_CLUB_CLASS_2: "Airavat Club Class 2.0",
+  EV_POWER_PLUS: "EV Power Plus",
+  FLYBUS: "Flybus",
+  KALYANA_RATHA: "Kalyana Ratha (AC Sleeper)",
+  AMOGHAVARSHA: "Amoghavarsha (Non-AC Sleeper)",
+  AC_SEATER_EXECUTIVE_CHAIR: "AC Seater Executive Chair",
+  AC_SLEEPER: "AC Sleeper",
 };
 
 export interface TagEntry {

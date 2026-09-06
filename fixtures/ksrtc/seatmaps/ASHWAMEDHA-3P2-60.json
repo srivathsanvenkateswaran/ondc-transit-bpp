@@ -1,14 +1,14 @@
 {
   "sourcing": {
-    "note": "The class is reported at 53 seats in a 2+2 layout by a secondary source. 53 is 12 full rows of four plus a rear row of five; the last row of an Indian coach is conventionally aisle-free. The specification this fixture implements says 13 full rows plus a rear five, which totals 57 rather than 53, and 12 is the reading that matches the sourced capacity. The row-by-row layout, the seat numbering and which columns are against a window are this repository's reading of that arrangement rather than a transcription of an operator's own seat plan.",
-    "label": "S"
+    "note": "Tatak's src/intercity/classes.ts ASHWAMEDHA entry reads '3+2 seater, non-reclining' [V - Wikipedia, for the sibling Ashwamedha Classic Class product this project's own docblock treats as the layout match]. No source gives a seat count for this coach, so documentedCapacity is null rather than a number nobody published; the twelve-row, five-across layout below (sixty seats) is this fixture's own plausible realisation of a 3+2 non-reclining ordinary bus, not a transcription of an operator seating chart. Genuinely distinct from every 2+2 class this provider already sells: three seats on one side of the aisle, two on the other, and nobody reclines.",
+    "label": "I"
   },
   "seatMap": {
-    "seatMapId": "AIRAVAT_CLUB-2P2-53",
-    "serviceClass": "AIRAVAT_CLUB",
+    "seatMapId": "ASHWAMEDHA-3P2-60",
+    "serviceClass": "ASHWAMEDHA",
     "kind": "SEATER",
     "decks": 1,
-    "documentedCapacity": 53,
+    "documentedCapacity": null,
     "seats": [
       {
         "seatId": "1A",
@@ -31,19 +31,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "1A"
+          "1A",
+          "1C"
         ]
       },
       {
         "seatId": "1C",
         "deck": 1,
         "row": 1,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "1D"
+          "1B"
         ]
       },
       {
@@ -52,10 +53,22 @@
         "row": 1,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "1E"
+        ]
+      },
+      {
+        "seatId": "1E",
+        "deck": 1,
+        "row": 1,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "1C"
+          "1D"
         ]
       },
       {
@@ -79,19 +92,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "2A"
+          "2A",
+          "2C"
         ]
       },
       {
         "seatId": "2C",
         "deck": 1,
         "row": 2,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "2D"
+          "2B"
         ]
       },
       {
@@ -100,10 +114,22 @@
         "row": 2,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "2E"
+        ]
+      },
+      {
+        "seatId": "2E",
+        "deck": 1,
+        "row": 2,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "2C"
+          "2D"
         ]
       },
       {
@@ -127,19 +153,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "3A"
+          "3A",
+          "3C"
         ]
       },
       {
         "seatId": "3C",
         "deck": 1,
         "row": 3,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "3D"
+          "3B"
         ]
       },
       {
@@ -148,10 +175,22 @@
         "row": 3,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "3E"
+        ]
+      },
+      {
+        "seatId": "3E",
+        "deck": 1,
+        "row": 3,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "3C"
+          "3D"
         ]
       },
       {
@@ -175,19 +214,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "4A"
+          "4A",
+          "4C"
         ]
       },
       {
         "seatId": "4C",
         "deck": 1,
         "row": 4,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "4D"
+          "4B"
         ]
       },
       {
@@ -196,10 +236,22 @@
         "row": 4,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "4E"
+        ]
+      },
+      {
+        "seatId": "4E",
+        "deck": 1,
+        "row": 4,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "4C"
+          "4D"
         ]
       },
       {
@@ -223,19 +275,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "5A"
+          "5A",
+          "5C"
         ]
       },
       {
         "seatId": "5C",
         "deck": 1,
         "row": 5,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "5D"
+          "5B"
         ]
       },
       {
@@ -244,10 +297,22 @@
         "row": 5,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "5E"
+        ]
+      },
+      {
+        "seatId": "5E",
+        "deck": 1,
+        "row": 5,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "5C"
+          "5D"
         ]
       },
       {
@@ -271,19 +336,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "6A"
+          "6A",
+          "6C"
         ]
       },
       {
         "seatId": "6C",
         "deck": 1,
         "row": 6,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "6D"
+          "6B"
         ]
       },
       {
@@ -292,10 +358,22 @@
         "row": 6,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "6E"
+        ]
+      },
+      {
+        "seatId": "6E",
+        "deck": 1,
+        "row": 6,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "6C"
+          "6D"
         ]
       },
       {
@@ -319,19 +397,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "7A"
+          "7A",
+          "7C"
         ]
       },
       {
         "seatId": "7C",
         "deck": 1,
         "row": 7,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "7D"
+          "7B"
         ]
       },
       {
@@ -340,10 +419,22 @@
         "row": 7,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "7E"
+        ]
+      },
+      {
+        "seatId": "7E",
+        "deck": 1,
+        "row": 7,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "7C"
+          "7D"
         ]
       },
       {
@@ -367,19 +458,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "8A"
+          "8A",
+          "8C"
         ]
       },
       {
         "seatId": "8C",
         "deck": 1,
         "row": 8,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "8D"
+          "8B"
         ]
       },
       {
@@ -388,10 +480,22 @@
         "row": 8,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "8E"
+        ]
+      },
+      {
+        "seatId": "8E",
+        "deck": 1,
+        "row": 8,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "8C"
+          "8D"
         ]
       },
       {
@@ -415,19 +519,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "9A"
+          "9A",
+          "9C"
         ]
       },
       {
         "seatId": "9C",
         "deck": 1,
         "row": 9,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "9D"
+          "9B"
         ]
       },
       {
@@ -436,10 +541,22 @@
         "row": 9,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "9E"
+        ]
+      },
+      {
+        "seatId": "9E",
+        "deck": 1,
+        "row": 9,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "9C"
+          "9D"
         ]
       },
       {
@@ -463,19 +580,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "10A"
+          "10A",
+          "10C"
         ]
       },
       {
         "seatId": "10C",
         "deck": 1,
         "row": 10,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "10D"
+          "10B"
         ]
       },
       {
@@ -484,10 +602,22 @@
         "row": 10,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "10E"
+        ]
+      },
+      {
+        "seatId": "10E",
+        "deck": 1,
+        "row": 10,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "10C"
+          "10D"
         ]
       },
       {
@@ -511,19 +641,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "11A"
+          "11A",
+          "11C"
         ]
       },
       {
         "seatId": "11C",
         "deck": 1,
         "row": 11,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "11D"
+          "11B"
         ]
       },
       {
@@ -532,10 +663,22 @@
         "row": 11,
         "column": 5,
         "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "11E"
+        ]
+      },
+      {
+        "seatId": "11E",
+        "deck": 1,
+        "row": 11,
+        "column": 6,
+        "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "11C"
+          "11D"
         ]
       },
       {
@@ -559,19 +702,20 @@
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "12A"
+          "12A",
+          "12C"
         ]
       },
       {
         "seatId": "12C",
         "deck": 1,
         "row": 12,
-        "column": 4,
+        "column": 3,
         "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "12D"
+          "12B"
         ]
       },
       {
@@ -580,73 +724,22 @@
         "row": 12,
         "column": 5,
         "kind": "SEAT",
-        "window": true,
-        "pairedSeatId": null,
-        "adjacentSeatIds": [
-          "12C"
-        ]
-      },
-      {
-        "seatId": "13A",
-        "deck": 1,
-        "row": 13,
-        "column": 1,
-        "kind": "SEAT",
-        "window": true,
-        "pairedSeatId": null,
-        "adjacentSeatIds": [
-          "13B"
-        ]
-      },
-      {
-        "seatId": "13B",
-        "deck": 1,
-        "row": 13,
-        "column": 2,
-        "kind": "SEAT",
         "window": false,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "13A",
-          "13C"
+          "12E"
         ]
       },
       {
-        "seatId": "13C",
+        "seatId": "12E",
         "deck": 1,
-        "row": 13,
-        "column": 3,
-        "kind": "SEAT",
-        "window": false,
-        "pairedSeatId": null,
-        "adjacentSeatIds": [
-          "13B",
-          "13D"
-        ]
-      },
-      {
-        "seatId": "13D",
-        "deck": 1,
-        "row": 13,
-        "column": 4,
-        "kind": "SEAT",
-        "window": false,
-        "pairedSeatId": null,
-        "adjacentSeatIds": [
-          "13C",
-          "13E"
-        ]
-      },
-      {
-        "seatId": "13E",
-        "deck": 1,
-        "row": 13,
-        "column": 5,
+        "row": 12,
+        "column": 6,
         "kind": "SEAT",
         "window": true,
         "pairedSeatId": null,
         "adjacentSeatIds": [
-          "13D"
+          "12D"
         ]
       }
     ]

@@ -10,42 +10,42 @@
       {
         "fromBoardingPointId": "BP-MNG-MANGALURU",
         "toBoardingPointId": "BP-UDP-UDUPI",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 15000,
         "sourcing": "S"
       },
       {
         "fromBoardingPointId": "BP-MNG-MANGALURU",
         "toBoardingPointId": "BP-GKN-GOKARNA",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 42500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-MNG-MANGALURU",
         "toBoardingPointId": "BP-ANK-ANKOLA",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 45500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-UDP-UDUPI",
         "toBoardingPointId": "BP-GKN-GOKARNA",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 32000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-UDP-UDUPI",
         "toBoardingPointId": "BP-ANK-ANKOLA",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 35000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-GKN-GOKARNA",
         "toBoardingPointId": "BP-ANK-ANKOLA",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 5400,
         "sourcing": "I"
       }

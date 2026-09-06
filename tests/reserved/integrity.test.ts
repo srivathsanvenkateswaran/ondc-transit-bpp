@@ -163,7 +163,7 @@ test("a seat on a deck the map does not have fails at boot", () => {
   refuses(
     (catalogue) => {
       const map = catalogue.seatMaps.find(
-        (m) => m.seatMapId === "AIRAVAT_CLUB-2P2-53",
+        (m) => m.seatMapId === "AIRAVAT_CLUB_CLASS-2P2-53",
       );
       map!.seats[0].deck = 2;
     },

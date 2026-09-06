@@ -10,105 +10,147 @@
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 7000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-BLR-PEENYA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 8000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 25500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-CTD-CHITRADURGA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 65000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-HVR-HAVERI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 103500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-MAJESTIC",
         "toBoardingPointId": "BP-HBL-HUBBALLI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 82500,
         "sourcing": "V"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-BLR-PEENYA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 6500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 24000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-CTD-CHITRADURGA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 63500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-HVR-HAVERI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 102000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-HBL-HUBBALLI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 123500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 23000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
         "toBoardingPointId": "BP-CTD-CHITRADURGA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 62000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-PEENYA",
         "toBoardingPointId": "BP-HVR-HAVERI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 100500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-PEENYA",
         "toBoardingPointId": "BP-HBL-HUBBALLI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 122000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 44500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-HVR-HAVERI",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 83000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-HBL-HUBBALLI",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 104500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CTD-CHITRADURGA",
         "toBoardingPointId": "BP-HVR-HAVERI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 44000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CTD-CHITRADURGA",
         "toBoardingPointId": "BP-HBL-HUBBALLI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 65500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HVR-HAVERI",
         "toBoardingPointId": "BP-HBL-HUBBALLI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 27000,
         "sourcing": "I"
       },
@@ -124,6 +166,13 @@
         "toBoardingPointId": "BP-BLR-PEENYA",
         "serviceClass": "PALLAKKI",
         "farePaise": 5500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 17500,
         "sourcing": "I"
       },
       {
@@ -156,6 +205,13 @@
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 16500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-CTD-CHITRADURGA",
         "serviceClass": "PALLAKKI",
         "farePaise": 43000,
@@ -173,6 +229,13 @@
         "toBoardingPointId": "BP-HBL-HUBBALLI",
         "serviceClass": "PALLAKKI",
         "farePaise": 83000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 15500,
         "sourcing": "I"
       },
       {
@@ -197,6 +260,27 @@
         "sourcing": "I"
       },
       {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 30000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-HVR-HAVERI",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 56000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-HBL-HUBBALLI",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 70500,
+        "sourcing": "I"
+      },
+      {
         "fromBoardingPointId": "BP-CTD-CHITRADURGA",
         "toBoardingPointId": "BP-HVR-HAVERI",
         "serviceClass": "PALLAKKI",
@@ -218,107 +302,296 @@
         "sourcing": "I"
       },
       {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 6000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-BLR-PEENYA",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 7500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 23500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 59000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-HVR-HAVERI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 94000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-HBL-HUBBALLI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 95100,
+        "sourcing": "V"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-BLR-PEENYA",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 6000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 22000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 57500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-HVR-HAVERI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 92500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-HBL-HUBBALLI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 112000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 20500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 56500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-HVR-HAVERI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 91500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-HBL-HUBBALLI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 111000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 40500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-HVR-HAVERI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 75500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-HBL-HUBBALLI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 95000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CTD-CHITRADURGA",
+        "toBoardingPointId": "BP-HVR-HAVERI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 40000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CTD-CHITRADURGA",
+        "toBoardingPointId": "BP-HBL-HUBBALLI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 59500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HVR-HAVERI",
+        "toBoardingPointId": "BP-HBL-HUBBALLI",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 24500,
+        "sourcing": "I"
+      },
+      {
         "fromBoardingPointId": "BP-HBL-HUBBALLI",
         "toBoardingPointId": "BP-HVR-HAVERI",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 27000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HBL-HUBBALLI",
         "toBoardingPointId": "BP-CTD-CHITRADURGA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 65500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HBL-HUBBALLI",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 104500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HBL-HUBBALLI",
         "toBoardingPointId": "BP-BLR-PEENYA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 122000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HBL-HUBBALLI",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 123500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HBL-HUBBALLI",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 82500,
         "sourcing": "V"
       },
       {
         "fromBoardingPointId": "BP-HVR-HAVERI",
         "toBoardingPointId": "BP-CTD-CHITRADURGA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 44000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HVR-HAVERI",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 83000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HVR-HAVERI",
         "toBoardingPointId": "BP-BLR-PEENYA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 100500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HVR-HAVERI",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 102000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-HVR-HAVERI",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 103500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CTD-CHITRADURGA",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 44500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CTD-CHITRADURGA",
         "toBoardingPointId": "BP-BLR-PEENYA",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 62000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CTD-CHITRADURGA",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 63500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-CTD-CHITRADURGA",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 65000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-BLR-PEENYA",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 23000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 24000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
+        "farePaise": 25500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-PEENYA",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 6500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-PEENYA",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 8000,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "toBoardingPointId": "BP-BLR-MAJESTIC",
-        "serviceClass": "AIRAVAT_CLUB",
+        "serviceClass": "AIRAVAT_CLUB_CLASS",
         "farePaise": 7000,
         "sourcing": "I"
       },
@@ -334,6 +607,13 @@
         "toBoardingPointId": "BP-CTD-CHITRADURGA",
         "serviceClass": "PALLAKKI",
         "farePaise": 44000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HBL-HUBBALLI",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 70500,
         "sourcing": "I"
       },
       {
@@ -366,6 +646,13 @@
       },
       {
         "fromBoardingPointId": "BP-HVR-HAVERI",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 56000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HVR-HAVERI",
         "toBoardingPointId": "BP-BLR-PEENYA",
         "serviceClass": "PALLAKKI",
         "farePaise": 68000,
@@ -383,6 +670,13 @@
         "toBoardingPointId": "BP-BLR-MAJESTIC",
         "serviceClass": "PALLAKKI",
         "farePaise": 69500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CTD-CHITRADURGA",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 30000,
         "sourcing": "I"
       },
       {
@@ -407,6 +701,27 @@
         "sourcing": "I"
       },
       {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-BLR-PEENYA",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 15500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 16500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 17500,
+        "sourcing": "I"
+      },
+      {
         "fromBoardingPointId": "BP-BLR-PEENYA",
         "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
         "serviceClass": "PALLAKKI",
@@ -426,6 +741,13 @@
         "serviceClass": "PALLAKKI",
         "farePaise": 4500,
         "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HBL-HUBBALLI",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "NON_AC_SLEEPER",
+        "farePaise": 95100,
+        "sourcing": "V"
       }
     ]
   }

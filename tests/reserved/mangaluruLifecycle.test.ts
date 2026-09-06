@@ -27,7 +27,7 @@ const migrationRoot = fileURLToPath(new URL("../../migrations/reserved", import.
 
 const TRAVEL_DATE = "2026-09-30";
 const SERVICE_ID = "0700BNGMNG";
-const ITEM = `RSV-${SERVICE_ID}-${TRAVEL_DATE}-AIRAVAT_CLUB`;
+const ITEM = `RSV-${SERVICE_ID}-${TRAVEL_DATE}-AIRAVAT_CLUB_CLASS`;
 
 async function makeOrders() {
   const source = await FixtureReservedSource.load(fixtureRoot, "ksrtc");

@@ -28,26 +28,90 @@ export type Corporation = "KSRTC" | "NWKRTC" | "KKRTC";
  * The classes this category sells. Every one of them genuinely sells numbered
  * seats.
  *
- * `SARIGE` and `ASHWAMEDHA` are deliberately absent: they are unreserved,
- * walk-up, standing-room-permitted ordinary buses run by the same
- * corporations, and gating on the corporation rather than the class would
- * block a plain mofussil bus from ever appearing as a walk-up option. An
- * ordinary intercity bus is a single-journey product and belongs on the
- * existing path if it is modelled at all.
+ * This is exactly the set Tatak's own `src/intercity/classes.ts` marks
+ * `reservationRequired: true` - fifteen of them, not five. Ten were missing
+ * from this list until this pass, and the gap was silent: a rider offered a
+ * Kalyana Ratha or an Amoghavarsha by Tatak's planner reached this provider
+ * with a class it had never heard of and was refused with "This coach is not
+ * available", which reads as a real sale gone wrong rather than as a class
+ * this provider simply never learned to sell.
  *
- * `EV_POWER_PLUS` and `AMBAARI_DREAM` are absent because no seat layout or
- * route scale could be sourced for either. `CORONA` and `CORONA_CLUB_CLASS`
- * are absent because they are not currently-marketed class names: "Corona"
- * survives only as the historic chassis name for the original 2015 sleeper,
- * and no active product under that name was found. Nothing here may publish
- * either.
+ * `SARIGE` is deliberately still absent: it is Tatak's one intercity class
+ * with `reservationRequired: false` - an unreserved, walk-up,
+ * standing-room-permitted ordinary bus - and gating on the corporation
+ * rather than the class would block a plain mofussil bus from ever appearing
+ * as a walk-up option. An ordinary intercity bus is a single-journey product
+ * and belongs on the existing path if it is modelled at all.
+ *
+ * `ASHWAMEDHA` was ALSO wrongly excluded on that same "unreserved ordinary
+ * bus" reasoning before this pass, on the assumption that a class priced at
+ * the ordinary floor must be an ordinary bus. Tatak's own data says
+ * otherwise: `reservationRequired: true`, and Shakti's own exclusion list
+ * does not name it, so it is a genuinely reserved, express-tier product that
+ * happens to be priced low - not `SARIGE` wearing a different name. It is
+ * included here now, for exactly the reason this whole pass exists: a
+ * silent mismatch between what this provider will sell and what Tatak
+ * actually offers is how classes go missing.
+ *
+ * `EV_POWER_PLUS` and `AMBAARI_DREAM_CLASS` were absent because no seat
+ * layout or route scale could be sourced for either. Tatak's own domain
+ * research has since resolved both (`classes.ts`'s own EV_POWER_PLUS and
+ * AMBAARI_DREAM_CLASS entries carry a stated layout each), so the reason for
+ * the exclusion no longer holds and both are included.
+ *
+ * `CORONA` and `CORONA_CLUB_CLASS` remain absent because they are not
+ * currently-marketed class names: "Corona" survives only as the historic
+ * chassis name for the original 2015 sleeper, and no active product under
+ * that name was found. Nothing here may publish either.
+ *
+ * ## Naming: this provider's ids are Tatak's ids, on purpose
+ *
+ * Before this pass, two of the five classes this provider sold used their
+ * own shorter ids (`RAJAHAMSA`, `AIRAVAT_CLUB`) rather than Tatak's own
+ * (`RAJAHAMSA_EXECUTIVE`, `AIRAVAT_CLUB_CLASS`), and nothing reconciled the
+ * two vocabularies - Tatak asked this provider for `RAJAHAMSA_EXECUTIVE` and
+ * was told no such class existed, on a class this provider was in fact
+ * selling under a different spelling. That mismatch is a stricter failure
+ * than the ten simply-missing classes above: those fail loudly with
+ * "not sellable", where a name mismatch fails as a false "not available" on
+ * a class both sides genuinely support.
+ *
+ * The fix is alignment, not a translation table. Every id in this list is
+ * copied from Tatak's own `src/intercity/classes.ts` `id` field, verbatim,
+ * for every class both projects carry. Where a translation existed only by
+ * coincidence of history (`RAJAHAMSA` -> `RAJAHAMSA_EXECUTIVE`,
+ * `AIRAVAT_CLUB` -> `AIRAVAT_CLUB_CLASS`) it is retired here: this list now
+ * IS the mapping, because the two sides use one spelling. A second
+ * consequence of alignment, not its purpose but worth recording: it also
+ * gives `AIRAVAT_CLUB_CLASS_2` a slot of its own. Before this pass this
+ * provider's vocabulary had no second Airavat Club tier, so the generator
+ * squeezed both `AIRAVAT_CLUB_CLASS` and `AIRAVAT_CLUB_CLASS_2` onto the one
+ * `AIRAVAT_CLUB` id, and whichever of the two claimed a fare cell for a
+ * boarding pair first silently kept the other's real, different fare from
+ * ever being sold. With `AIRAVAT_CLUB_CLASS_2` carrying its own id, that
+ * squeeze is gone: each tier owns its own fare cells and its own seat map.
+ *
+ * The generator that turns Tatak's GTFS output into this provider's fixtures
+ * (`scripts/generate-ksrtc-fixtures.ts`) reads this exact list as the single
+ * named place that says which of Tatak's classes this provider can sell -
+ * see that script's own `CLASS_MAP` for where the two are joined.
  */
 export const SERVICE_CLASSES = [
-  "RAJAHAMSA",
+  "RAJAHAMSA_EXECUTIVE",
   "AIRAVAT",
-  "AIRAVAT_CLUB",
+  "AIRAVAT_CLUB_CLASS",
   "PALLAKKI",
   "AMBAARI_UTSAV",
+  "ASHWAMEDHA",
+  "NON_AC_SLEEPER",
+  "AMBAARI_DREAM_CLASS",
+  "AIRAVAT_CLUB_CLASS_2",
+  "EV_POWER_PLUS",
+  "FLYBUS",
+  "KALYANA_RATHA",
+  "AMOGHAVARSHA",
+  "AC_SEATER_EXECUTIVE_CHAIR",
+  "AC_SLEEPER",
 ] as const;
 
 export type ServiceClass = (typeof SERVICE_CLASSES)[number];

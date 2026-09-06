@@ -1,11 +1,11 @@
 {
   "sourcing": {
-    "note": "Same 2+1, 30-berth layout as PALLAKKI-2P1-30 (five rows per deck of a double plus a single, 5 x 3 x 2 = 30): docs/reserved-intercity.md section 5.2 groups PALLAKKI and AMBAARI_UTSAV together as one 2+1 two-deck sleeper pattern and section 16 names this exact file (\"AMBAARI_UTSAV-2P1-30.json\") in the fixture tree it specifies, but only PALLAKKI carries its own secondary capacity citation. The berth count, numbering and geometry here are this generator's own scaffolding, carried over from the PALLAKKI map rather than independently sourced for this class, which is why documentedCapacity is left null rather than asserted at 30.",
+    "note": "Tatak's src/intercity/classes.ts NON_AC_SLEEPER entry: a plain 'NON AC SLEEPER' line item KSRTC prices as a DIFFERENT product from PALLAKKI on the same page, and yet 'nothing on the page distinguishes their coach - not reservation, not layout', so Tatak carries PALLAKKI's own 2+1, 30-berth shape across rather than inventing a second one. This fixture does the same: same row arrangement as PALLAKKI-2P1-30, under this class's own id. documentedCapacity is null rather than 30, because the 30 is inherited rather than independently published for this brand name.",
     "label": "S"
   },
   "seatMap": {
-    "seatMapId": "AMBAARI_UTSAV-2P1-30",
-    "serviceClass": "AMBAARI_UTSAV",
+    "seatMapId": "NON_AC_SLEEPER-2P1-30",
+    "serviceClass": "NON_AC_SLEEPER",
     "kind": "SLEEPER",
     "decks": 2,
     "documentedCapacity": null,

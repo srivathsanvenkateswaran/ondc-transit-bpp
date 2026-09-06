@@ -90,6 +90,22 @@
     {
       "code": "SHV",
       "name": "Shivamogga"
+    },
+    {
+      "code": "TMK",
+      "name": "Tumakuru"
+    },
+    {
+      "code": "BDM",
+      "name": "Badami"
+    },
+    {
+      "code": "BGK",
+      "name": "Bagalkot"
+    },
+    {
+      "code": "BJP",
+      "name": "Vijayapura"
     }
   ]
 }

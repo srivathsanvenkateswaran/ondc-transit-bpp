@@ -258,6 +258,46 @@
           "lon": 75.5680645
         }
       }
+    ],
+    "TMK": [
+      {
+        "boardingPointId": "BP-TMK-TUMAKURU",
+        "name": "Tumakuru KSRTC Bus Stand",
+        "gps": {
+          "lat": 13.3411568,
+          "lon": 77.1025164
+        }
+      }
+    ],
+    "BDM": [
+      {
+        "boardingPointId": "BP-BDM-BADAMI",
+        "name": "Badami Bus Station",
+        "gps": {
+          "lat": 15.9234183,
+          "lon": 75.6784662
+        }
+      }
+    ],
+    "BGK": [
+      {
+        "boardingPointId": "BP-BGK-BAGALKOT",
+        "name": "Bagalkot Bus Station",
+        "gps": {
+          "lat": 16.1840641,
+          "lon": 75.7022663
+        }
+      }
+    ],
+    "BJP": [
+      {
+        "boardingPointId": "BP-BJP-VIJAYAPURA",
+        "name": "Vijayapura Central Bus Station",
+        "gps": {
+          "lat": 16.8249461,
+          "lon": 75.7153973
+        }
+      }
     ]
   }
 }

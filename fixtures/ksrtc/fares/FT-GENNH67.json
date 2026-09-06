@@ -10,14 +10,14 @@
       {
         "fromBoardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
         "toBoardingPointId": "BP-BLL-BALLARI",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 15500,
         "sourcing": "I"
       },
       {
         "fromBoardingPointId": "BP-BLL-BALLARI",
         "toBoardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
-        "serviceClass": "RAJAHAMSA",
+        "serviceClass": "RAJAHAMSA_EXECUTIVE",
         "farePaise": 15500,
         "sourcing": "I"
       }
