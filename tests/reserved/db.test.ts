@@ -42,11 +42,11 @@ test("every migration in the tree is numbered, ordered and gapless", () => {
   });
 });
 
-test("migrations apply once and are recorded", () => {
-  const database = openReservedDatabase({ url: ":memory:", migrationRoot });
-  const applied = database
+test("migrations apply once and are recorded", async () => {
+  const database = await openReservedDatabase({ url: ":memory:", migrationRoot });
+  const applied = (await database
     .prepare("SELECT version FROM schema_migrations ORDER BY version")
-    .all() as Array<{ version: number }>;
+    .all()) as Array<{ version: number }>;
   assert.deepEqual(
     applied.map((row) => row.version),
     migrationsUnder(migrationRoot).map((migration) => migration.version),
@@ -54,11 +54,11 @@ test("migrations apply once and are recorded", () => {
   database.close();
 });
 
-test("reopening a migrated file applies nothing and loses nothing", () => {
+test("reopening a migrated file applies nothing and loses nothing", async () => {
   const directory = temporaryDirectory();
   const url = `file:${join(directory, "reserved.db")}`;
-  const first = openReservedDatabase({ url, migrationRoot });
-  first
+  const first = await openReservedDatabase({ url, migrationRoot });
+  await first
     .prepare(
       `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
          hold_id, operator, bap_id, bap_uri, transaction_id, expires_at, created_at)
@@ -69,21 +69,21 @@ test("reopening a migrated file applies nothing and loses nothing", () => {
 
   // The whole reason this category cannot stay in memory: the row is the
   // fact, not a copy of one, and it has to outlive a release.
-  const second = openReservedDatabase({ url, migrationRoot });
-  const rows = second.prepare("SELECT seat_id FROM seat_locks").all();
+  const second = await openReservedDatabase({ url, migrationRoot });
+  const rows = await second.prepare("SELECT seat_id FROM seat_locks").all();
   assert.equal(rows.length, 1);
   second.close();
   rmSync(directory, { recursive: true, force: true });
 });
 
-test("a database written by a newer release refuses to start", () => {
+test("a database written by a newer release refuses to start", async () => {
   // A newer schema read by older code is how a hold quietly stops being
   // honoured, so the refusal is at boot rather than at the first select.
-  const database = openReservedDatabase({ url: ":memory:", migrationRoot });
-  database
+  const database = await openReservedDatabase({ url: ":memory:", migrationRoot });
+  await database
     .prepare("INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)")
     .run(9_999, 0);
-  assert.throws(
+  await assert.rejects(
     () => openReservedDatabase({ url: ":memory:", migrationRoot, handle: database }),
     /schema version 9999 .* this build knows/,
   );
@@ -101,37 +101,37 @@ test("a migration tree with a gap fails rather than skipping one", () => {
   rmSync(directory, { recursive: true, force: true });
 });
 
-test("the live-lock index is the guarantee, not the availability check", () => {
+test("the live-lock index is the guarantee, not the availability check", async () => {
   // Two rows claiming one berth on one dated departure cannot both be live.
   // The application check exists to produce a good error message; if the two
   // ever disagree, this constraint is the one that is right.
-  const database = openReservedDatabase({ url: ":memory:", migrationRoot });
+  const database = await openReservedDatabase({ url: ":memory:", migrationRoot });
   const insert = database.prepare(
     `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
        hold_id, operator, bap_id, bap_uri, transaction_id, expires_at, created_at)
      VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
   );
-  insert.run("SL1", "S", "2026-09-30", "U3A", "HELD", "H1", "ksrtc", "bap", "uri", "tx1", 1, 0);
-  assert.throws(
+  await insert.run("SL1", "S", "2026-09-30", "U3A", "HELD", "H1", "ksrtc", "bap", "uri", "tx1", 1, 0);
+  await assert.rejects(
     () =>
       insert.run("SL2", "S", "2026-09-30", "U3A", "HELD", "H2", "ksrtc", "bap", "uri", "tx2", 1, 0),
     /UNIQUE constraint failed/,
   );
   // A booking is the same claim at a higher strength, so it collides too.
-  assert.throws(
+  await assert.rejects(
     () =>
       insert.run("SL3", "S", "2026-09-30", "U3A", "BOOKED", null, "ksrtc", "bap", "uri", "tx3", null, 0),
     /UNIQUE constraint failed/,
   );
   // A swept or released row stays in the table with its state changed, and
   // stops standing in the way of the next claim.
-  database.prepare("UPDATE seat_locks SET state = 'EXPIRED' WHERE id = 'SL1'").run();
-  insert.run("SL4", "S", "2026-09-30", "U3A", "HELD", "H4", "ksrtc", "bap", "uri", "tx4", 1, 0);
+  await database.prepare("UPDATE seat_locks SET state = 'EXPIRED' WHERE id = 'SL1'").run();
+  await insert.run("SL4", "S", "2026-09-30", "U3A", "HELD", "H4", "ksrtc", "bap", "uri", "tx4", 1, 0);
   assert.equal(
     (
-      database
+      (await database
         .prepare("SELECT COUNT(*) AS live FROM seat_locks WHERE state IN ('HELD','BOOKED')")
-        .get() as { live: number }
+        .get()) as { live: number }
     ).live,
     1,
   );

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import Database from "libsql";
+import Database from "libsql/promise";
 
 /**
  * Where a held or booked seat actually lives.
@@ -52,18 +52,73 @@ import Database from "libsql";
  * `store.ts` touched a driver-specific error shape, a raw row's key set, or a
  * `better-sqlite3` method this fork does not also provide.
  *
- * Two consequences worth stating rather than discovering, both true before
- * this change and still true after it:
+ * ## Why the promise client, and what replaced the guarantee it removed
  *
- *   - The API is synchronous, which is a strictly stronger guarantee than the
- *     one section 8.5 asks for. It says the acquire path must perform its
- *     sweep, its availability check and its insert with no `await` between
- *     them; here there is no `await` available to write, so no interleaving is
- *     expressible rather than merely avoided.
- *   - Running behind more than one replica needs a real server rather than a
- *     file, which is a swap of this module's target and nothing above it.
- *     Everything above talks to `ReservedStore`, and the unique index remains
- *     the guarantee either way.
+ * This module used the synchronous `libsql` entry point, and leaned on it:
+ * section 8.5 asks that the acquire path perform its sweep, its availability
+ * check and its insert with no `await` between them, and with a synchronous
+ * driver there is no `await` to write, so no interleaving was expressible
+ * rather than merely avoided.
+ *
+ * The cost of that was not stated anywhere, and it is the whole reason this
+ * changed: a synchronous native call cannot yield to Node's event loop for
+ * its entire duration. Measured locally on 2026-09-07, a single synchronous
+ * libSQL call made to take 4.37 seconds let a concurrent 20ms timer fire
+ * exactly zero times out of the ~218 ticks it was owed. On a local file that
+ * duration is microseconds and nobody notices. Against the hosted database
+ * this deployment actually points at - Turso in Mumbai, from a dyno in
+ * Heroku's `us` region, about 230ms a statement - every single prepared
+ * statement, and every `BEGIN IMMEDIATE` and `COMMIT`, froze the entire
+ * process for that round trip: not merely the KSRTC request that issued it,
+ * but every BMTC and BMRCL search behind it and `/healthz` too. Requests
+ * queued behind whoever held a blocking call, which is why `/ksrtc/search`
+ * ran a 7.4 second median against a round-trip count that should have cost
+ * about 1.15 seconds uncontended, and why nine of them in one sample ran out
+ * Heroku's 30 second router clock entirely.
+ *
+ * So `libsql/promise` - the same driver, the same call shape, the same
+ * engine, with the I/O awaited instead of blocked on. What that removes is
+ * the by-construction half of section 8.5's argument, and it is replaced
+ * with the ordinary two:
+ *
+ *   - **One transaction at a time on this handle.** `withTransaction` below
+ *     serialises every transaction it opens against every other transaction
+ *     on the same database, so an acquire path's sweep, check and insert
+ *     still run with nothing else's write between them. This is not only a
+ *     correctness argument: one connection cannot hold two `BEGIN IMMEDIATE`s
+ *     at once, so without the queue two overlapping selects would fail with
+ *     "cannot start a transaction within a transaction" rather than race.
+ *   - **The unique index is still the guarantee.** `seat_locks_live` is what
+ *     actually stops one berth being held twice, exactly as section 8.5 says,
+ *     and `ReservedStore` still translates its constraint violation into
+ *     `SEAT-UNAVAILABLE` rather than surfacing it. The availability check
+ *     produces a good message; the index decides.
+ *
+ * What is deliberately *not* claimed: a read issued outside a transaction can
+ * now interleave with another request's open transaction on this one
+ * connection, and would see that transaction's uncommitted rows. Every such
+ * read in this codebase is advisory - it exists to produce an error message
+ * or to render a seat map - and the index decides the case where it would
+ * matter. Every write, without exception, is inside a transaction, which
+ * `tests/reserved/no-bare-writes.test.ts` exists to keep true.
+ *
+ * ## What this version of libsql actually makes asynchronous
+ *
+ * `libsql/promise` is not uniformly async, and it is worth naming which half
+ * is which rather than assuming. In 0.5.29, `prepare`, `exec` and a
+ * statement's `all` go through the driver's `*Async` bindings and genuinely
+ * yield; a statement's `run` and `get` still call the synchronous binding and
+ * would still block. So `get` is served here by `all` and its first row -
+ * every `get` in this codebase is a lookup by primary key, by a unique index,
+ * or an aggregate that returns exactly one row, so the first row is the row -
+ * and only `run`, the single-statement write, is left calling a blocking
+ * binding. Writes are a small minority of this provider's statements and none
+ * of them are on the search path that was timing out.
+ *
+ * Running behind more than one replica needs a real server rather than a
+ * file, which is a swap of this module's target and nothing above it.
+ * Everything above talks to `ReservedStore`, and the unique index remains the
+ * guarantee either way.
  */
 
 /**
@@ -79,15 +134,116 @@ import Database from "libsql";
  * these five methods needs to change.
  */
 export interface ReservedStatement {
-  run(...params: unknown[]): { changes: number | bigint; lastInsertRowid: number | bigint };
-  get(...params: unknown[]): unknown;
-  all(...params: unknown[]): unknown[];
+  run(
+    ...params: unknown[]
+  ): Promise<{ changes: number | bigint; lastInsertRowid: number | bigint }>;
+  get(...params: unknown[]): Promise<unknown>;
+  all(...params: unknown[]): Promise<unknown[]>;
 }
 
 export interface ReservedDatabase {
+  /**
+   * Synchronous, and returning a handle whose three methods are not.
+   *
+   * The driver's own `prepare` is asynchronous now, but hoisting that into
+   * every call site would have turned `db.prepare(sql).run(x)` into two
+   * awaits at roughly ninety places for no gain: the preparation and the
+   * execution are one logical round trip to a caller, and nothing here ever
+   * holds a prepared statement across anything. So the handle is lazy and
+   * each of `run`, `get` and `all` awaits the preparation it needs.
+   */
   prepare(sql: string): ReservedStatement;
-  exec(sql: string): unknown;
+  exec(sql: string): Promise<unknown>;
   close(): unknown;
+}
+
+/**
+ * The driver's own statement, of which this module calls two methods.
+ *
+ * Exported for `db-reconnect.test.ts`, which hands `ReconnectingDatabase` a
+ * scripted connection in place of a real one: without this the test would
+ * have to describe the driver's shape itself and could drift from what this
+ * module actually calls.
+ */
+export interface DriverStatement {
+  /**
+   * The one method `libsql/promise` 0.5.29 still answers synchronously. It is
+   * declared as either, rather than as the driver's own synchronous shape,
+   * so that the day it does return a promise nothing here has to change - and
+   * so a test's scripted connection can be honestly asynchronous.
+   */
+  run(
+    ...params: unknown[]
+  ):
+    | { changes: number | bigint; lastInsertRowid: number | bigint }
+    | Promise<{ changes: number | bigint; lastInsertRowid: number | bigint }>;
+  all(...params: unknown[]): Promise<unknown[]>;
+}
+
+/**
+ * The driver's `Database`, narrowed to what this module uses.
+ *
+ * `libsql/promise`'s shipped types declare `prepare` and `exec` as `any`,
+ * so this is the honest description of the two calls rather than a cast at
+ * every use.
+ */
+export interface DriverDatabase {
+  prepare(sql: string): Promise<DriverStatement>;
+  exec(sql: string): Promise<unknown>;
+  close(): void;
+}
+
+function driverDatabase(database: Database): DriverDatabase {
+  return database as unknown as DriverDatabase;
+}
+
+/**
+ * A `ReservedStatement` over one `libsql/promise` connection.
+ *
+ * `get` is `all`'s first row rather than the driver's own `get`: see this
+ * module's header for why - the driver's `get` is one of the two methods
+ * `libsql/promise` left calling a blocking binding, and every `get` in this
+ * codebase asks a question with at most one answer.
+ */
+function statementOver(
+  database: DriverDatabase,
+  sql: string,
+): ReservedStatement {
+  return {
+    run: async (...params: unknown[]) =>
+      await (await database.prepare(sql)).run(...params),
+    get: async (...params: unknown[]) =>
+      (await (await database.prepare(sql)).all(...params))[0],
+    all: async (...params: unknown[]) =>
+      (await database.prepare(sql)).all(...params),
+  };
+}
+
+/**
+ * The plain, non-reconnecting handle: a local file or `:memory:`.
+ *
+ * A thin adapter rather than the driver's own object, because the driver's
+ * `prepare` returns a promise and this interface's does not - see
+ * `ReservedDatabase.prepare` for why the laziness lives here.
+ */
+class PromiseDatabase implements ReservedDatabase {
+  private readonly driver: DriverDatabase;
+
+  constructor(database: Database) {
+    this.driver = driverDatabase(database);
+  }
+
+  prepare(sql: string): ReservedStatement {
+    return statementOver(this.driver, sql);
+  }
+
+  exec(sql: string): Promise<unknown> {
+    return this.driver.exec(sql);
+  }
+
+  close(): unknown {
+    return this.driver.close();
+  }
 }
 
 type EventLogger = (fields: Record<string, unknown>) => void;
@@ -309,22 +465,22 @@ function commandKind(sql: string): OperationKind {
  * reconnect, rather than re-preparing on every call.
  */
 export class ReconnectingDatabase implements ReservedDatabase {
-  private current: Database.Database;
+  private current: DriverDatabase;
   private generation = 0;
   private inTransaction = false;
   private readonly statementCache = new Map<
     string,
-    { generation: number; statement: Database.Statement }
+    { generation: number; statement: Promise<DriverStatement> }
   >();
 
   constructor(
-    private readonly factory: () => Database.Database,
+    private readonly factory: () => DriverDatabase,
     private readonly eventLogger: EventLogger,
   ) {
     this.current = this.factory();
   }
 
-  private reconnect(cause: unknown): void {
+  private async reconnect(cause: unknown): Promise<void> {
     try {
       this.current.close();
     } catch {
@@ -348,13 +504,16 @@ export class ReconnectingDatabase implements ReservedDatabase {
     // Foreign-key enforcement is a per-connection pragma, not a property of
     // the database file or server: a fresh connection starts without it, and
     // `openReservedDatabase` only turns it on for the first connection.
-    this.current.exec("PRAGMA foreign_keys = ON");
+    await this.current.exec("PRAGMA foreign_keys = ON");
   }
 
-  private attempt<T>(kind: OperationKind, operation: (db: Database.Database) => T): T {
+  private async attempt<T>(
+    kind: OperationKind,
+    operation: (db: DriverDatabase) => T | Promise<T>,
+  ): Promise<T> {
     const wasInTransaction = this.inTransaction;
     try {
-      const result = operation(this.current);
+      const result = await operation(this.current);
       if (kind === "begin") this.inTransaction = true;
       else if (kind === "commit" || kind === "rollback") this.inTransaction = false;
       return result;
@@ -383,7 +542,7 @@ export class ReconnectingDatabase implements ReservedDatabase {
         throw error;
       }
       if (!isDeadStreamError(error)) throw error;
-      this.reconnect(error);
+      await this.reconnect(error);
       if (wasInTransaction) {
         // See the class doc: retrying here would silently run the statement
         // outside the transaction it was supposed to belong to. The
@@ -395,36 +554,54 @@ export class ReconnectingDatabase implements ReservedDatabase {
         this.inTransaction = false;
         throw error;
       }
-      const result = operation(this.current);
+      const result = await operation(this.current);
       if (kind === "begin") this.inTransaction = true;
       return result;
     }
   }
 
-  private statementFor(db: Database.Database, sql: string): Database.Statement {
+  /**
+   * The prepared statement for `sql` on the live connection.
+   *
+   * The *promise* is cached, not the statement, so two calls for the same SQL
+   * that overlap share one preparation instead of racing to make two. A
+   * preparation that fails is evicted, so the failure is not cached for the
+   * life of the connection.
+   */
+  private statementFor(db: DriverDatabase, sql: string): Promise<DriverStatement> {
     const cached = this.statementCache.get(sql);
     if (cached && cached.generation === this.generation) return cached.statement;
-    const statement = db.prepare(sql);
-    this.statementCache.set(sql, { generation: this.generation, statement });
+    const generation = this.generation;
+    const statement = db.prepare(sql).catch((error: unknown) => {
+      const entry = this.statementCache.get(sql);
+      if (entry && entry.generation === generation) this.statementCache.delete(sql);
+      throw error;
+    });
+    this.statementCache.set(sql, { generation, statement });
     return statement;
   }
 
-  private withStatement<T>(sql: string, run: (statement: Database.Statement) => T): T {
-    return this.attempt("other", (db) => run(this.statementFor(db, sql)));
+  private withStatement<T>(
+    sql: string,
+    run: (statement: DriverStatement) => T | Promise<T>,
+  ): Promise<T> {
+    return this.attempt("other", async (db) => run(await this.statementFor(db, sql)));
   }
 
   prepare(sql: string): ReservedStatement {
     return {
-      run: (...params: unknown[]) =>
-        this.withStatement(sql, (statement) => statement.run(...params)),
+      run: async (...params: unknown[]) =>
+        await this.withStatement(sql, (statement) => statement.run(...params)),
       get: (...params: unknown[]) =>
-        this.withStatement(sql, (statement) => statement.get(...params)),
+        this.withStatement(sql, async (statement) =>
+          (await statement.all(...params))[0],
+        ),
       all: (...params: unknown[]) =>
         this.withStatement(sql, (statement) => statement.all(...params)),
     };
   }
 
-  exec(sql: string): unknown {
+  exec(sql: string): Promise<unknown> {
     return this.attempt(commandKind(sql), (db) => db.exec(sql));
   }
 
@@ -458,16 +635,63 @@ export class ReconnectingDatabase implements ReservedDatabase {
  * deliberately only implements `prepare`, `exec` and `close` - see its class
  * doc for why a single persistent connection is not an assumption this
  * module can make.
+ *
+ * **One at a time per database, and that is load bearing.** Every call queues
+ * behind whatever transaction is already open on the same handle. Two reasons,
+ * and either one alone would be enough:
+ *
+ *   - One connection cannot hold two transactions. Overlapping selects for
+ *     different seats on the same coach are an ordinary thing for this
+ *     provider to be asked, and without the queue the second one's `BEGIN
+ *     IMMEDIATE` would fail with "cannot start a transaction within a
+ *     transaction" - an internal error where a rider should have got a seat.
+ *   - It is what replaces the guarantee the synchronous driver used to give
+ *     for free. Section 8.5 asks that the acquire path's sweep, availability
+ *     check and insert run with nothing interleaved between them; with the
+ *     queue they do, because nothing else's transaction can begin until this
+ *     one has committed or rolled back.
+ *
+ * A queue is not a lock on the database, only on this process's use of this
+ * handle, and it is not what makes double-booking impossible - the unique
+ * index is, across processes as well as within one. See `store.ts`.
  */
-export function withTransaction<T>(database: ReservedDatabase, fn: () => T): T {
-  database.exec("BEGIN IMMEDIATE");
+const transactionQueue = new WeakMap<ReservedDatabase, Promise<unknown>>();
+
+export function withTransaction<T>(
+  database: ReservedDatabase,
+  fn: () => T | Promise<T>,
+): Promise<T> {
+  // Queued behind whatever transaction is already open on this database, and
+  // on failure as well as on success: a transaction that threw has still
+  // ended, and refusing to run the next one because the last one failed would
+  // turn one bad request into an outage.
+  const previous = transactionQueue.get(database) ?? Promise.resolve();
+  const result = previous.then(
+    () => runTransaction(database, fn),
+    () => runTransaction(database, fn),
+  );
+  transactionQueue.set(
+    database,
+    result.then(
+      () => undefined,
+      () => undefined,
+    ),
+  );
+  return result;
+}
+
+async function runTransaction<T>(
+  database: ReservedDatabase,
+  fn: () => T | Promise<T>,
+): Promise<T> {
+  await database.exec("BEGIN IMMEDIATE");
   try {
-    const result = fn();
-    database.exec("COMMIT");
+    const result = await fn();
+    await database.exec("COMMIT");
     return result;
   } catch (error) {
     try {
-      database.exec("ROLLBACK");
+      await database.exec("ROLLBACK");
     } catch {
       // Best-effort cleanup. The transaction is already gone - most often
       // the ordinary case `ReconnectingDatabase` already turns into a no-op
@@ -485,22 +709,18 @@ export function withTransaction<T>(database: ReservedDatabase, fn: () => T): T {
  * `schema_migrations` in the same transaction, so a failure half way through
  * one leaves neither the change nor the record of it.
  */
-export function openReservedDatabase(options: OpenOptions): ReservedDatabase {
+export async function openReservedDatabase(
+  options: OpenOptions,
+): Promise<ReservedDatabase> {
   if (options.handle === undefined && isRemoteDatabaseUrl(options.url) && !options.authToken) {
     throw new Error(
       `Reserved database URL ${options.url} is remote and needs an auth token, but none was given`,
     );
   }
-  // `libsql`'s shipped types are copied from better-sqlite3's and were never
-  // extended for `authToken`, even though the runtime reads it (README,
-  // "Connecting to a Remote libSQL server"; `index.js` does `opts?.authToken`).
-  // The cast through `unknown` is for that gap, not for anything this
-  // repository controls.
-  const remoteOptions = { authToken: options.authToken } as unknown as Database.Options;
   const isRemote = isRemoteDatabaseUrl(options.url);
   const path = resolveDatabasePath(options.url);
-  const openConnection = (): Database.Database =>
-    new Database(path, isRemote ? remoteOptions : undefined);
+  const openConnection = (): DriverDatabase =>
+    driverDatabase(new Database(path, isRemote ? { authToken: options.authToken } : {}));
 
   // Only a remote handle gets the reconnecting wrapper: it is the only case
   // an idle connection can be dropped out from under this process, and
@@ -514,9 +734,9 @@ export function openReservedDatabase(options: OpenOptions): ReservedDatabase {
     options.handle ??
     (isRemote
       ? new ReconnectingDatabase(openConnection, options.eventLogger ?? (() => undefined))
-      : openConnection());
-  database.exec("PRAGMA foreign_keys = ON");
-  database.exec(`
+      : new PromiseDatabase(new Database(path, {})));
+  await database.exec("PRAGMA foreign_keys = ON");
+  await database.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       version     INTEGER PRIMARY KEY,
       applied_at  INTEGER NOT NULL
@@ -527,9 +747,9 @@ export function openReservedDatabase(options: OpenOptions): ReservedDatabase {
   const knownVersion = migrations.at(-1)?.version ?? 0;
   const applied = new Set(
     (
-      database
+      (await database
         .prepare("SELECT version FROM schema_migrations")
-        .all() as Array<{ version: number }>
+        .all()) as Array<{ version: number }>
     ).map((row) => row.version),
   );
   const ahead = [...applied].filter((version) => version > knownVersion);
@@ -544,27 +764,27 @@ export function openReservedDatabase(options: OpenOptions): ReservedDatabase {
     );
   }
 
-  migrations
-    .filter((migration) => !applied.has(migration.version))
-    .forEach((migration) => {
-      database.exec("BEGIN");
-      try {
-        database.exec(migration.sql);
-        database
-          .prepare(
-            "INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)",
-          )
-          .run(migration.version, Date.now());
-        database.exec("COMMIT");
-      } catch (error) {
-        database.exec("ROLLBACK");
-        throw new Error(
-          `Reserved migration ${migration.version} (${migration.name}) failed: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    });
+  for (const migration of migrations.filter(
+    (candidate) => !applied.has(candidate.version),
+  )) {
+    await database.exec("BEGIN");
+    try {
+      await database.exec(migration.sql);
+      await database
+        .prepare(
+          "INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)",
+        )
+        .run(migration.version, Date.now());
+      await database.exec("COMMIT");
+    } catch (error) {
+      await database.exec("ROLLBACK");
+      throw new Error(
+        `Reserved migration ${migration.version} (${migration.name}) failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
 
   return database;
 }

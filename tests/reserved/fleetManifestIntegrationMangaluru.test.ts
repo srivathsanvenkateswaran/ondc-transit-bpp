@@ -103,7 +103,7 @@ test(
 
       let counter = 0;
       const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
-      const store = new ReservedStore(openReservedDatabase({ url: ":memory:", migrationRoot }), {
+      const store = new ReservedStore(await openReservedDatabase({ url: ":memory:", migrationRoot }), {
         idFactory,
       });
       const events: Record<string, unknown>[] = [];

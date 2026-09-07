@@ -242,7 +242,7 @@ export async function createApp(
           })
         : reservedFixtures);
     reservedStore = new ReservedStore(
-      openReservedDatabase({
+      await openReservedDatabase({
         url: config.reservedDatabaseUrl,
         migrationRoot: config.reservedMigrationRoot,
         authToken: config.reservedDatabaseAuthToken,
@@ -509,7 +509,8 @@ export async function createApp(
       // enabled on a shared host a more consequential decision than it was
       // when the only thing behind it was a specimen ticket.
       const order =
-        store.inspect(orderId) ?? reservedStore?.inspect(orderId)?.order;
+        store.inspect(orderId) ??
+        (await reservedStore?.inspect(orderId))?.order;
       json(response, order ? 200 : 404, order ?? { error: "Order not found" });
       return;
     }

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   openReservedDatabase,
+  withTransaction,
   type ReservedDatabase,
   type ReservedStatement,
 } from "../../src/reserved/db.js";
@@ -97,6 +98,13 @@ function trackingDatabase(inner: ReservedDatabase): {
     prepare(sql: string): ReservedStatement {
       const statement = inner.prepare(sql);
       return {
+        // Recorded when the write is *issued*, not when it settles. The
+        // statement is asynchronous now, so a write started inside a
+        // transaction and awaited across the COMMIT would look like a bare
+        // write if this checked afterwards - and a write issued after the
+        // COMMIT while an earlier one was still in flight would not look like
+        // one at all. The question this test asks is which transaction a
+        // write belongs to, and that is decided the moment it is issued.
         run: (...params: unknown[]) => {
           if (!inTransaction) bareWrites.push(sql.replace(/\s+/g, " ").trim());
           return statement.run(...params);
@@ -106,6 +114,9 @@ function trackingDatabase(inner: ReservedDatabase): {
       };
     },
     exec: (sql: string) => {
+      // Set before `inner.exec` is awaited, for the same reason: everything
+      // this process issues after asking for a BEGIN is meant to be inside
+      // it, and everything issued after asking for a COMMIT is not.
       const trimmed = sql.trimStart().toUpperCase();
       if (trimmed.startsWith("BEGIN")) inTransaction = true;
       else if (trimmed.startsWith("COMMIT") || trimmed.startsWith("ROLLBACK")) {
@@ -118,12 +129,12 @@ function trackingDatabase(inner: ReservedDatabase): {
   return { database, bareWrites };
 }
 
-function harness() {
+async function harness() {
   const clock = { at: NOW };
   let counter = 0;
   const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
   const { database, bareWrites } = trackingDatabase(
-    openReservedDatabase({ url: ":memory:", migrationRoot }),
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
   );
   const store = new ReservedStore(database, { idFactory });
   const orders = new ReservedOrderService(
@@ -151,7 +162,7 @@ function harness() {
 }
 
 test("every write the full booking lifecycle makes runs inside a transaction, never bare", async () => {
-  const { orders, clock, bareWrites } = harness();
+  const { orders, clock, bareWrites } = await harness();
 
   await orders.search(
     reservedSearchRequest({ travelDate: TRAVEL_DATE }) as never,
@@ -206,4 +217,43 @@ test("every write the full booking lifecycle makes runs inside a transaction, ne
     [],
     "a confirmed cancel's stored-order rewrite must not write outside a transaction",
   );
+});
+
+/**
+ * The guard's own guard.
+ *
+ * `trackingDatabase` decides whether a write is bare by watching this handle's
+ * `BEGIN`/`COMMIT` and the moment a write is issued. Under the synchronous
+ * driver that was the only thing it could have watched; now that every one of
+ * those is a promise, a detector that quietly stopped detecting would leave
+ * the test above passing for the wrong reason - it asserts an empty list, and
+ * an empty list is what a broken detector produces too. So: a write with
+ * nothing around it is still recorded, and the same write inside a
+ * transaction is still not.
+ */
+test("the bare-write detector still detects a bare write", async () => {
+  const { database, bareWrites } = trackingDatabase(
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
+  );
+  const insert = (id: string) =>
+    database
+      .prepare(
+        `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
+           hold_id, operator, bap_id, bap_uri, transaction_id, expires_at, created_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+      )
+      .run(id, "S", "2026-09-30", id, "RELEASED", null, "ksrtc", "bap", "uri", id, null, 0);
+
+  await insert("BARE");
+  assert.equal(bareWrites.length, 1, "a write outside any transaction must be recorded");
+  assert.match(bareWrites[0], /INSERT INTO seat_locks/);
+
+  await withTransaction(database, () => insert("INSIDE"));
+  assert.equal(
+    bareWrites.length,
+    1,
+    "a write inside a transaction must not be recorded",
+  );
+
+  database.close();
 });

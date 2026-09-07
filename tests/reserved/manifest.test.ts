@@ -293,14 +293,14 @@ function countingDatabase(inner: ReservedDatabase): {
 }
 
 /** How many booked seats still carry a passenger name. */
-function namesLeft(store: ReservedStore): number {
+async function namesLeft(store: ReservedStore): Promise<number> {
   return Number(
     (
-      store.handle
+      (await store.handle
         .prepare(
           "SELECT COUNT(*) AS n FROM booking_seats WHERE name IS NOT NULL",
         )
-        .get() as { n: number }
+        .get()) as { n: number }
     ).n,
   );
 }
@@ -309,18 +309,18 @@ const SWEEP_NOW = Date.parse("2026-11-01T06:00:00.000Z");
 const WENT_LONG_AGO = Date.parse("2026-09-01T18:00:00.000Z");
 
 /** One confirmed booking on a coach that went two months ago, names and all. */
-function bookOneStaleSeat(
+async function bookOneStaleSeat(
   store: ReservedStore,
   seatId: string,
   transactionId: string,
   nowMs: number,
-): void {
+): Promise<void> {
   const identity = {
     bapId: "buyer.example.test",
     bapUri: "https://buyer.example.test",
     transactionId,
   };
-  const hold = store.acquireHold({
+  const hold = await store.acquireHold({
     operator: "ksrtc",
     identity,
     serviceId: "2259BNGHMP",
@@ -329,7 +329,7 @@ function bookOneStaleSeat(
     nowMs,
     ttlSeconds: 600,
   });
-  store.confirmBooking({
+  await store.confirmBooking({
     holdId: hold.holdId,
     operator: "ksrtc",
     identity,
@@ -357,25 +357,25 @@ function bookOneStaleSeat(
   });
 }
 
-test("the retention sweep runs at most once an interval, and says so by not touching the database", () => {
+test("the retention sweep runs at most once an interval, and says so by not touching the database", async () => {
   // The sweep is called on every search and every status check, which against
   // a database on another continent made it an unconditional round trip on a
   // rider's request to ask a question whose answer is nearly always "nothing
   // is due". Throttling it is the whole point, so the assertion is about
   // statements reaching the database, not about the number it returns.
   const counting = countingDatabase(
-    openReservedDatabase({ url: ":memory:", migrationRoot }),
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
   );
   const store = new ReservedStore(counting.database);
 
-  bookOneStaleSeat(store, "U3A", "txn-first", SWEEP_NOW);
-  assert.equal(store.sweepManifests(SWEEP_NOW, 30), 1);
+  await bookOneStaleSeat(store, "U3A", "txn-first", SWEEP_NOW);
+  assert.equal(await store.sweepManifests(SWEEP_NOW, 30), 1);
 
   // A second booking that is just as stale, and a second sweep well inside
   // the interval. It does not run, and nothing at all reaches the database.
-  bookOneStaleSeat(store, "U3B", "txn-second", SWEEP_NOW);
+  await bookOneStaleSeat(store, "U3B", "txn-second", SWEEP_NOW);
   const before = counting.statements;
-  assert.equal(store.sweepManifests(SWEEP_NOW + 1_000, 30), 0);
+  assert.equal(await store.sweepManifests(SWEEP_NOW + 1_000, 30), 0);
   assert.equal(
     counting.statements,
     before,
@@ -383,18 +383,18 @@ test("the retention sweep runs at most once an interval, and says so by not touc
   );
   // Which is a real, stated lag rather than a free win: the second booking
   // still carries its passenger's name, and will until the interval is up.
-  assert.equal(namesLeft(store), 1);
+  assert.equal(await namesLeft(store), 1);
 
   // Once the interval has passed, the next caller pays for it and the second
   // booking's names go the way of the first's.
   assert.equal(
-    store.sweepManifests(SWEEP_NOW + MANIFEST_SWEEP_INTERVAL_MS + 1, 30),
+    await store.sweepManifests(SWEEP_NOW + MANIFEST_SWEEP_INTERVAL_MS + 1, 30),
     1,
   );
-  assert.equal(namesLeft(store), 0);
+  assert.equal(await namesLeft(store), 0);
   // And the request behind that one is throttled in its turn.
   assert.equal(
-    store.sweepManifests(SWEEP_NOW + MANIFEST_SWEEP_INTERVAL_MS + 2, 30),
+    await store.sweepManifests(SWEEP_NOW + MANIFEST_SWEEP_INTERVAL_MS + 2, 30),
     0,
   );
 });

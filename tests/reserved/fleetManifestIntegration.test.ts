@@ -99,14 +99,14 @@ const PASSENGERS = [
  * behaviour on the simulator's side, and a real trap for a test that wants
  * to observe all three.
  */
-function harness(
+async function harness(
   clock: { at: number },
   fleetManifest?: InstanceType<typeof HttpFleetManifestPublisher> | InertFleetManifestPublisher,
   events: Record<string, unknown>[] = [],
 ) {
   let counter = 0;
   const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
-  const store = new ReservedStore(openReservedDatabase({ url: ":memory:", migrationRoot }), {
+  const store = new ReservedStore(await openReservedDatabase({ url: ":memory:", migrationRoot }), {
     idFactory,
   });
   const orders = new ReservedOrderService(
@@ -199,7 +199,7 @@ test(
         ttlSeconds: 3600,
       });
       const clock = { at: BPP_NOW };
-      const { orders, events } = harness(clock, publisher);
+      const { orders, events } = await harness(clock, publisher);
 
       /* 1. Confirm names both passengers and both seats. */
       await orders.select(
@@ -352,7 +352,7 @@ test("this provider's own publisher is inert with no FLEET_MANIFEST_URL configur
     throw new Error("the inert publisher must never call fetch");
   }) as typeof fetch;
   try {
-    const { orders } = harness({ at: BPP_NOW }, new InertFleetManifestPublisher());
+    const { orders } = await harness({ at: BPP_NOW }, new InertFleetManifestPublisher());
     await orders.select(
       reservedOrderRequest("select", { itemId: ITEM, seatIds: ["L2B"] }) as never,
     );
@@ -401,7 +401,7 @@ test("a confirm still succeeds, and reports the failure, when the fleet simulato
     timeoutMs: 2_000,
     eventLogger: (fields) => events.push(fields),
   });
-  const { orders } = harness({ at: BPP_NOW }, publisher, events);
+  const { orders } = await harness({ at: BPP_NOW }, publisher, events);
   await orders.select(
     reservedOrderRequest("select", { itemId: ITEM, seatIds: ["L2B"] }) as never,
   );
@@ -452,7 +452,7 @@ test("a confirm answers without waiting for the fleet push, and the push still h
     },
   };
 
-  const { orders } = harness({ at: BPP_NOW }, slowPublisher as never);
+  const { orders } = await harness({ at: BPP_NOW }, slowPublisher as never);
   await orders.select(
     reservedOrderRequest("select", { itemId: ITEM, seatIds: ["L2B"] }) as never,
   );

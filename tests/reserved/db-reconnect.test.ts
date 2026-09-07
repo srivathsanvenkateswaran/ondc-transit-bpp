@@ -5,10 +5,12 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import Database from "libsql";
+import Database from "libsql/promise";
 
 import {
   ReconnectingDatabase,
+  type DriverDatabase,
+  type DriverStatement,
   isDeadStreamError,
   openReservedDatabase,
   isNothingToRollBack,
@@ -73,51 +75,46 @@ function cannotCommitError(): Error {
  * instead of running the next call - the same interface `openReservedDatabase`
  * hands `ReconnectingDatabase`, with one seam added for tests to pull.
  */
-function flakyFactory(
-  path: string,
-  queue: Array<(real: Database.Database) => never>,
-): () => Database.Database {
+type Sabotage = (real: DriverDatabase) => Promise<never>;
+
+function flakyFactory(path: string, queue: Sabotage[]): () => DriverDatabase {
   return () => {
-    const real = new Database(path);
-    const maybeThrow = (): void => {
+    const real = new Database(path, {}) as unknown as DriverDatabase;
+    const maybeThrow = async (): Promise<void> => {
       const next = queue.shift();
-      if (next) next(real);
+      if (next) await next(real);
     };
     return {
-      prepare(sql: string) {
-        maybeThrow();
-        const statement = real.prepare(sql);
+      async prepare(sql: string): Promise<DriverStatement> {
+        await maybeThrow();
+        const statement = await real.prepare(sql);
         return {
-          run: (...params: unknown[]) => {
-            maybeThrow();
-            return statement.run(...(params as []));
+          run: async (...params: unknown[]) => {
+            await maybeThrow();
+            return statement.run(...params);
           },
-          get: (...params: unknown[]) => {
-            maybeThrow();
-            return statement.get(...(params as []));
-          },
-          all: (...params: unknown[]) => {
-            maybeThrow();
-            return statement.all(...(params as []));
+          all: async (...params: unknown[]) => {
+            await maybeThrow();
+            return statement.all(...params);
           },
         };
       },
-      exec(sql: string) {
+      async exec(sql: string) {
         // `ReconnectingDatabase.reconnect` re-applies this pragma on every
         // fresh connection, unprompted by anything a test scripts; scripted
         // failures below target the operation under test, not that plumbing.
-        if (sql !== "PRAGMA foreign_keys = ON") maybeThrow();
+        if (sql !== "PRAGMA foreign_keys = ON") await maybeThrow();
         return real.exec(sql);
       },
       close() {
         return real.close();
       },
-    } as unknown as Database.Database;
+    };
   };
 }
 
-function throwing(error: Error): () => never {
-  return () => {
+function throwing(error: Error): Sabotage {
+  return async () => {
     throw error;
   };
 }
@@ -132,9 +129,9 @@ function throwing(error: Error): () => never {
  * fix cares about (`ReconnectingDatabase` correctly treating it as a no-op
  * once there is nothing left).
  */
-function rolledBackThenThrowing(error: Error): (real: Database.Database) => never {
-  return (real) => {
-    real.exec("ROLLBACK");
+function rolledBackThenThrowing(error: Error): Sabotage {
+  return async (real) => {
+    await real.exec("ROLLBACK");
     throw error;
   };
 }
@@ -161,20 +158,20 @@ test("isDeadStreamError matches the production log line and nothing coincidental
   assert.equal(isDeadStreamError(undefined), false);
 });
 
-test("a dead-stream error on a standalone operation reconnects once and the retry succeeds", () => {
+test("a dead-stream error on a standalone operation reconnects once and the retry succeeds", async () => {
   const { path, cleanup } = temporaryDatabaseFile();
   try {
     // Schema exists before the wrapper is ever built, matching how a Turso
     // database this module talks to is always already migrated.
-    openReservedDatabase({ url: `file:${path}`, migrationRoot }).close();
+    (await openReservedDatabase({ url: `file:${path}`, migrationRoot })).close();
 
-    const queue: Array<() => never> = [throwing(deadStreamError())];
+    const queue: Sabotage[] = [throwing(deadStreamError())];
     const reconnects: Array<Record<string, unknown>> = [];
     const database = new ReconnectingDatabase(flakyFactory(path, queue), (fields) =>
       reconnects.push(fields),
     );
 
-    database
+    await database
       .prepare(
         `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
            hold_id, operator, bap_id, bap_uri, transaction_id, expires_at, created_at)
@@ -182,9 +179,9 @@ test("a dead-stream error on a standalone operation reconnects once and the retr
       )
       .run("SL1", "S", "2026-09-30", "U3A", "HELD", "H1", "ksrtc", "bap", "uri", "tx1", 1, 0);
 
-    const row = database
+    const row = (await database
       .prepare("SELECT seat_id, state FROM seat_locks WHERE id = ?")
-      .get("SL1") as { seat_id: string; state: string };
+      .get("SL1")) as { seat_id: string; state: string };
     assert.equal(row.seat_id, "U3A");
     assert.equal(row.state, "HELD");
 
@@ -198,12 +195,12 @@ test("a dead-stream error on a standalone operation reconnects once and the retr
   }
 });
 
-test("a second consecutive dead-stream error propagates rather than retrying again", () => {
+test("a second consecutive dead-stream error propagates rather than retrying again", async () => {
   const { path, cleanup } = temporaryDatabaseFile();
   try {
-    openReservedDatabase({ url: `file:${path}`, migrationRoot }).close();
+    (await openReservedDatabase({ url: `file:${path}`, migrationRoot })).close();
 
-    const queue: Array<() => never> = [
+    const queue: Sabotage[] = [
       throwing(deadStreamError()),
       throwing(deadStreamError()),
     ];
@@ -212,7 +209,7 @@ test("a second consecutive dead-stream error propagates rather than retrying aga
       reconnects.push(fields),
     );
 
-    assert.throws(
+    await assert.rejects(
       () => database.exec("SELECT 1"),
       /stream not found/,
     );
@@ -227,12 +224,12 @@ test("a second consecutive dead-stream error propagates rather than retrying aga
   }
 });
 
-test("a real SQL error is not retried, and rawCode survives the wrapper for ReservedStore to read", () => {
+test("a real SQL error is not retried, and rawCode survives the wrapper for ReservedStore to read", async () => {
   const { path, cleanup } = temporaryDatabaseFile();
   try {
-    openReservedDatabase({ url: `file:${path}`, migrationRoot }).close();
+    (await openReservedDatabase({ url: `file:${path}`, migrationRoot })).close();
 
-    const queue: Array<() => never> = [];
+    const queue: Sabotage[] = [];
     const reconnects: Array<Record<string, unknown>> = [];
     const database = new ReconnectingDatabase(flakyFactory(path, queue), (fields) =>
       reconnects.push(fields),
@@ -248,7 +245,7 @@ test("a real SQL error is not retried, and rawCode survives the wrapper for Rese
       nowMs: 0,
       ttlSeconds: 600,
     };
-    store.acquireHold(params);
+    await store.acquireHold(params);
 
     // A second, distinct buyer racing for the same seat: the availability
     // check is skipped so the insert itself reaches the unique index, the
@@ -256,7 +253,7 @@ test("a real SQL error is not retried, and rawCode survives the wrapper for Rese
     // requests. This is a genuine UNIQUE-constraint failure, not a dropped
     // stream, and must fail once rather than being retried into a spurious
     // success.
-    assert.throws(
+    await assert.rejects(
       () =>
         store.acquireHold({
           ...params,
@@ -278,22 +275,22 @@ test("a real SQL error is not retried, and rawCode survives the wrapper for Rese
   }
 });
 
-test("a dead-stream error mid-transaction is not retried, but heals the connection for what runs next", () => {
+test("a dead-stream error mid-transaction is not retried, but heals the connection for what runs next", async () => {
   const { path, cleanup } = temporaryDatabaseFile();
   try {
-    openReservedDatabase({ url: `file:${path}`, migrationRoot }).close();
+    (await openReservedDatabase({ url: `file:${path}`, migrationRoot })).close();
 
-    const queue: Array<() => never> = [];
+    const queue: Sabotage[] = [];
     const reconnects: Array<Record<string, unknown>> = [];
     const database = new ReconnectingDatabase(flakyFactory(path, queue), (fields) =>
       reconnects.push(fields),
     );
 
-    database.exec("BEGIN IMMEDIATE");
+    await database.exec("BEGIN IMMEDIATE");
     queue.push(throwing(deadStreamError()));
     // Retrying this insert on a fresh connection would run it outside the
     // transaction it was supposed to belong to, so it must propagate instead.
-    assert.throws(
+    await assert.rejects(
       () =>
         database
           .prepare(
@@ -319,14 +316,14 @@ test("a dead-stream error mid-transaction is not retried, but heals the connecti
     // and turned a successful recovery into an INTERNAL-ERROR. The rider saw
     // "the operator could not answer that request in a form Tatak can read"
     // on a connection that was already healthy again.
-    assert.doesNotThrow(() => database.exec("ROLLBACK"));
+    await assert.doesNotReject(() => database.exec("ROLLBACK"));
     assert.equal(reconnects.length, 1);
 
     // The connection itself is healthy again: an unrelated statement outside
     // any transaction succeeds with no further reconnect needed.
-    const count = database
+    const count = (await database
       .prepare("SELECT COUNT(*) AS n FROM seat_locks")
-      .get() as { n: number };
+      .get()) as { n: number };
     assert.equal(count.n, 0);
     assert.equal(reconnects.length, 1);
 
@@ -406,23 +403,23 @@ test("isTransactionAlreadyGone matches every wording Turso used for the same fac
  * later, ordinary statement would have been wrongly treated as mid-transaction
  * and left to fail instead of quietly recovering.
  */
-test("a transaction Turso discarded mid-batch is not retried, and stops the wrapper believing one is still open", () => {
+test("a transaction Turso discarded mid-batch is not retried, and stops the wrapper believing one is still open", async () => {
   const { path, cleanup } = temporaryDatabaseFile();
   try {
-    openReservedDatabase({ url: `file:${path}`, migrationRoot }).close();
+    (await openReservedDatabase({ url: `file:${path}`, migrationRoot })).close();
 
-    const queue: Array<(real: Database.Database) => never> = [];
+    const queue: Sabotage[] = [];
     const reconnects: Array<Record<string, unknown>> = [];
     const database = new ReconnectingDatabase(flakyFactory(path, queue), (fields) =>
       reconnects.push(fields),
     );
 
-    database.exec("BEGIN IMMEDIATE");
+    await database.exec("BEGIN IMMEDIATE");
     // The real connection is left with nothing open too, not only the
     // JS-visible error faked for the wrapper - matching what Turso actually
     // did server-side, not only the message it sent back.
     queue.push(rolledBackThenThrowing(transactionRolledBackError()));
-    assert.throws(
+    await assert.rejects(
       () =>
         database
           .prepare(
@@ -444,9 +441,9 @@ test("a transaction Turso discarded mid-batch is not retried, and stops the wrap
     // already-existing `isNothingToRollBack` path and mask whether this fix
     // is the one actually doing the work.
     queue.push(throwing(deadStreamError()));
-    const before = database
+    const before = (await database
       .prepare("SELECT COUNT(*) AS n FROM seat_locks")
-      .get() as { n: number };
+      .get()) as { n: number };
     assert.equal(before.n, 0);
     assert.equal(reconnects.length, 1);
 
@@ -465,22 +462,22 @@ test("a transaction Turso discarded mid-batch is not retried, and stops the wrap
  * hit - `COMMIT` itself, not an earlier statement, is the one that discovers
  * the transaction is gone.
  */
-test("a COMMIT that finds no transaction open is a real failure, never swallowed", () => {
+test("a COMMIT that finds no transaction open is a real failure, never swallowed", async () => {
   const { path, cleanup } = temporaryDatabaseFile();
   try {
-    openReservedDatabase({ url: `file:${path}`, migrationRoot }).close();
+    (await openReservedDatabase({ url: `file:${path}`, migrationRoot })).close();
 
-    const queue: Array<(real: Database.Database) => never> = [];
+    const queue: Sabotage[] = [];
     const reconnects: Array<Record<string, unknown>> = [];
     const database = new ReconnectingDatabase(flakyFactory(path, queue), (fields) =>
       reconnects.push(fields),
     );
 
-    database.exec("BEGIN IMMEDIATE");
+    await database.exec("BEGIN IMMEDIATE");
     // The real connection genuinely has nothing open too, matching what
     // Turso actually did server-side rather than only the message it sent.
     queue.push(rolledBackThenThrowing(cannotCommitError()));
-    assert.throws(
+    await assert.rejects(
       () => database.exec("COMMIT"),
       /cannot commit - no transaction is active/,
     );
@@ -492,14 +489,14 @@ test("a COMMIT that finds no transaction open is a real failure, never swallowed
     // through the different, already-existing `isNothingToRollBack` path and
     // mask whether this fix is the one actually doing the work.
     queue.push(throwing(deadStreamError()));
-    const count = database
+    const count = (await database
       .prepare("SELECT COUNT(*) AS n FROM seat_locks")
-      .get() as { n: number };
+      .get()) as { n: number };
     assert.equal(count.n, 0);
     assert.equal(reconnects.length, 1);
 
-    database.exec("BEGIN IMMEDIATE");
-    database.exec("COMMIT");
+    await database.exec("BEGIN IMMEDIATE");
+    await database.exec("COMMIT");
 
     database.close();
   } finally {
@@ -515,15 +512,15 @@ test("a COMMIT that finds no transaction open is a real failure, never swallowed
  * unrelated reason - the cleanup attempt's own failure must never replace
  * the original one.
  */
-test("withTransaction re-throws the original failure even if the rollback it attempts also fails", () => {
+test("withTransaction re-throws the original failure even if the rollback it attempts also fails", async () => {
   const { path, cleanup } = temporaryDatabaseFile();
   try {
-    const database = openReservedDatabase({ url: `file:${path}`, migrationRoot });
+    const database = await openReservedDatabase({ url: `file:${path}`, migrationRoot });
     const originalError = new Error("the actual reason this transaction failed");
     let rollbackAttempted = false;
     const wrapped = {
       prepare: (sql: string) => database.prepare(sql),
-      exec: (sql: string) => {
+      exec: async (sql: string) => {
         if (sql === "ROLLBACK") {
           rollbackAttempted = true;
           throw new Error("connection is unusable, rollback cannot even be attempted");
@@ -533,7 +530,7 @@ test("withTransaction re-throws the original failure even if the rollback it att
       close: () => database.close(),
     };
 
-    assert.throws(
+    await assert.rejects(
       () =>
         withTransaction(wrapped, () => {
           throw originalError;
@@ -548,12 +545,12 @@ test("withTransaction re-throws the original failure even if the rollback it att
   }
 });
 
-test("withTransaction commits on success and returns fn's value", () => {
+test("withTransaction commits on success and returns fn's value", async () => {
   const { path, cleanup } = temporaryDatabaseFile();
   try {
-    const database = openReservedDatabase({ url: `file:${path}`, migrationRoot });
-    const result = withTransaction(database, () => {
-      database
+    const database = await openReservedDatabase({ url: `file:${path}`, migrationRoot });
+    const result = await withTransaction(database, async () => {
+      await database
         .prepare(
           `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
              hold_id, operator, bap_id, bap_uri, transaction_id, expires_at, created_at)
@@ -563,9 +560,9 @@ test("withTransaction commits on success and returns fn's value", () => {
       return "committed";
     });
     assert.equal(result, "committed");
-    const row = database
+    const row = (await database
       .prepare("SELECT state FROM seat_locks WHERE id = ?")
-      .get("SL1") as { state: string };
+      .get("SL1")) as { state: string };
     assert.equal(row.state, "HELD");
     database.close();
   } finally {

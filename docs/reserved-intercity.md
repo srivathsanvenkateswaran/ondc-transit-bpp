@@ -1175,9 +1175,21 @@ seats that were taken and returning the current seat map alongside, so the clien
 can re-render without a second round trip.
 
 **Inside one process, atomicity is structural.** The acquire path performs its
-sweep, its availability check and its insert inside one SQLite transaction with
-no `await` between them, so no interleaving is possible. The unique index does
-the real work:
+sweep, its availability check and its insert inside one SQLite transaction, and
+only one transaction at a time runs on the connection this process holds, so no
+other write interleaves with them.
+
+This paragraph used to say "with no `await` between them", and that was a
+description of the driver rather than of the requirement: the store used
+libSQL's synchronous entry point, so there was no `await` to write. That
+driver freezes Node's whole event loop for the duration of every statement it
+issues, which is affordable against a local file and is not affordable against
+a hosted database on another continent - it froze this provider's Bengaluru
+bus and metro traffic too, once per statement. The store is asynchronous now
+and the serialisation is explicit, in `withTransaction`. What has not changed
+at all is the sentence below.
+
+The unique index does the real work:
 
 ```sql
 CREATE UNIQUE INDEX seat_locks_live

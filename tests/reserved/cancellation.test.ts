@@ -36,12 +36,12 @@ const DEPARTURE = Date.parse("2026-09-30T17:29:00.000Z");
 const NOW = Date.parse("2026-09-20T10:00:00.000Z");
 const HOUR = 60 * 60 * 1000;
 
-function harness() {
+async function harness() {
   const clock = { at: NOW };
   let counter = 0;
   const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
   const store = new ReservedStore(
-    openReservedDatabase({ url: ":memory:", migrationRoot }),
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
     { idFactory },
   );
   const orders = new ReservedOrderService(
@@ -100,7 +100,7 @@ const MIXED_PAIR = [
 ];
 
 async function bookedPair(clockAt = NOW) {
-  const context = harness();
+  const context = await harness();
   context.clock.at = clockAt;
   await context.orders.select(
     reservedOrderRequest("select", {
@@ -153,8 +153,11 @@ test("a soft cancel returns the exact figure and changes nothing", async () => {
   // Nothing changed state: the booking is still live and still says so.
   assert.equal((message.order as any).status, "ACTIVE");
   assert.equal(
-    store.findBooking("ksrtc", { bapId: "bap.example.test", bapUri: "https://bap.example.test" }, orderId)!
-      .status,
+    (await store.findBooking(
+      "ksrtc",
+      { bapId: "bap.example.test", bapUri: "https://bap.example.test" },
+      orderId,
+    ))!.status,
     "CONFIRMED",
   );
 });
@@ -237,16 +240,16 @@ test("committing cancels the booking and stores what it paid back", async () => 
     reservedCancelRequest({ orderId, code: "CONFIRM_CANCEL", quoteId }) as never,
   );
   assert.equal((committed.order as any).status, "CANCELLED");
-  const stored = store.findBooking(
+  const stored = (await store.findBooking(
     "ksrtc",
     { bapId: "bap.example.test", bapUri: "https://bap.example.test" },
     orderId,
-  )!;
+  ))!;
   assert.equal(stored.status, "CANCELLED");
   assert.equal(stored.refundPaise, 103_000);
   assert.equal(stored.slabCode, "OVER_72H");
   // The berths go back into inventory.
-  assert.deepEqual(store.liveClaims("2259BNGHMP", TRAVEL_DATE), []);
+  assert.deepEqual(await store.liveClaims("2259BNGHMP", TRAVEL_DATE), []);
 });
 
 test("a repeated commitment returns the stored figure, never a fresh evaluation", async () => {
@@ -331,11 +334,11 @@ test("one passenger of two leaves the rest of the booking live", async () => {
   );
   // A booking with a confirmed seat left is still a booking.
   assert.equal((committed.order as any).status, "ACTIVE");
-  const stored = store.findBooking(
+  const stored = (await store.findBooking(
     "ksrtc",
     { bapId: "bap.example.test", bapUri: "https://bap.example.test" },
     orderId,
-  )!;
+  ))!;
   assert.equal(stored.status, "CONFIRMED");
   assert.deepEqual(
     stored.seats.map((seat) => [seat.seatId, seat.status]),
@@ -346,7 +349,9 @@ test("one passenger of two leaves the rest of the booking live", async () => {
   );
   // The cancelled berth goes back into inventory and the kept one does not.
   assert.deepEqual(
-    store.liveClaims("2259BNGHMP", TRAVEL_DATE).map((claim) => claim.seatId),
+    (await store.liveClaims("2259BNGHMP", TRAVEL_DATE)).map(
+      (claim) => claim.seatId,
+    ),
     ["U3A"],
   );
   // The manifest on the stored order loses the passenger who left.
@@ -465,7 +470,7 @@ test("cancelling the last confirmed seat cancels the booking", async () => {
   }
   // A booking with no confirmed seats left is cancelled, not an empty
   // confirmed booking.
-  const read = orders.status(reservedStatusRequest({ orderId }) as never);
+  const read = await orders.status(reservedStatusRequest({ orderId }) as never);
   assert.equal((read.order as any).status, "CANCELLED");
   assert.equal((read.refund as any).price.value, "1030");
 });
@@ -481,18 +486,18 @@ test("an unattributable sale records a null rather than a guess", async () => {
   // which is precisely why this corridor is ambiguous. So the column is null
   // and the basis says how little is known.
   const { store, orderId } = await bookedPair();
-  const booking = store.findBooking(
+  const booking = (await store.findBooking(
     "ksrtc",
     { bapId: "bap.example.test", bapUri: "https://bap.example.test" },
     orderId,
-  )!;
+  ))!;
   assert.equal(booking.settlementCorporation, null);
   assert.equal(booking.settlementBasis, "none");
 });
 
 test("an unattributed sale joins a backlog somebody can query", async () => {
   const { store, orders, orderId } = await bookedPair();
-  assert.deepEqual(store.unattributedBookings(), [
+  assert.deepEqual(await store.unattributedBookings(), [
     {
       serviceId: "2259BNGHMP",
       travelDate: TRAVEL_DATE,
@@ -515,7 +520,7 @@ test("an unattributed sale joins a backlog somebody can query", async () => {
       quoteId: entryOf(quoted.tags, "REFUND_SLAB", "REFUND_QUOTE_ID")!,
     }) as never,
   );
-  assert.deepEqual(store.unattributedBookings(), [
+  assert.deepEqual(await store.unattributedBookings(), [
     {
       serviceId: "2259BNGHMP",
       travelDate: TRAVEL_DATE,
@@ -551,7 +556,7 @@ test("a confirmed attribution is copied at the instant of confirm and frozen", a
   let counter = 0;
   const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
   const store = new ReservedStore(
-    openReservedDatabase({ url: ":memory:", migrationRoot }),
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
     { idFactory },
   );
   const orders = new ReservedOrderService(
@@ -587,23 +592,23 @@ test("a confirmed attribution is copied at the instant of confirm and frozen", a
       }) as never,
     )
   ).order as Record<string, unknown>;
-  const booking = store.findBooking(
+  const booking = (await store.findBooking(
     "ksrtc",
     { bapId: "bap.example.test", bapUri: "https://bap.example.test" },
     confirmed.id as string,
-  )!;
+  ))!;
   assert.equal(booking.settlementCorporation, "KKRTC");
   assert.equal(booking.settlementBasis, "confirmed");
-  assert.deepEqual(store.unattributedBookings(), []);
+  assert.deepEqual(await store.unattributedBookings(), []);
 
   // A later data refresh reclassifies the service. A settled sale must not be
   // quietly reassigned to somebody else's ledger after the fact.
   mutable.current = { ...service, operatingCorporation: "NWKRTC" };
-  const reread = store.findBooking(
+  const reread = (await store.findBooking(
     "ksrtc",
     { bapId: "bap.example.test", bapUri: "https://bap.example.test" },
     confirmed.id as string,
-  )!;
+  ))!;
   assert.equal(reread.settlementCorporation, "KKRTC");
 });
 
@@ -625,7 +630,7 @@ test("no attribution of any kind reaches a rider-facing response", async () => {
   );
   const payloads = [
     await orders.select(reservedOrderRequest("select", { itemId: ITEM }) as never),
-    orders.status(reservedStatusRequest({ orderId }) as never),
+    await orders.status(reservedStatusRequest({ orderId }) as never),
     quoted,
     committed,
   ];
@@ -712,12 +717,12 @@ test("what a corporation is owed is the complement of what the rider got back", 
       quoteId: entryOf(quoted.tags, "REFUND_SLAB", "REFUND_QUOTE_ID")!,
     }) as never,
   );
-  const booking = store.findBooking(
+  const booking = (await store.findBooking(
     "ksrtc",
     { bapId: "bap.example.test", bapUri: "https://bap.example.test" },
     orderId,
-  )!;
-  const [backlog] = store.unattributedBookings();
+  ))!;
+  const [backlog] = await store.unattributedBookings();
   const paid =
     booking.basePaise + booking.reservationFeePaise + booking.tollPaise;
   assert.equal(backlog.owedPaise + (booking.refundPaise ?? 0), paid - 2_000);
