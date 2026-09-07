@@ -1105,6 +1105,12 @@ export class ReservedOrderService {
     input: OrderInput,
   ): { hold: HoldRecord; records: ManifestRecord[] } {
     const nowMs = this.now().getTime();
+    // The one sweep of this (service, date) that init and confirm pay for.
+    // It has to happen here rather than further down, because the refusal
+    // path returns before anything below runs and a lapsed hold has to be
+    // off the coach by then: a confirm refused with HOLD-EXPIRED releases
+    // the berths it was holding, and whoever asks next must see them free.
+    //
     // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
     this.store.withTransaction(() =>
       this.store.sweepExpiredHolds(
@@ -1154,10 +1160,20 @@ export class ReservedOrderService {
     // Re-checked here rather than at select, because the hold taken at select
     // named seats only and the manifest is the first point at which this
     // provider learns which gender is going in which seat.
-    const snapshot = this.snapshot(
+    //
+    // Read through `snapshotFromClaims` rather than `snapshot`, because
+    // `snapshot` opens a transaction and sweeps this same (service, date)
+    // before it reads, and the sweep above already did exactly that,
+    // microseconds earlier. The second sweep could never find a hold the
+    // first one left behind, so it was three round trips - BEGIN, UPDATE,
+    // COMMIT - for no effect on every init and every confirm. What is left
+    // is the read the gender check actually needs, against a table this
+    // function has already swept.
+    const snapshot = this.snapshotFromClaims(
       resolved.service,
       resolved.seatMap,
       resolved.travelDate,
+      this.store.liveClaims(resolved.service.serviceId, resolved.travelDate),
       identity,
     );
     assertGenderLocks(
@@ -1201,7 +1217,9 @@ export class ReservedOrderService {
    * holds and reading live claims for every service in the search in one
    * round trip each - the sweep and the read are the two database calls
    * `snapshot` makes per service, and neither belongs inside a loop that
-   * would otherwise pay for them once per service.
+   * would otherwise pay for them once per service. `liveHoldAndManifest`
+   * calls it for the other reason a caller might: it has already swept this
+   * (service, date) itself, and only the read is left to do.
    */
   private snapshotFromClaims(
     service: ReservedService,
