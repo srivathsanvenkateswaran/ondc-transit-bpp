@@ -246,6 +246,7 @@ export async function createApp(
         url: config.reservedDatabaseUrl,
         migrationRoot: config.reservedMigrationRoot,
         authToken: config.reservedDatabaseAuthToken,
+        eventLogger,
       }),
       reservedOverrides.idFactory
         ? { idFactory: reservedOverrides.idFactory }
