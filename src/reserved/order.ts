@@ -67,6 +67,7 @@ import type {
   ReservedStore,
 } from "./store.js";
 import type {
+  FareCell,
   FareTable,
   ReservedOperatorKey,
   ReservedService,
@@ -207,6 +208,18 @@ export class ReservedOrderService {
     const items: Array<Record<string, unknown>> = [];
     const fulfillments: Array<Record<string, unknown>> = [];
 
+    // First pass: work out which services this search will actually publish,
+    // and gather everything an item needs apart from availability. Nothing
+    // here is a database call - `seatMapFor` and `fareTableFor` read a source
+    // that holds its whole catalogue in memory (the fixture set at boot, or
+    // the HTTP source's own cached fetch), so doing this for every candidate
+    // service costs nothing extra.
+    const eligible: Array<{
+      service: ReservedService;
+      seatMap: SeatMap;
+      pair: BoardingPair;
+      cell: FareCell;
+    }> = [];
     for (const service of services) {
       const departureAt = stopInstantMilliseconds(
         query.travelDate,
@@ -233,18 +246,41 @@ export class ReservedOrderService {
       // a price on an item, and there is no honest one to put there.
       if (!cell) continue;
 
-      const snapshot = this.snapshot(service, seatMap, query.travelDate);
+      eligible.push({ service, seatMap, pair, cell });
+    }
+
+    // Second pass: availability. This is the part that used to cost two
+    // database round trips per service - a sweep of that service's expired
+    // holds, then a read of its live claims. Both are now one round trip for
+    // every eligible service at once, in the same order the per-service
+    // sweep-then-read used to run in: every expired hold across this search's
+    // services is swept before any of their claims are read, so a hold that
+    // just expired is never counted as live.
+    const serviceIds = eligible.map((entry) => entry.service.serviceId);
+    this.store.sweepExpiredHoldsForServices(serviceIds, query.travelDate, nowMs);
+    const claimsByService = this.store.liveClaimsForServices(
+      serviceIds,
+      query.travelDate,
+    );
+
+    for (const entry of eligible) {
+      const snapshot = this.snapshotFromClaims(
+        entry.service,
+        entry.seatMap,
+        query.travelDate,
+        claimsByService.get(entry.service.serviceId) ?? [],
+      );
       items.push(
         reservedItem({
-          service,
+          service: entry.service,
           travelDate: query.travelDate,
-          pricePaise: cell.farePaise,
-          pair,
-          fareSourcing: cell.sourcing,
+          pricePaise: entry.cell.farePaise,
+          pair: entry.pair,
+          fareSourcing: entry.cell.sourcing,
           availableCount: snapshot.availableCount,
         }),
       );
-      fulfillments.push(catalogueFulfillment(service, query.travelDate));
+      fulfillments.push(catalogueFulfillment(entry.service, query.travelDate));
     }
 
     return {
@@ -1137,13 +1173,33 @@ export class ReservedOrderService {
       travelDate,
       this.now().getTime(),
     );
+    const claims = this.store.liveClaims(service.serviceId, travelDate);
+    return this.snapshotFromClaims(service, seatMap, travelDate, claims, viewer);
+  }
+
+  /**
+   * The read-only half of {@link snapshot}: seeded occupancy, per-seat state
+   * and the available count, given claims the caller already fetched.
+   *
+   * `search` calls this directly, once per service, after sweeping expired
+   * holds and reading live claims for every service in the search in one
+   * round trip each - the sweep and the read are the two database calls
+   * `snapshot` makes per service, and neither belongs inside a loop that
+   * would otherwise pay for them once per service.
+   */
+  private snapshotFromClaims(
+    service: ReservedService,
+    seatMap: SeatMap,
+    travelDate: string,
+    claims: LiveSeatClaim[],
+    viewer?: ReservedIdentity,
+  ): Snapshot {
     const seeded = seededOccupancy(
       service,
       seatMap,
       travelDate,
       this.options.reservation.occupancySeed,
     );
-    const claims = this.store.liveClaims(service.serviceId, travelDate);
     const neighbourhood = { map: seatMap, seededSold: seeded, claims, viewer };
     return {
       seeded,

@@ -3,11 +3,16 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { istIsoInstant } from "../../src/reserved/calendar.js";
+import { reservedSearchQuery } from "../../src/reserved/catalog.js";
 import { openReservedDatabase } from "../../src/reserved/db.js";
+import { reservedItemId } from "../../src/reserved/domain.js";
 import { ReservedLifecycleError } from "../../src/reserved/errors.js";
 import { FixtureReservedSource } from "../../src/reserved/fixture.js";
+import { seededOccupancy } from "../../src/reserved/occupancy.js";
 import { ReservedOrderService } from "../../src/reserved/order.js";
+import { availableSeatCount } from "../../src/reserved/seatstate.js";
 import { ReservedStore } from "../../src/reserved/store.js";
+import type { ReservedService } from "../../src/reserved/types.js";
 import {
   reservedOrderRequest,
   reservedSearchRequest,
@@ -198,6 +203,324 @@ test("a departure past its closing window is not published at all", async () => 
     reservedSearchRequest({ travelDate: TRAVEL_DATE }) as never,
   );
   assert.deepEqual((message.catalog as any).providers[0].items, []);
+});
+
+/* ------------------------------------------------------------------ *
+ * search: batched availability
+ *
+ * `snapshot` used to run per service inside the search loop, and each call
+ * made two database round trips - sweep this service's expired holds, then
+ * read its live claims. A corridor with dozens of running services paid for
+ * dozens of round trips before it could answer at all, which is what made
+ * Bengaluru to Mangaluru (82 services), Hassan (115) and Kunigal (114)
+ * unanswerable in production. The tests below pin the fix: one search now
+ * costs the same handful of round trips no matter how many services it
+ * answers for, and answers with exactly the same items and the same
+ * available counts a per-service read would have produced.
+ * ------------------------------------------------------------------ */
+
+/**
+ * Wraps a real `ReservedDatabase` and counts every statement invocation
+ * (`run`, `get`, `all`) as one round trip - the same call shape `db.ts`
+ * documents as identical between a local file and a remote Turso connection,
+ * so counting invocations here stands in for counting network hops there.
+ */
+function countingDatabase(inner: import("../../src/reserved/db.js").ReservedDatabase) {
+  let roundTrips = 0;
+  const database: import("../../src/reserved/db.js").ReservedDatabase = {
+    prepare(sql: string) {
+      const statement = inner.prepare(sql);
+      return {
+        run: (...params: unknown[]) => {
+          roundTrips += 1;
+          return statement.run(...params);
+        },
+        get: (...params: unknown[]) => {
+          roundTrips += 1;
+          return statement.get(...params);
+        },
+        all: (...params: unknown[]) => {
+          roundTrips += 1;
+          return statement.all(...params);
+        },
+      };
+    },
+    exec: (sql: string) => inner.exec(sql),
+    close: () => inner.close(),
+  };
+  return { database, roundTrips: () => roundTrips };
+}
+
+function harnessWithCountingStore() {
+  const clock = { at: NOW };
+  const { database, roundTrips } = countingDatabase(
+    openReservedDatabase({ url: ":memory:", migrationRoot }),
+  );
+  const store = new ReservedStore(database);
+  const orders = new ReservedOrderService(
+    "ksrtc",
+    source,
+    {
+      subscriberId: "ksrtc.provider.example.test",
+      subscriberUri: "https://ksrtc-network.example.test",
+    },
+    store,
+    {
+      publicBaseUrl: "https://provider.example.test",
+      reservation: {
+        closeMinutes: 45,
+        horizonDays: 30,
+        occupancySeed: 20_260_905,
+        holdTtlSeconds: HOLD_TTL_SECONDS,
+        manifestRetentionDays: 30,
+      },
+      now: () => new Date(clock.at),
+    },
+  );
+  return { orders, store, clock, roundTrips };
+}
+
+test("a search costs the same handful of database round trips whether it answers one service or eighty-two", async () => {
+  const one = harnessWithCountingStore();
+  const oneServiceMessage = await one.orders.search(
+    // The default route (BLR to HMP, Hampi) runs exactly one service on this
+    // date - see "a search answers with dated items and a quiet
+    // seats-remaining count" above.
+    reservedSearchRequest({ travelDate: TRAVEL_DATE }) as never,
+  );
+  assert.equal(
+    (oneServiceMessage.catalog as any).providers[0].items.length,
+    1,
+  );
+  const oneServiceRoundTrips = one.roundTrips();
+
+  const many = harnessWithCountingStore();
+  const manyServiceMessage = await many.orders.search(
+    // Bengaluru to Mangaluru: 82 running services on this date, the corridor
+    // named in the production measurement this fix responds to.
+    reservedSearchRequest({
+      fromTownCode: "BLR",
+      toTownCode: "MNG",
+      travelDate: TRAVEL_DATE,
+    }) as never,
+  );
+  assert.equal(
+    (manyServiceMessage.catalog as any).providers[0].items.length,
+    82,
+  );
+  const manyServiceRoundTrips = many.roundTrips();
+
+  // The number of round trips a search costs must not depend on how many
+  // services it answers for. Before this fix each additional service added
+  // two round trips (a sweep and a claims read); now the sweep and the read
+  // are each one query for the whole search, so eighty-two services cost the
+  // same as one.
+  assert.equal(manyServiceRoundTrips, oneServiceRoundTrips);
+  // Pinned to a concrete, small number so a future change that reintroduces
+  // even a single per-service call is caught rather than silently
+  // tolerated by the equality check above alone.
+  assert.ok(
+    manyServiceRoundTrips <= 3,
+    `expected at most 3 round trips for a search with services, got ${manyServiceRoundTrips}`,
+  );
+});
+
+test("search publishes the same items and available counts a per-service read would, and still skips a closed window and an unpriced pair", async () => {
+  const query = reservedSearchQuery(
+    reservedSearchRequest({
+      fromTownCode: "BLR",
+      toTownCode: "MNG",
+      travelDate: TRAVEL_DATE,
+    }) as never,
+  );
+  const realServices = await source.services(query);
+  const [realA, realB, realC, cloneBase1, cloneBase2] = realServices;
+  assert.ok(realA && realB && realC && cloneBase1 && cloneBase2);
+
+  // A service whose departure has already closed for booking: cloned from a
+  // real running service so its seat map and fare table are otherwise
+  // ordinary, with only its identity and departure time changed.
+  const closedService: ReservedService = {
+    ...structuredClone(cloneBase1),
+    serviceId: "TEST-CLOSED-WINDOW",
+    departureMinute: 0,
+  };
+  // A service whose headline boarding pair this provider does not price:
+  // same shape as a real service, but pointed at a fare table with nothing
+  // in it, which is what "no cell matches the headline pair" looks like
+  // regardless of what that pair actually is.
+  const unpricedService: ReservedService = {
+    ...structuredClone(cloneBase2),
+    serviceId: "TEST-NO-HEADLINE-FARE",
+    fareTableId: "TEST-FARETABLE-EMPTY",
+  };
+
+  const spySource: import("../../src/reserved/types.js").ReservedServiceSource = {
+    operator: source.operator,
+    services: async () => [
+      realA,
+      realB,
+      realC,
+      closedService,
+      unpricedService,
+    ],
+    service: (serviceId: string) => source.service(serviceId),
+    seatMap: (seatMapId: string) => source.seatMap(seatMapId),
+    fareTable: async (fareTableId: string) =>
+      fareTableId === "TEST-FARETABLE-EMPTY"
+        ? { fareTableId, currency: "INR" as const, fares: [] }
+        : source.fareTable(fareTableId),
+  };
+
+  const clock = { at: NOW };
+  const store = new ReservedStore(
+    openReservedDatabase({ url: ":memory:", migrationRoot }),
+  );
+  const orders = new ReservedOrderService(
+    "ksrtc",
+    spySource,
+    {
+      subscriberId: "ksrtc.provider.example.test",
+      subscriberUri: "https://ksrtc-network.example.test",
+    },
+    store,
+    {
+      publicBaseUrl: "https://provider.example.test",
+      reservation: {
+        closeMinutes: 45,
+        horizonDays: 30,
+        occupancySeed: 20_260_905,
+        holdTtlSeconds: HOLD_TTL_SECONDS,
+        manifestRetentionDays: 30,
+      },
+      now: () => new Date(clock.at),
+    },
+  );
+
+  // At this instant `closedService`'s midnight departure is thirty minutes
+  // in the past - past the 45-minute close - while every real BLR-MNG
+  // service (earliest departure 06:05) is still hours away and open.
+  clock.at = Date.parse("2026-09-29T19:00:00.000Z");
+
+  // Hold a seat on realA and a different seat on realC before searching, so
+  // the test can catch a claim read up under the wrong service id - a bug
+  // batching is exactly positioned to introduce.
+  const seatMapA = await source.seatMap(realA.seatMapId);
+  const seatMapC = await source.seatMap(realC.seatMapId);
+  const heldSeatA = seatMapA!.seats[0].seatId;
+  // Deliberately a different seat position from `heldSeatA`, not just a
+  // different service: two seat maps can both label their first seat "1A",
+  // and the point of this pair of holds is to prove a claim never crosses
+  // service boundaries, not merely that two distinct id strings exist.
+  const heldSeatC = seatMapC!.seats[1].seatId;
+  assert.notEqual(
+    heldSeatA,
+    heldSeatC,
+    "the test needs two distinct seat id strings to prove claims aren't mixed up by id alone",
+  );
+  store.acquireHold({
+    operator: "ksrtc",
+    identity: {
+      bapId: "bap.example.test",
+      bapUri: "https://bap.example.test",
+      transactionId: "batching-test-a",
+    },
+    serviceId: realA.serviceId,
+    travelDate: TRAVEL_DATE,
+    seatIds: [heldSeatA],
+    nowMs: clock.at,
+    ttlSeconds: HOLD_TTL_SECONDS,
+  });
+  store.acquireHold({
+    operator: "ksrtc",
+    identity: {
+      bapId: "bap.example.test",
+      bapUri: "https://bap.example.test",
+      transactionId: "batching-test-c",
+    },
+    serviceId: realC.serviceId,
+    travelDate: TRAVEL_DATE,
+    seatIds: [heldSeatC],
+    nowMs: clock.at,
+    ttlSeconds: HOLD_TTL_SECONDS,
+  });
+
+  const message = await orders.search(
+    reservedSearchRequest({
+      fromTownCode: "BLR",
+      toTownCode: "MNG",
+      travelDate: TRAVEL_DATE,
+    }) as never,
+  );
+  const items = (message.catalog as any).providers[0].items as Array<{
+    id: string;
+    quantity: { available: { count: number } };
+  }>;
+  const itemIds = items.map((item) => item.id);
+
+  assert.ok(
+    !itemIds.includes(
+      reservedItemId(
+        closedService.serviceId,
+        TRAVEL_DATE,
+        closedService.serviceClass,
+      ),
+    ),
+    "a service outside the booking window must not be published",
+  );
+  assert.ok(
+    !itemIds.includes(
+      reservedItemId(
+        unpricedService.serviceId,
+        TRAVEL_DATE,
+        unpricedService.serviceClass,
+      ),
+    ),
+    "a service with no published fare for its headline pair must not be published",
+  );
+  assert.equal(items.length, 3);
+
+  for (const service of [realA, realB, realC]) {
+    const itemId = reservedItemId(
+      service.serviceId,
+      TRAVEL_DATE,
+      service.serviceClass,
+    );
+    const item = items.find((candidate) => candidate.id === itemId);
+    assert.ok(item, `expected ${itemId} to be published`);
+
+    // The independently-read ground truth: sweep and read this one
+    // service's claims directly, the way the pre-batching code did it, and
+    // recompute availability the same way `snapshot` does.
+    const seatMap = await source.seatMap(service.seatMapId);
+    const claims = store.liveClaims(service.serviceId, TRAVEL_DATE);
+    const seeded = seededOccupancy(service, seatMap!, TRAVEL_DATE, 20_260_905);
+    const expectedAvailable = availableSeatCount({
+      map: seatMap!,
+      seededSold: seeded,
+      claims,
+    });
+    assert.equal(item!.quantity.available.count, expectedAvailable);
+  }
+
+  // The two holds actually landed on the services they were taken against,
+  // not on each other - the failure mode a service-id mixup in the batched
+  // claims read would produce.
+  assert.ok(
+    store
+      .liveClaims(realA.serviceId, TRAVEL_DATE)
+      .some((claim) => claim.seatId === heldSeatA),
+  );
+  assert.ok(
+    !store
+      .liveClaims(realC.serviceId, TRAVEL_DATE)
+      .some((claim) => claim.seatId === heldSeatA),
+  );
+  assert.ok(
+    store
+      .liveClaims(realC.serviceId, TRAVEL_DATE)
+      .some((claim) => claim.seatId === heldSeatC),
+  );
 });
 
 /* ------------------------------------------------------------------ *
