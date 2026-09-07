@@ -217,6 +217,19 @@ export function isDeadStreamError(error: unknown): boolean {
   return message !== undefined && DEAD_STREAM_PATTERNS.some((pattern) => pattern.test(message));
 }
 
+/**
+ * A ROLLBACK that failed because there is nothing to roll back.
+ *
+ * SQLite says this when no transaction is active. It reaches this module only
+ * after a reconnect has already thrown the transaction away, so it means the
+ * rollback's goal is met rather than that anything went wrong. Matched
+ * narrowly: a rollback failing for any other reason is still a real failure.
+ */
+export function isNothingToRollBack(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : undefined;
+  return message !== undefined && /cannot rollback\s*-?\s*no transaction is active/i.test(message);
+}
+
 type OperationKind = "begin" | "commit" | "rollback" | "other";
 
 /**
@@ -311,11 +324,28 @@ export class ReconnectingDatabase implements ReservedDatabase {
       else if (kind === "commit" || kind === "rollback") this.inTransaction = false;
       return result;
     } catch (error) {
+      if (kind === "rollback" && isNothingToRollBack(error)) {
+        // The rollback got what it wanted. A connection that has just been
+        // replaced carries none of the work the lost one held, so there is
+        // no open transaction to undo and saying so is not a failure. Before
+        // this, a stream that died mid-transaction healed correctly and then
+        // the caller's own ROLLBACK turned the recovery into an
+        // INTERNAL-ERROR, which is what a rider saw as "the operator could
+        // not answer that request in a form Tatak can read".
+        this.inTransaction = false;
+        return undefined as T;
+      }
       if (!isDeadStreamError(error)) throw error;
       this.reconnect(error);
       if (wasInTransaction) {
         // See the class doc: retrying here would silently run the statement
-        // outside the transaction it was supposed to belong to.
+        // outside the transaction it was supposed to belong to. The
+        // transaction itself is gone either way - the connection that held it
+        // is - so the flag has to be cleared here rather than waiting for a
+        // COMMIT or ROLLBACK that can no longer reach it. Leaving it set made
+        // every later operation on this handle believe it was inside a
+        // transaction and refuse to retry.
+        this.inTransaction = false;
         throw error;
       }
       const result = operation(this.current);
