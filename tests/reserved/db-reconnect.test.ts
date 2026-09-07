@@ -12,6 +12,8 @@ import {
   isDeadStreamError,
   openReservedDatabase,
   isNothingToRollBack,
+  isTransactionAlreadyGone,
+  withTransaction,
 } from "../../src/reserved/db.js";
 import { ReservedLifecycleError } from "../../src/reserved/errors.js";
 import { ReservedStore } from "../../src/reserved/store.js";
@@ -48,19 +50,38 @@ function deadStreamError(): Error {
 }
 
 /**
+ * The exact shapes reproduced directly against the real Turso database on
+ * 2026-09-07: hold a transaction open past roughly ten to twenty seconds and
+ * whichever statement runs next - here, a statement mid-batch - is told the
+ * interactive transaction is gone, even though the stream itself answered
+ * fine. This is a *different* fact from a dead stream (`deadStreamError`
+ * above): the connection is healthy, only the transaction was discarded.
+ */
+function transactionRolledBackError(): Error {
+  return new Error(
+    'Hrana(StreamError(Error { message: "SQLite error: interactive transaction was rolled back because the stream was idle for too long; retry the transaction", code: "SQLITE_BUSY" }))',
+  );
+}
+
+/** The wording production saw when `COMMIT` itself was the first statement to discover the same fact. */
+function cannotCommitError(): Error {
+  return new Error('Hrana(Api("SQLite error: cannot commit - no transaction is active"))');
+}
+
+/**
  * Wraps a real libsql connection and, on demand, throws a scripted error
  * instead of running the next call - the same interface `openReservedDatabase`
  * hands `ReconnectingDatabase`, with one seam added for tests to pull.
  */
 function flakyFactory(
   path: string,
-  queue: Array<() => never>,
+  queue: Array<(real: Database.Database) => never>,
 ): () => Database.Database {
   return () => {
     const real = new Database(path);
     const maybeThrow = (): void => {
       const next = queue.shift();
-      if (next) next();
+      if (next) next(real);
     };
     return {
       prepare(sql: string) {
@@ -97,6 +118,23 @@ function flakyFactory(
 
 function throwing(error: Error): () => never {
   return () => {
+    throw error;
+  };
+}
+
+/**
+ * The accurate version of "a transaction Turso discarded on its own": the
+ * real connection underneath is left with nothing to roll back too, not only
+ * the JS-visible error faked for the wrapper. Without this, a scripted
+ * failure that never touches the real connection leaves it still genuinely
+ * mid-transaction, so a later real `ROLLBACK` succeeds for an unrelated
+ * reason (there really is something open) rather than for the reason this
+ * fix cares about (`ReconnectingDatabase` correctly treating it as a no-op
+ * once there is nothing left).
+ */
+function rolledBackThenThrowing(error: Error): (real: Database.Database) => never {
+  return (real) => {
+    real.exec("ROLLBACK");
     throw error;
   };
 }
@@ -322,4 +360,215 @@ test("a rollback after a mid-transaction reconnect is not an error", () => {
   // A rollback that failed for a real reason is still a failure.
   assert.equal(isNothingToRollBack(new Error("SQLite error: database is locked")), false);
   assert.equal(isNothingToRollBack(new Error("stream not found: abc")), false);
+});
+
+/**
+ * The failure that replaced "cannot rollback" as the live one in production
+ * on 2026-09-07, once the fix above shipped.
+ *
+ * Turso does not only kill an idle stream outright (`isDeadStreamError`,
+ * fifteen minutes idle at the connection level). It separately times out an
+ * *interactive transaction* that sits open too long - reproduced directly
+ * against the real database by holding one open past roughly ten to twenty
+ * seconds - while the stream underneath answers fine. `isDeadStreamError`
+ * does not, and must not, match this: the two call for different responses.
+ * A dead stream means the connection is unusable and needs replacing. A
+ * discarded transaction on a live stream means only the bookkeeping needs
+ * correcting; reconnecting a perfectly good connection would just spend a
+ * round trip this fix exists to stop spending.
+ */
+test("isTransactionAlreadyGone matches every wording Turso used for the same fact, and nothing else", () => {
+  assert.equal(isTransactionAlreadyGone(cannotCommitError()), true);
+  assert.equal(isTransactionAlreadyGone(transactionRolledBackError()), true);
+  assert.equal(
+    isTransactionAlreadyGone(
+      new Error('Hrana(Api("SQLite error: cannot rollback - no transaction is active"))'),
+    ),
+    true,
+  );
+  // A dead stream is a different fact and must not match here: the two
+  // predicates call for different recoveries (see the class doc).
+  assert.equal(isTransactionAlreadyGone(deadStreamError()), false);
+  assert.equal(isTransactionAlreadyGone(new Error("SQLite error: database is locked")), false);
+  assert.equal(isTransactionAlreadyGone(new Error("UNIQUE constraint failed: t.id")), false);
+  assert.equal(isTransactionAlreadyGone(undefined), false);
+});
+
+/**
+ * The actual production failure, reproduced: Turso auto-rolled back an
+ * interactive transaction while the stream stayed healthy, and the next
+ * statement in the batch - not `BEGIN`, `COMMIT`, or `ROLLBACK` - is the one
+ * that discovers it. Before this fix, `ReconnectingDatabase` did not
+ * recognise this wording at all: it fell through to `!isDeadStreamError` and
+ * simply rethrew, leaving `inTransaction` stuck at `true`. The concrete
+ * consequence: `attempt` only auto-retries a dead-stream error once, and only
+ * when it is not mid-transaction, so a wholly unrelated dead stream on some
+ * later, ordinary statement would have been wrongly treated as mid-transaction
+ * and left to fail instead of quietly recovering.
+ */
+test("a transaction Turso discarded mid-batch is not retried, and stops the wrapper believing one is still open", () => {
+  const { path, cleanup } = temporaryDatabaseFile();
+  try {
+    openReservedDatabase({ url: `file:${path}`, migrationRoot }).close();
+
+    const queue: Array<(real: Database.Database) => never> = [];
+    const reconnects: Array<Record<string, unknown>> = [];
+    const database = new ReconnectingDatabase(flakyFactory(path, queue), (fields) =>
+      reconnects.push(fields),
+    );
+
+    database.exec("BEGIN IMMEDIATE");
+    // The real connection is left with nothing open too, not only the
+    // JS-visible error faked for the wrapper - matching what Turso actually
+    // did server-side, not only the message it sent back.
+    queue.push(rolledBackThenThrowing(transactionRolledBackError()));
+    assert.throws(
+      () =>
+        database
+          .prepare(
+            `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
+               hold_id, operator, bap_id, bap_uri, transaction_id, expires_at, created_at)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+          )
+          .run("SL1", "S", "2026-09-30", "U3A", "HELD", "H1", "ksrtc", "bap", "uri", "tx1", 1, 0),
+      /interactive transaction was rolled back/,
+    );
+    // Nothing was reconnected - the stream was fine, only the transaction was
+    // gone, and a reconnect here would spend a round trip for no reason.
+    assert.equal(reconnects.length, 0);
+
+    // The concrete consequence of leaving `inTransaction` stuck at `true`:
+    // `attempt` only auto-retries a dead-stream error once, and only when it
+    // reads `false` here. Checked immediately, with no ROLLBACK in between -
+    // a ROLLBACK would reach the same fixed state through the different,
+    // already-existing `isNothingToRollBack` path and mask whether this fix
+    // is the one actually doing the work.
+    queue.push(throwing(deadStreamError()));
+    const before = database
+      .prepare("SELECT COUNT(*) AS n FROM seat_locks")
+      .get() as { n: number };
+    assert.equal(before.n, 0);
+    assert.equal(reconnects.length, 1);
+
+    database.close();
+  } finally {
+    cleanup();
+  }
+});
+
+/**
+ * The hard constraint on this whole fix: a `COMMIT` that finds no
+ * transaction open is never a success. The work it was meant to durably
+ * record was never inside a transaction by the time it ran, and reporting
+ * that as a written hold would be exactly the double-sale risk this
+ * provider's schema exists to prevent. This is the shape production actually
+ * hit - `COMMIT` itself, not an earlier statement, is the one that discovers
+ * the transaction is gone.
+ */
+test("a COMMIT that finds no transaction open is a real failure, never swallowed", () => {
+  const { path, cleanup } = temporaryDatabaseFile();
+  try {
+    openReservedDatabase({ url: `file:${path}`, migrationRoot }).close();
+
+    const queue: Array<(real: Database.Database) => never> = [];
+    const reconnects: Array<Record<string, unknown>> = [];
+    const database = new ReconnectingDatabase(flakyFactory(path, queue), (fields) =>
+      reconnects.push(fields),
+    );
+
+    database.exec("BEGIN IMMEDIATE");
+    // The real connection genuinely has nothing open too, matching what
+    // Turso actually did server-side rather than only the message it sent.
+    queue.push(rolledBackThenThrowing(cannotCommitError()));
+    assert.throws(
+      () => database.exec("COMMIT"),
+      /cannot commit - no transaction is active/,
+    );
+
+    // The concrete consequence of leaving `inTransaction` stuck at `true`
+    // after this: `attempt` only retries a dead-stream error once,
+    // automatically, when it reads `false` here. Checked immediately, with
+    // no ROLLBACK in between - a ROLLBACK would reach the same fixed state
+    // through the different, already-existing `isNothingToRollBack` path and
+    // mask whether this fix is the one actually doing the work.
+    queue.push(throwing(deadStreamError()));
+    const count = database
+      .prepare("SELECT COUNT(*) AS n FROM seat_locks")
+      .get() as { n: number };
+    assert.equal(count.n, 0);
+    assert.equal(reconnects.length, 1);
+
+    database.exec("BEGIN IMMEDIATE");
+    database.exec("COMMIT");
+
+    database.close();
+  } finally {
+    cleanup();
+  }
+});
+
+/**
+ * `withTransaction` centralises the four hand-rolled BEGIN/COMMIT/ROLLBACK
+ * blocks `store.ts` used to carry. The one behaviour worth pinning on its
+ * own: whatever broke the transaction is what the caller hears about, even
+ * if the best-effort ROLLBACK issued afterward *also* fails for some
+ * unrelated reason - the cleanup attempt's own failure must never replace
+ * the original one.
+ */
+test("withTransaction re-throws the original failure even if the rollback it attempts also fails", () => {
+  const { path, cleanup } = temporaryDatabaseFile();
+  try {
+    const database = openReservedDatabase({ url: `file:${path}`, migrationRoot });
+    const originalError = new Error("the actual reason this transaction failed");
+    let rollbackAttempted = false;
+    const wrapped = {
+      prepare: (sql: string) => database.prepare(sql),
+      exec: (sql: string) => {
+        if (sql === "ROLLBACK") {
+          rollbackAttempted = true;
+          throw new Error("connection is unusable, rollback cannot even be attempted");
+        }
+        return database.exec(sql);
+      },
+      close: () => database.close(),
+    };
+
+    assert.throws(
+      () =>
+        withTransaction(wrapped, () => {
+          throw originalError;
+        }),
+      (error: unknown) => error === originalError,
+    );
+    assert.equal(rollbackAttempted, true);
+
+    database.close();
+  } finally {
+    cleanup();
+  }
+});
+
+test("withTransaction commits on success and returns fn's value", () => {
+  const { path, cleanup } = temporaryDatabaseFile();
+  try {
+    const database = openReservedDatabase({ url: `file:${path}`, migrationRoot });
+    const result = withTransaction(database, () => {
+      database
+        .prepare(
+          `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
+             hold_id, operator, bap_id, bap_uri, transaction_id, expires_at, created_at)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+        )
+        .run("SL1", "S", "2026-09-30", "U3A", "HELD", "H1", "ksrtc", "bap", "uri", "tx1", 1, 0);
+      return "committed";
+    });
+    assert.equal(result, "committed");
+    const row = database
+      .prepare("SELECT state FROM seat_locks WHERE id = ?")
+      .get("SL1") as { state: string };
+    assert.equal(row.state, "HELD");
+    database.close();
+  } finally {
+    cleanup();
+  }
 });

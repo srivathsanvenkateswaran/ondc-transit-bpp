@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { openReservedDatabase } from "../../src/reserved/db.js";
+import { openReservedDatabase, type ReservedDatabase } from "../../src/reserved/db.js";
 import { ReservedLifecycleError } from "../../src/reserved/errors.js";
 import { ReservedStore } from "../../src/reserved/store.js";
 
@@ -28,6 +28,45 @@ function newStore(): ReservedStore {
     openReservedDatabase({ url: ":memory:", migrationRoot }),
     { idFactory: () => `ID${String((counter += 1)).padStart(4, "0")}` },
   );
+}
+
+/**
+ * Wraps a real `ReservedDatabase` and counts every statement invocation
+ * (`run`, `get`, `all`) as one round trip - the same accounting
+ * `tests/reserved/order.test.ts` uses to pin the search loop's own batching,
+ * because a synchronous local driver and a remote Turso connection make the
+ * identical calls (`db.ts`'s own doc), so counting invocations here stands in
+ * for counting network hops there.
+ */
+function countingStore(): { store: ReservedStore; roundTrips: () => number } {
+  let counter = 0;
+  let roundTrips = 0;
+  const inner = openReservedDatabase({ url: ":memory:", migrationRoot });
+  const database: ReservedDatabase = {
+    prepare(sql: string) {
+      const statement = inner.prepare(sql);
+      return {
+        run: (...params: unknown[]) => {
+          roundTrips += 1;
+          return statement.run(...params);
+        },
+        get: (...params: unknown[]) => {
+          roundTrips += 1;
+          return statement.get(...params);
+        },
+        all: (...params: unknown[]) => {
+          roundTrips += 1;
+          return statement.all(...params);
+        },
+      };
+    },
+    exec: (sql: string) => inner.exec(sql),
+    close: () => inner.close(),
+  };
+  const store = new ReservedStore(database, {
+    idFactory: () => `ID${String((counter += 1)).padStart(4, "0")}`,
+  });
+  return { store, roundTrips: () => roundTrips };
 }
 
 /**
@@ -68,6 +107,44 @@ function acquire(
     ttlSeconds: TTL,
   });
 }
+
+/**
+ * `acquireHold` used to insert one seat row per round trip, so a select
+ * naming several seats held its transaction open for a multiple of one
+ * seat's network latency. Against the real, remote Turso database that
+ * matters: Turso ends an "interactive transaction" that sits open too long
+ * even when the underlying stream is fine, well before the stream itself
+ * would ever be judged dead - reproduced directly on 2026-09-07 by holding a
+ * transaction open past roughly ten to twenty seconds, which a per-seat
+ * round trip on a several-seat hold reached routinely and reliably. The
+ * fix batches every seat's insert into one statement, so the round-trip
+ * count a hold costs must not grow with how many seats it names.
+ */
+test("acquiring a hold costs the same handful of database round trips for one seat or six", () => {
+  const one = countingStore();
+  acquire(one.store, "tx1", ["U3A"], 1_000_000);
+  const oneSeatRoundTrips = one.roundTrips();
+  one.store.close();
+
+  const six = countingStore();
+  acquire(
+    six.store,
+    "tx1",
+    ["U3A", "U3B", "U3C", "U3D", "U3E", "U3F"],
+    1_000_000,
+  );
+  const sixSeatRoundTrips = six.roundTrips();
+  six.store.close();
+
+  assert.equal(sixSeatRoundTrips, oneSeatRoundTrips);
+  // Pinned to a concrete, small number so a future change that reintroduces
+  // even one per-seat round trip is caught rather than silently tolerated by
+  // the equality check above alone.
+  assert.ok(
+    sixSeatRoundTrips <= 5,
+    `expected at most 5 round trips to acquire a hold, got ${sixSeatRoundTrips}`,
+  );
+});
 
 test("a hold carries an absolute expiry this provider computed", () => {
   const store = newStore();
