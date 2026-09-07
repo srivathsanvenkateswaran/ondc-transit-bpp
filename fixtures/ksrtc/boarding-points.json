@@ -1,0 +1,303 @@
+{
+  "sourcing": {
+    "note": "The Bengaluru points are named stands and localities on the corridors the research describes, and their coordinates are approximate town-level positions taken from public mapping. The Chennai points are named localities the research lists as boarding and dropping points on the Bengaluru-Chennai corridor; no coordinate was sourced for any of them and none is published. A boarding point with no coordinate publishes none rather than one synthesised from a town centroid: 2026-dated complaints against the incumbents still report a pin that does not match where the coach actually stops, so a pin is only as trustworthy as the operational data behind it.",
+    "label": "S"
+  },
+  "points": {
+    "BLR": [
+      {
+        "boardingPointId": "BP-BLR-MAJESTIC",
+        "name": "Majestic (Kempegowda Bus Station)",
+        "nameLocal": "ಮೆಜೆಸ್ಟಿಕ್ (ಕೆಂಪೇಗೌಡ ಬಸ್ ನಿಲ್ದಾಣ)",
+        "gps": {
+          "lat": 12.9776,
+          "lon": 77.5713
+        }
+      },
+      {
+        "boardingPointId": "BP-BLR-MADIWALA",
+        "name": "Madiwala",
+        "nameLocal": "ಮಡಿವಾಳ",
+        "gps": {
+          "lat": 12.922,
+          "lon": 77.6191
+        }
+      },
+      {
+        "boardingPointId": "BP-BLR-ELECTRONIC-CITY",
+        "name": "Electronic City",
+        "nameLocal": "ಎಲೆಕ್ಟ್ರಾನಿಕ್ ಸಿಟಿ",
+        "gps": {
+          "lat": 12.8452,
+          "lon": 77.6602
+        }
+      },
+      {
+        "boardingPointId": "BP-BLR-YESHWANTHPUR",
+        "name": "Yeshwanthpur TTMC",
+        "gps": {
+          "lat": 13.01878,
+          "lon": 77.55758
+        }
+      },
+      {
+        "boardingPointId": "BP-BLR-PEENYA",
+        "name": "Peenya Satellite Bus Station",
+        "gps": {
+          "lat": 13.04409,
+          "lon": 77.52554
+        }
+      }
+    ],
+    "HPT": [
+      {
+        "boardingPointId": "BP-HPT-HOSAPETE",
+        "name": "Hosapete Bus Stand",
+        "nameLocal": "ಹೊಸಪೇಟೆ ಬಸ್ ನಿಲ್ದಾಣ",
+        "gps": {
+          "lat": 15.2689,
+          "lon": 76.3909
+        }
+      },
+      {
+        "boardingPointId": "BP-HPT-JSW-VIJAYANAGAR",
+        "name": "Hosapete JSW Vijayaganar Bus Terminal",
+        "gps": {
+          "lat": 15.275087639999999,
+          "lon": 76.38881015999999
+        }
+      }
+    ],
+    "HMP": [
+      {
+        "boardingPointId": "BP-HMP-HAMPI",
+        "name": "Hampi",
+        "nameLocal": "ಹಂಪೆ",
+        "gps": {
+          "lat": 15.335,
+          "lon": 76.46
+        }
+      }
+    ],
+    "MAA": [
+      {
+        "boardingPointId": "BP-MAA-AMBATTUR",
+        "name": "Ambattur",
+        "nameLocal": "அம்பத்தூர்"
+      },
+      {
+        "boardingPointId": "BP-MAA-KOYAMBEDU",
+        "name": "Koyambedu (CMBT)",
+        "nameLocal": "கோயம்பேடு"
+      },
+      {
+        "boardingPointId": "BP-MAA-ADYAR",
+        "name": "Adyar",
+        "nameLocal": "அடையாறு"
+      }
+    ],
+    "MNG": [
+      {
+        "boardingPointId": "BP-MNG-MANGALURU",
+        "name": "Mangaluru KSRTC Bus Stand (Bejai)",
+        "nameLocal": "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ, ಮಂಗಳೂರು",
+        "gps": {
+          "lat": 12.8852444,
+          "lon": 74.8416769
+        }
+      }
+    ],
+    "CKM": [
+      {
+        "boardingPointId": "BP-CKM-CHIKKAMAGALURU",
+        "name": "Chikkamagaluru KSRTC Bus Station",
+        "nameLocal": "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ",
+        "gps": {
+          "lat": 13.3180039,
+          "lon": 75.7716607
+        }
+      }
+    ],
+    "MYS": [
+      {
+        "boardingPointId": "BP-MYS-MYSURU-CENTRAL",
+        "name": "Mysuru Central Bus Stand",
+        "nameLocal": "ಕ.ರಾ.ರ.ಸಾ.ನಿ. ಬಸ್ ನಿಲ್ದಾಣ",
+        "gps": {
+          "lat": 12.312567,
+          "lon": 76.6584136
+        }
+      }
+    ],
+    "HSN": [
+      {
+        "boardingPointId": "BP-HSN-HASSAN",
+        "name": "Hassan Bus Station",
+        "gps": {
+          "lat": 12.9981795,
+          "lon": 76.1046362
+        }
+      }
+    ],
+    "KNG": [
+      {
+        "boardingPointId": "BP-KNG-KUNIGAL",
+        "name": "Kunigal KSRTC Bus Stand",
+        "gps": {
+          "lat": 13.0251811,
+          "lon": 77.0293837
+        }
+      }
+    ],
+    "CTD": [
+      {
+        "boardingPointId": "BP-CTD-CHITRADURGA",
+        "name": "Chitradurga KSRTC Bus Station",
+        "gps": {
+          "lat": 14.2268023,
+          "lon": 76.3960352
+        }
+      }
+    ],
+    "HVR": [
+      {
+        "boardingPointId": "BP-HVR-HAVERI",
+        "name": "Haveri Bus Stand",
+        "gps": {
+          "lat": 14.788137,
+          "lon": 75.3978506
+        }
+      }
+    ],
+    "HBL": [
+      {
+        "boardingPointId": "BP-HBL-HUBBALLI",
+        "name": "Hubballi New Bus Station",
+        "gps": {
+          "lat": 15.3493019,
+          "lon": 75.1164175
+        }
+      }
+    ],
+    "MDK": [
+      {
+        "boardingPointId": "BP-MDK-MADIKERI",
+        "name": "Madikeri KSRTC Bus Stand",
+        "gps": {
+          "lat": 12.4233982,
+          "lon": 75.7378564
+        }
+      }
+    ],
+    "MND": [
+      {
+        "boardingPointId": "BP-MND-MANDYA-RURAL",
+        "name": "Mandya Rural Bus Stand",
+        "gps": {
+          "lat": 12.52857344,
+          "lon": 76.9012659
+        }
+      }
+    ],
+    "ANK": [
+      {
+        "boardingPointId": "BP-ANK-ANKOLA",
+        "name": "Ankola Bus Stand",
+        "gps": {
+          "lat": 14.6600753,
+          "lon": 74.3069664
+        }
+      }
+    ],
+    "GKN": [
+      {
+        "boardingPointId": "BP-GKN-GOKARNA",
+        "name": "Gokarna Bus Station",
+        "gps": {
+          "lat": 14.5461529,
+          "lon": 74.3191748
+        }
+      }
+    ],
+    "UDP": [
+      {
+        "boardingPointId": "BP-UDP-UDUPI",
+        "name": "Udupi Service Bus Station",
+        "gps": {
+          "lat": 13.3427023,
+          "lon": 74.7472121
+        }
+      }
+    ],
+    "BLL": [
+      {
+        "boardingPointId": "BP-BLL-BALLARI",
+        "name": "Ballari New Bus Terminal",
+        "gps": {
+          "lat": 15.13750737999999,
+          "lon": 76.91858056
+        }
+      }
+    ],
+    "KRK": [
+      {
+        "boardingPointId": "BP-KRK-KARKALA",
+        "name": "Karkala Bus Stand",
+        "gps": {
+          "lat": 13.2128782,
+          "lon": 74.9985126
+        }
+      }
+    ],
+    "SHV": [
+      {
+        "boardingPointId": "BP-SHV-SHIVAMOGGA",
+        "name": "Shivamogga Shimoga KSRTC Bus Stand",
+        "gps": {
+          "lat": 13.9289881,
+          "lon": 75.5680645
+        }
+      }
+    ],
+    "TMK": [
+      {
+        "boardingPointId": "BP-TMK-TUMAKURU",
+        "name": "Tumakuru KSRTC Bus Stand",
+        "gps": {
+          "lat": 13.3411568,
+          "lon": 77.1025164
+        }
+      }
+    ],
+    "BDM": [
+      {
+        "boardingPointId": "BP-BDM-BADAMI",
+        "name": "Badami Bus Station",
+        "gps": {
+          "lat": 15.9234183,
+          "lon": 75.6784662
+        }
+      }
+    ],
+    "BGK": [
+      {
+        "boardingPointId": "BP-BGK-BAGALKOT",
+        "name": "Bagalkot Bus Station",
+        "gps": {
+          "lat": 16.1840641,
+          "lon": 75.7022663
+        }
+      }
+    ],
+    "BJP": [
+      {
+        "boardingPointId": "BP-BJP-VIJAYAPURA",
+        "name": "Vijayapura Central Bus Station",
+        "gps": {
+          "lat": 16.8249461,
+          "lon": 75.7153973
+        }
+      }
+    ]
+  }
+}

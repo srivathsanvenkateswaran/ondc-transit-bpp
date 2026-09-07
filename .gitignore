@@ -10,3 +10,7 @@ stage-0/onix-sync/runtime/
 
 # Rendered deployment config, cached beckn-onix checkout, verification runs.
 deploy/runtime/
+
+# The reserved intercity database, when a local run writes one beside the
+# process rather than into memory. Held and booked seats are runtime state.
+data/

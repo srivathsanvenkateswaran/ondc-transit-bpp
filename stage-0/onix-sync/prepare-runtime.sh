@@ -40,9 +40,13 @@ readonly BMTC_BPP_URI_VALUE="${BMTC_BPP_URI:-http://bmtc-bpp-network:${BMTC_BPP_
 readonly BMRCL_BPP_ID_VALUE="${BMRCL_BPP_ID:-bmrcl.bpp.transit.localhost}"
 readonly BMRCL_BPP_NETWORK_PORT_VALUE="${BMRCL_BPP_NETWORK_PORT:-6102}"
 readonly BMRCL_BPP_URI_VALUE="${BMRCL_BPP_URI:-http://bmrcl-bpp-network:${BMRCL_BPP_NETWORK_PORT_VALUE}}"
+readonly KSRTC_BPP_ID_VALUE="${KSRTC_BPP_ID:-ksrtc.bpp.transit.localhost}"
+readonly KSRTC_BPP_NETWORK_PORT_VALUE="${KSRTC_BPP_NETWORK_PORT:-6202}"
+readonly KSRTC_BPP_URI_VALUE="${KSRTC_BPP_URI:-http://ksrtc-bpp-network:${KSRTC_BPP_NETWORK_PORT_VALUE}}"
 readonly PROVIDER_PORT_VALUE="${PROVIDER_PORT:-7001}"
 readonly BMTC_WEBHOOK_URL_VALUE="${BMTC_WEBHOOK_URL:-http://transit-bpp:${PROVIDER_PORT_VALUE}/bmtc/inbound}"
 readonly BMRCL_WEBHOOK_URL_VALUE="${BMRCL_WEBHOOK_URL:-http://transit-bpp:${PROVIDER_PORT_VALUE}/bmrcl/inbound}"
+readonly KSRTC_WEBHOOK_URL_VALUE="${KSRTC_WEBHOOK_URL:-http://transit-bpp:${PROVIDER_PORT_VALUE}/ksrtc/inbound}"
 readonly SEARCH_TTL_VALUE="${SEARCH_TTL:-PT4S}"
 
 mkdir -p "${ROOT_DIR}/runtime/config"
@@ -90,6 +94,11 @@ render_pair() {
           --arg ttl "${SEARCH_TTL_VALUE}" \
           '.app.subscriberId = $subscriber_id | .app.subscriberUri = $subscriber_uri | .app.actions.requests.search.ttl = $ttl | .app.actions.responses.on_search.ttl = $ttl' "${destination}"
         ;;
+      ksrtc)
+        yq -yi --arg subscriber_id "${KSRTC_BPP_ID_VALUE}" --arg subscriber_uri "${KSRTC_BPP_URI_VALUE}" \
+          --arg ttl "${SEARCH_TTL_VALUE}" \
+          '.app.subscriberId = $subscriber_id | .app.subscriberUri = $subscriber_uri | .app.actions.requests.search.ttl = $ttl | .app.actions.responses.on_search.ttl = $ttl' "${destination}"
+        ;;
     esac
   done
 
@@ -107,11 +116,20 @@ render_pair bmtc "${bmtc_public}" "${bmtc_private}" bmtc-bpp-client.yml bmtc-bpp
 IFS=$'\t' read -r bmrcl_public bmrcl_private < <(generate_pair)
 render_pair bmrcl "${bmrcl_public}" "${bmrcl_private}" bmrcl-bpp-client.yml bmrcl-bpp-network.yml
 
+# The reserved intercity seller. A separate key pair rather than a shared one,
+# because it is a separate subscriber registered under a separate network
+# domain, and a shared key would make the two indistinguishable to the
+# registry.
+IFS=$'\t' read -r ksrtc_public ksrtc_private < <(generate_pair)
+render_pair ksrtc "${ksrtc_public}" "${ksrtc_private}" ksrtc-bpp-client.yml ksrtc-bpp-network.yml
+
 yq -yi --arg port "${BAP_CLIENT_PORT:-5001}" '.server.port = ($port | tonumber)' "${ROOT_DIR}/runtime/config/bap-client.yml"
 yq -yi --arg port "${BAP_NETWORK_PORT_VALUE}" '.server.port = ($port | tonumber)' "${ROOT_DIR}/runtime/config/bap-network.yml"
 yq -yi --arg port "${BMTC_BPP_CLIENT_PORT:-6001}" --arg webhook "${BMTC_WEBHOOK_URL_VALUE}" '.server.port = ($port | tonumber) | .client.webhook.url = $webhook' "${ROOT_DIR}/runtime/config/bmtc-bpp-client.yml"
 yq -yi --arg port "${BMTC_BPP_NETWORK_PORT_VALUE}" '.server.port = ($port | tonumber)' "${ROOT_DIR}/runtime/config/bmtc-bpp-network.yml"
 yq -yi --arg port "${BMRCL_BPP_CLIENT_PORT:-6101}" --arg webhook "${BMRCL_WEBHOOK_URL_VALUE}" '.server.port = ($port | tonumber) | .client.webhook.url = $webhook' "${ROOT_DIR}/runtime/config/bmrcl-bpp-client.yml"
 yq -yi --arg port "${BMRCL_BPP_NETWORK_PORT_VALUE}" '.server.port = ($port | tonumber)' "${ROOT_DIR}/runtime/config/bmrcl-bpp-network.yml"
+yq -yi --arg port "${KSRTC_BPP_CLIENT_PORT:-6201}" --arg webhook "${KSRTC_WEBHOOK_URL_VALUE}" '.server.port = ($port | tonumber) | .client.webhook.url = $webhook' "${ROOT_DIR}/runtime/config/ksrtc-bpp-client.yml"
+yq -yi --arg port "${KSRTC_BPP_NETWORK_PORT_VALUE}" '.server.port = ($port | tonumber)' "${ROOT_DIR}/runtime/config/ksrtc-bpp-network.yml"
 
 echo "Rendered runtime configs; private keys remain under ignored runtime/."

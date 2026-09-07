@@ -1,0 +1,998 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json",
+  "$comment": "Shared shapes for the TRANSIT.LOCALHOST:INTERCITY domain, version 0.1.0. This tree is deliberately duplicated rather than shared with the schema tree next door. A descriptor, a price and a tag are the same shapes in both, and reusing them would mean a change made for one domain silently altering what the other accepts. A test asserts that nothing here refs outside this tree.",
+  "$defs": {
+    "context": {
+      "type": "object",
+      "required": [
+        "domain",
+        "location",
+        "action",
+        "version",
+        "bap_id",
+        "bap_uri",
+        "bpp_id",
+        "bpp_uri",
+        "transaction_id",
+        "message_id",
+        "timestamp",
+        "ttl"
+      ],
+      "properties": {
+        "domain": {
+          "const": "TRANSIT.LOCALHOST:INTERCITY"
+        },
+        "location": {
+          "type": "object",
+          "required": [
+            "country",
+            "city"
+          ],
+          "properties": {
+            "country": {
+              "type": "object",
+              "required": [
+                "code"
+              ],
+              "properties": {
+                "code": {
+                  "const": "IND"
+                }
+              }
+            },
+            "city": {
+              "type": "object",
+              "required": [
+                "code"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "bap_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bap_uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bpp_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bpp_uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transaction_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ttl": {
+          "type": "string",
+          "pattern": "^P"
+        }
+      }
+    },
+    "travelDate": {
+      "$comment": "A bare calendar date in Asia/Kolkata, never an instant. A planner that collapses a timestamp to a time of day silently discards the date component, which is the failure this field exists to prevent.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$"
+    },
+    "descriptor": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "codeDescriptor": {
+      "type": "object",
+      "required": [
+        "code"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "price": {
+      "type": "object",
+      "required": [
+        "currency",
+        "value"
+      ],
+      "properties": {
+        "currency": {
+          "const": "INR"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9]+(?:\\.[0-9]{1,2})?$"
+        }
+      }
+    },
+    "signedPrice": {
+      "type": "object",
+      "required": [
+        "currency",
+        "value"
+      ],
+      "properties": {
+        "currency": {
+          "const": "INR"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^-?[0-9]+(?:\\.[0-9]{1,2})?$"
+        }
+      }
+    },
+    "tagEntry": {
+      "type": "object",
+      "required": [
+        "descriptor"
+      ],
+      "properties": {
+        "descriptor": {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "tag": {
+      "type": "object",
+      "required": [
+        "descriptor",
+        "list"
+      ],
+      "properties": {
+        "descriptor": {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "display": {
+          "type": "boolean"
+        },
+        "list": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/tagEntry"
+          }
+        }
+      }
+    },
+    "seatState": {
+      "$comment": "Five states, and a client's legend must enumerate all five. A legend that undercounts the states actually on screen is a documented real-world failure, and the female-only state must be a distinct enumerated value rather than a colour hint folded into AVAILABLE.",
+      "enum": [
+        "AVAILABLE",
+        "HELD",
+        "HELD_BY_YOU",
+        "FEMALE_ONLY",
+        "SOLD:simulated",
+        "SOLD:booked"
+      ]
+    },
+    "stop": {
+      "$comment": "gps is optional and genuinely often absent. A named locality on an intercity corridor is a fare and time identity, not necessarily a surveyed point on a map, and a boarding point with no coordinate publishes none rather than one synthesised from a town centroid.",
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "location"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_stop_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "START",
+            "INTERMEDIATE_STOP",
+            "END"
+          ]
+        },
+        "location": {
+          "type": "object",
+          "required": [
+            "descriptor"
+          ],
+          "properties": {
+            "descriptor": {
+              "$ref": "#/$defs/codeDescriptor"
+            },
+            "gps": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        },
+        "time": {
+          "type": "object",
+          "required": [
+            "timestamp"
+          ],
+          "properties": {
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tag"
+          }
+        }
+      }
+    },
+    "reservationFulfillment": {
+      "$comment": "There is no authorization object anywhere on a reserved fulfillment. No QR, no rotating secret, no token. The boarding check on an intercity coach is a conductor with a manifest, not a gate with a reader, and minting a credential would model a verification nobody performs.",
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "tags"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "RESERVATION"
+        },
+        "vehicle": {
+          "type": "object",
+          "required": [
+            "category"
+          ],
+          "properties": {
+            "category": {
+              "const": "COACH"
+            }
+          }
+        },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/stop"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/tag"
+          }
+        }
+      }
+    },
+    "catalogueItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "category_ids",
+        "descriptor",
+        "price",
+        "quantity",
+        "fulfillment_ids",
+        "time",
+        "tags"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^RSV-"
+        },
+        "category_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "descriptor": {
+          "$ref": "#/$defs/descriptor"
+        },
+        "price": {
+          "$ref": "#/$defs/price"
+        },
+        "quantity": {
+          "$comment": "available.count is the seats-remaining integer, published quietly. There is no low-stock flag, no threshold and no percentage: the wire carries nothing that would encourage dressing a count as urgency.",
+          "type": "object",
+          "required": [
+            "maximum",
+            "minimum"
+          ],
+          "properties": {
+            "available": {
+              "type": "object",
+              "required": [
+                "count"
+              ],
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "maximum": {
+              "type": "object",
+              "required": [
+                "count"
+              ],
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6
+                }
+              }
+            },
+            "minimum": {
+              "type": "object",
+              "required": [
+                "count"
+              ],
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "fulfillment_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "time": {
+          "type": "object",
+          "required": [
+            "label",
+            "timestamp"
+          ],
+          "properties": {
+            "label": {
+              "const": "Departure"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/tag"
+          },
+          "contains": {
+            "type": "object",
+            "required": [
+              "descriptor"
+            ],
+            "properties": {
+              "descriptor": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "const": "SIMULATED_INVENTORY"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "required": [
+        "id",
+        "descriptor",
+        "categories",
+        "items",
+        "fulfillments"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "descriptor": {
+          "$ref": "#/$defs/descriptor"
+        },
+        "categories": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "descriptor"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "descriptor": {
+                "$ref": "#/$defs/descriptor"
+              }
+            }
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/catalogueItem"
+          }
+        },
+        "fulfillments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reservationFulfillment"
+          }
+        },
+        "payments": {
+          "type": "array"
+        }
+      }
+    },
+    "selectedItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "quantity"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quantity": {
+          "type": "object",
+          "required": [
+            "selected"
+          ],
+          "properties": {
+            "selected": {
+              "type": "object",
+              "required": [
+                "count"
+              ],
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "selectionOrder": {
+      "type": "object",
+      "required": [
+        "items",
+        "provider"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/selectedItem"
+          }
+        },
+        "provider": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "fulfillments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "stops"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "location"
+                  ],
+                  "properties": {
+                    "type": {
+                      "enum": [
+                        "START",
+                        "END"
+                      ]
+                    },
+                    "location": {
+                      "type": "object",
+                      "required": [
+                        "descriptor"
+                      ],
+                      "properties": {
+                        "descriptor": {
+                          "$ref": "#/$defs/codeDescriptor"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tag"
+          }
+        }
+      }
+    },
+    "billing": {
+      "$comment": "One name and one phone for the whole order, never one per passenger. A contact for the booking is a real operational need; an identifier per traveller is not.",
+      "type": "object",
+      "required": [
+        "name",
+        "phone"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phone": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "required": [
+        "collected_by",
+        "status",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "collected_by": {
+          "enum": [
+            "BAP",
+            "BPP"
+          ]
+        },
+        "status": {
+          "enum": [
+            "NOT_PAID",
+            "PAID"
+          ]
+        },
+        "type": {
+          "const": "PRE_ORDER"
+        },
+        "params": {
+          "type": "object"
+        },
+        "tags": {
+          "type": "array"
+        }
+      }
+    },
+    "quote": {
+      "type": "object",
+      "required": [
+        "price",
+        "breakup"
+      ],
+      "properties": {
+        "price": {
+          "$ref": "#/$defs/price"
+        },
+        "breakup": {
+          "$comment": "Two fields, because they answer two different questions. `code` is what a client keys a line off and is stable; `title` is what the rider reads. They were one field carrying the code, which put BASE_FARE on a fare screen - a client cannot invent a label for a code it was never given one for, and every client shipping its own private code-to-English map is a translation table that rots the day a line is added.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "code",
+              "title",
+              "price"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^[A-Z][A-Z0-9_]*$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "price": {
+                "$ref": "#/$defs/signedPrice"
+              }
+            }
+          }
+        }
+      }
+    },
+    "refund": {
+      "type": "object",
+      "required": [
+        "price",
+        "breakup"
+      ],
+      "properties": {
+        "price": {
+          "$ref": "#/$defs/signedPrice"
+        },
+        "breakup": {
+          "$comment": "The four lines of a refund, and they are always all four: a zero reservation fee is published rather than omitted, so that a rider who paid one can see that none of it is coming back rather than wondering where it went. The enumeration moved from `title` to `code` when the two were separated; `title` is prose and enumerating prose would freeze the wording.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "code",
+              "title",
+              "price"
+            ],
+            "properties": {
+              "code": {
+                "enum": [
+                  "BASE_FARE",
+                  "SLAB_DEDUCTION",
+                  "RESERVATION_FEE",
+                  "TOLL_REFUND"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "price": {
+                "$ref": "#/$defs/signedPrice"
+              }
+            }
+          }
+        }
+      }
+    },
+    "baseOrder": {
+      "type": "object",
+      "required": [
+        "items",
+        "provider",
+        "fulfillments",
+        "quote",
+        "tags"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "CANCELLED"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/catalogueItem"
+          }
+        },
+        "provider": {
+          "type": "object",
+          "required": [
+            "id",
+            "descriptor"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "descriptor": {
+              "$ref": "#/$defs/descriptor"
+            }
+          }
+        },
+        "fulfillments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/reservationFulfillment"
+          }
+        },
+        "billing": {
+          "$ref": "#/$defs/billing"
+        },
+        "payments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/payment"
+          }
+        },
+        "quote": {
+          "$ref": "#/$defs/quote"
+        },
+        "cancellation_terms": {
+          "type": "array",
+          "minItems": 1
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/tag"
+          }
+        }
+      }
+    },
+    "confirmedOrder": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseOrder"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "status",
+            "billing",
+            "payments"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^SPECIMEN-"
+            },
+            "status": {
+              "const": "ACTIVE"
+            },
+            "fulfillments": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/reservationFulfillment"
+              },
+              "contains": {
+                "type": "object",
+                "required": [
+                  "tags"
+                ],
+                "properties": {
+                  "tags": {
+                    "type": "array",
+                    "contains": {
+                      "type": "object",
+                      "required": [
+                        "descriptor"
+                      ],
+                      "properties": {
+                        "descriptor": {
+                          "type": "object",
+                          "required": [
+                            "code"
+                          ],
+                          "properties": {
+                            "code": {
+                              "const": "BOOKING_REF"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "settledOrder": {
+      "$comment": "A booking as it stands now, which may be cancelled. on_confirm keeps the stricter confirmedOrder, because a confirm that answered with a cancelled order would be answering a different question; on_status and on_cancel need this one, because a cancelled booking is exactly what both of them exist to report. Cancelled and completed are different words for different facts and neither is this field: a confirmed booking past its own departure is completed, which is a claim about the state machine rather than about whether the rider boarded.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseOrder"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "status",
+            "billing",
+            "payments"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^SPECIMEN-"
+            },
+            "status": {
+              "enum": [
+                "ACTIVE",
+                "CANCELLED"
+              ]
+            },
+            "fulfillments": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/reservationFulfillment"
+              },
+              "contains": {
+                "type": "object",
+                "required": [
+                  "tags"
+                ],
+                "properties": {
+                  "tags": {
+                    "type": "array",
+                    "contains": {
+                      "type": "object",
+                      "required": [
+                        "descriptor"
+                      ],
+                      "properties": {
+                        "descriptor": {
+                          "type": "object",
+                          "required": [
+                            "code"
+                          ],
+                          "properties": {
+                            "code": {
+                              "const": "BOOKING_REF"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "error": {
+      "$comment": "A domain error arrives as an error on the callback with no message.order. An error message names codes, never values: an unexpected value is exactly where an identity document number would arrive, and error messages reach the event log. `paths` was declared here and never set by anything, which made it a field a client could wait for forever; it is removed rather than shipped permanently absent, on the same reasoning section 9.1 uses to decline the bay. What a refusal has to say about particular seats it says in message.tags, as data, which is where the seat ids of a SEAT-UNAVAILABLE now travel.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

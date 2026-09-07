@@ -1,0 +1,281 @@
+# The envelope schema the pinned protocol server validates against for the
+# TRANSIT.LOCALHOST:INTERCITY domain at version 0.1.0.
+#
+# Why this file exists at all
+# ---------------------------
+# The protocol server resolves its core schema by the `version` in the request
+# context: `schemas/core_<version>.yaml`. The two existing sellers are on
+# 2.0.1 and mount `core_2.0.1.yaml`; this domain is on 0.1.0 and needs a
+# document under its own name. That is the whole of the core-schema
+# compatibility work a second domain turned out to need. The mounted schema
+# next door does not constrain a domain code - its `Domain.code` carries no
+# type and no enum, and the `ONDC:TRV11` listing beside it lives under
+# `x-enum`, an OpenAPI extension the validator does not read - so the domain
+# string itself was never the obstacle. The file name was.
+#
+# Why it is written rather than symlinked
+# ---------------------------------------
+# Pointing this name at the schema next door would couple the two vocabularies
+# through the deployment layer, which is exactly the coupling
+# docs/reserved-intercity.md section 2 refuses at the schema layer. This
+# document is deliberately its own, and it is deliberately thin: the detailed
+# per-action validation for this domain lives in
+# schemas/transit_local_intercity/0.1.0/, which this provider applies to every
+# request it accepts and every callback it emits. This file's job is the
+# envelope, and duplicating the whole item vocabulary here would put a second
+# copy of it somewhere nobody would think to update.
+#
+# Verification status
+# -------------------
+# UNVERIFIED. No container was run against this file. The two claims above -
+# that the protocol server resolves a core schema by context version, and that
+# it needs a matching context_<version>.json alongside - are read off the
+# existing compose file's own workaround, which copies context_1.1.0.json to
+# context_2.0.1.json for exactly that reason, and off the version-keyed name
+# of the schema it already mounts. A first run on a real host should be
+# treated as a first run.
+openapi: 3.0.0
+info:
+  title: Reserved intercity coach seats, local specimen domain
+  description: >-
+    A locally owned, Beckn-shaped domain under a reserved and unresolvable
+    name. It claims conformance to no published specification and sits in no
+    namespace anybody else administers.
+  version: 0.1.0
+security:
+  - SubscriberAuth: []
+paths:
+  /search:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /on_search:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /select:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /on_select:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /init:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /on_init:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /confirm:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /on_confirm:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /status:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /on_status:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /cancel:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+  /on_cancel:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+      responses:
+        default:
+          $ref: '#/components/responses/Ack'
+components:
+  securitySchemes:
+    SubscriberAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+  responses:
+    Ack:
+      description: Acknowledgement of the request on the open connection.
+      content:
+        application/json:
+          schema:
+            type: object
+  schemas:
+    Envelope:
+      type: object
+      required:
+        - context
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+        error:
+          $ref: '#/components/schemas/Error'
+    Context:
+      description: >-
+        The transaction envelope. Identical in shape to the one the other
+        sellers on this stack use, and pinned to this domain and this version
+        so that a payload from another domain cannot arrive here by accident.
+      type: object
+      required:
+        - domain
+        - location
+        - action
+        - version
+        - bap_id
+        - bap_uri
+        - transaction_id
+        - message_id
+        - timestamp
+        - ttl
+      properties:
+        domain:
+          type: string
+          enum:
+            - TRANSIT.LOCALHOST:INTERCITY
+        location:
+          type: object
+          properties:
+            country:
+              type: object
+              properties:
+                code:
+                  type: string
+            city:
+              type: object
+              properties:
+                code:
+                  type: string
+        action:
+          type: string
+          enum:
+            - search
+            - on_search
+            - select
+            - on_select
+            - init
+            - on_init
+            - confirm
+            - on_confirm
+            - status
+            - on_status
+            - cancel
+            - on_cancel
+        version:
+          type: string
+          enum:
+            - 0.1.0
+        bap_id:
+          type: string
+        bap_uri:
+          type: string
+          format: uri
+        bpp_id:
+          type: string
+        bpp_uri:
+          type: string
+          format: uri
+        transaction_id:
+          type: string
+        message_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        ttl:
+          type: string
+    Error:
+      description: >-
+        A domain error arrives on the callback with no order beside it. Codes,
+        never values: an unexpected value is exactly where an identity document
+        number would arrive, and error messages reach the event log.
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        paths:
+          type: string
+        message:
+          type: string

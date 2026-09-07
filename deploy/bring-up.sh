@@ -389,10 +389,19 @@ start_stack() {
   if (( DO_BUILD == 1 )); then
     recreate_args+=(--build)
   fi
+  # The reserved intercity seller is a second pair of protocol servers on a
+  # second domain, and it only comes up when the deployment has asked for it.
+  # A run without RESERVED_ENABLED starts exactly the topology it started
+  # before.
+  local reserved_services=()
+  if reserved_enabled; then
+    reserved_services=(ksrtc-bpp-client ksrtc-bpp-network)
+  fi
   ( cd "${REPO_ROOT}" && docker compose up -d "${recreate_args[@]}" \
       bap-client bap-network \
       bmtc-bpp-client bmtc-bpp-network \
       bmrcl-bpp-client bmrcl-bpp-network \
+      ${reserved_services[@]+"${reserved_services[@]}"} \
       transit-bpp ) \
     || die "could not start the provider topology. Try: docker compose logs"
 

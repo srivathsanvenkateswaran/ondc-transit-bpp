@@ -1,0 +1,173 @@
+{
+  "sourcing": {
+    "note": "Aggregator cheapest-fare figures of Rs 450-606 Bengaluru to Hampi and Rs 570-plus Bengaluru to Hosapete were reported, and both read like promotional floor prices rather than a fare table. The two cannot both be right: Hosapete is an earlier stop on the same run and cannot cost more than Hampi. Rather than ship a table in which an earlier stop is dearer, the Hampi headline is taken from the middle of the sourced range and every other cell is interpolated down from it and labelled as an inference. No corporation-published fare table was found for this corridor or this class, and no tax arithmetic is performed on any of these numbers: computing GST on a synthesised fare would dress a guess as a bill. AC_SEATER_EXECUTIVE_CHAIR cells added in a later pass are a separate, better-sourced addition: Kempegowda Bus Station (Majestic) to Hosapete Bus Stand is KSRTC own published fare (807 rupees, grade V, docs/research/sources/ksrtc-bng-hosapete-2026-09-07.tsv, trip 0545BNGHSP); every other AC_SEATER_EXECUTIVE_CHAIR cell here is read directly off the same page (grade I where the page repeats the Majestic fare for another city-side pickup, or computes a shorter-boarding fare the page itself publishes for an intermediate stand) rather than interpolated by this project. The two real, sourced services this class sells on this corridor (0545BNGHSP, 1535BNGHSP) are hand-authored in services.json rather than run through generate-ksrtc-fixtures.ts, because that script deliberately does not read the ka-bng-hmp corridor at all - see its own docblock on why swapping this corridor out from under the many other test suites that default to it is a separate, deliberate upgrade rather than a side effect of a class-coverage pass.",
+    "label": "S"
+  },
+  "fareTable": {
+    "fareTableId": "FT-BNGHMP",
+    "currency": "INR",
+    "fares": [
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-HMP-HAMPI",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 55000,
+        "sourcing": "S"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-HPT-HOSAPETE",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 53000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MADIWALA",
+        "toBoardingPointId": "BP-HMP-HAMPI",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 53000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MADIWALA",
+        "toBoardingPointId": "BP-HPT-HOSAPETE",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 51000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY",
+        "toBoardingPointId": "BP-HMP-HAMPI",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 51000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-ELECTRONIC-CITY",
+        "toBoardingPointId": "BP-HPT-HOSAPETE",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 49000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-HMP-HAMPI",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 55000,
+        "sourcing": "S"
+      },
+      {
+        "fromBoardingPointId": "BP-HPT-HOSAPETE",
+        "toBoardingPointId": "BP-BLR-MAJESTIC",
+        "serviceClass": "PALLAKKI",
+        "farePaise": 53000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-HPT-HOSAPETE",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 80700,
+        "sourcing": "V"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-HPT-HOSAPETE",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 80700,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-HPT-HOSAPETE",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 80700,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 5000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-BLR-PEENYA",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 6000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 19500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-MAJESTIC",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 49500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-BLR-PEENYA",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 5000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 18500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-YESHWANTHPUR",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 48500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-TMK-TUMAKURU",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 17000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-BLR-PEENYA",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 47000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-CTD-CHITRADURGA",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 34000,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-TMK-TUMAKURU",
+        "toBoardingPointId": "BP-HPT-HOSAPETE",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 61500,
+        "sourcing": "I"
+      },
+      {
+        "fromBoardingPointId": "BP-CTD-CHITRADURGA",
+        "toBoardingPointId": "BP-HPT-HOSAPETE",
+        "serviceClass": "AC_SEATER_EXECUTIVE_CHAIR",
+        "farePaise": 31500,
+        "sourcing": "I"
+      }
+    ]
+  }
+}

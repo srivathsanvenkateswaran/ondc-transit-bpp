@@ -16,11 +16,16 @@
 # What it does, in order
 # ----------------------
 #   1. Log in to the registry admin API and take an ApiKey.
-#   2. Create the ONDC:TRV11 network domain if it is missing. The registry
-#      rejects `POST /subscribers/register` with "Invalid domain" until it
-#      exists, and nothing in beckn-onix's option-4 path creates it.
+#   2. Create the ONDC:TRV11 network domain if it is missing, and, when
+#      RESERVED_ENABLED=true, the TRANSIT.LOCALHOST:INTERCITY domain as well.
+#      The registry rejects `POST /subscribers/register` with "Invalid domain"
+#      until the domain exists, and nothing in beckn-onix's option-4 path
+#      creates it. The domain row is also the gateway's routing entry: the
+#      gateway has no routing table of its own, and fans a search out to the
+#      subscribers the registry returns for that search's own domain.
 #   3. Register the BAP and the two BPP subscribers, or update their keys if
-#      they are already there.
+#      they are already there, plus the reserved intercity seller when it is
+#      enabled.
 #   4. Move each of them, and the gateway's own self-registered record, from
 #      INITIATED to SUBSCRIBED. The registry creates every record INITIATED and
 #      the gateway lookup only returns SUBSCRIBED ones.
@@ -88,32 +93,32 @@ registry_save() {
 }
 
 ensure_domain() {
-  local existing
+  local domain="$1" description="$2" existing
   existing="$(registry_get network_domains | python3 -c '
 import json, sys
 want = sys.argv[1]
-print("yes" if any(d.get("name") == want for d in json.load(sys.stdin)) else "no")' "${ONDC_DOMAIN}")" \
+print("yes" if any(d.get("name") == want for d in json.load(sys.stdin)) else "no")' "${domain}")" \
     || die "could not read network_domains from the registry."
 
   if [[ "${existing}" == "yes" ]]; then
-    ok "network domain ${ONDC_DOMAIN} already present"
+    ok "network domain ${domain} already present"
     return 0
   fi
 
-  announce "creating network domain ${ONDC_DOMAIN}"
+  announce "creating network domain ${domain}"
   curl -fsS -m 30 -o /dev/null -X POST -H "ApiKey:${API_KEY}" \
-    --data-urlencode "Name=${ONDC_DOMAIN}" \
-    --data-urlencode "Description=ONDC unreserved transit ticketing, local test network" \
+    --data-urlencode "Name=${domain}" \
+    --data-urlencode "Description=${description}" \
     "${REGISTRY_ADMIN_URL}/network_domains/save" \
-    || die "could not create network domain ${ONDC_DOMAIN}."
+    || die "could not create network domain ${domain}."
 
   registry_get network_domains | python3 -c '
 import json, sys
 want = sys.argv[1]
 if not any(d.get("name") == want for d in json.load(sys.stdin)):
-    sys.exit(1)' "${ONDC_DOMAIN}" \
-    || die "created network domain ${ONDC_DOMAIN} but the registry does not list it."
-  ok "network domain ${ONDC_DOMAIN} created"
+    sys.exit(1)' "${domain}" \
+    || die "created network domain ${domain} but the registry does not list it."
+  ok "network domain ${domain} created"
 }
 
 # Read one `app.<key>: <value>` line out of a rendered ONIX runtime config.
@@ -144,7 +149,7 @@ public_key_for() {
 
 # Register one subscriber, or bring an existing record's key up to date.
 seed_subscriber() {
-  local prefix="$1" type="$2" network_config="$3"
+  local prefix="$1" type="$2" network_config="$3" domain="${4:-${ONDC_DOMAIN}}"
   local subscriber_id unique_key subscriber_uri country city public_key
 
   subscriber_id="$(onix_config_value "${network_config}" subscriberId)"
@@ -154,7 +159,7 @@ seed_subscriber() {
   city="$(onix_config_value "${network_config}" city)"
   public_key="$(public_key_for "${prefix}")"
 
-  announce "${type} ${subscriber_id} key=${unique_key} uri=${subscriber_uri}"
+  announce "${type} ${subscriber_id} key=${unique_key} uri=${subscriber_uri} domain=${domain}"
 
   local payload
   payload="$(python3 -c '
@@ -283,6 +288,14 @@ verify_lookup() {
   bmtc_id="$(onix_config_value "${RUNTIME_CONFIG_DIR}/bmtc-bpp-network.yml" subscriberId)"
   bmrcl_id="$(onix_config_value "${RUNTIME_CONFIG_DIR}/bmrcl-bpp-network.yml" subscriberId)"
 
+  local reserved_args=()
+  if reserved_enabled; then
+    reserved_args=(
+      "$(onix_config_value "${RUNTIME_CONFIG_DIR}/ksrtc-bpp-network.yml" subscriberId)"
+      "$(public_key_for ksrtc)"
+    )
+  fi
+
   mkdir -p "${RUNTIME_DIR}"
   local lookup_raw="${RUNTIME_DIR}/registry-lookup.raw.json"
   curl -fsS -m 30 -H 'Content-Type: application/json' -d '{}' \
@@ -292,7 +305,8 @@ verify_lookup() {
   if ! python3 - "${lookup_raw}" \
     "${bap_id}" "${expected_bap}" \
     "${bmtc_id}" "${expected_bmtc}" \
-    "${bmrcl_id}" "${expected_bmrcl}" <<'PY'
+    "${bmrcl_id}" "${expected_bmrcl}" \
+    ${reserved_args[@]+"${reserved_args[@]}"} <<'PY'
 import json, sys
 
 path = sys.argv[1]
@@ -359,6 +373,35 @@ print("  gateway BPP lookup returns 2 subscribed sellers: " + ", ".join(ids))
 ' "${bpp_lookup_raw}" \
     || die "registry seeding left the gateway unable to find two sellers. Raw lookup: ${bpp_lookup_raw}"
   ok "gateway BPP lookup verified; raw response saved to ${bpp_lookup_raw}"
+
+  # The two domains have to stay apart, and this is where that is provable
+  # rather than asserted. A search on one domain must reach the sellers on
+  # that domain and nobody else: a reserved item appearing in an unreserved
+  # search, or the reverse, is the failure the whole domain split exists to
+  # prevent.
+  if ! reserved_enabled; then
+    return 0
+  fi
+  local reserved_lookup_raw="${RUNTIME_DIR}/registry-reserved-lookup.raw.json"
+  curl -fsS -m 30 -H 'Content-Type: application/json' \
+    -d "{\"type\":\"BPP\",\"domain\":\"${RESERVED_DOMAIN}\",\"country\":\"${country}\",\"city\":\"${city}\"}" \
+    "${REGISTRY_ADMIN_URL}/subscribers/lookup" -o "${reserved_lookup_raw}" \
+    || die "the gateway's own BPP lookup for ${RESERVED_DOMAIN} failed."
+
+  python3 -c '
+import json, sys
+records = json.load(open(sys.argv[1]))
+ids = sorted({r.get("subscriber_id") for r in records if r.get("status") == "SUBSCRIBED"})
+if ids != [sys.argv[2]]:
+    sys.exit(
+        "the reserved domain lookup returned "
+        f"{ids}, not exactly [{sys.argv[2]!r}]. A search on the reserved domain "
+        "would reach the wrong set of sellers."
+    )
+print("  reserved domain lookup returns exactly its own seller: " + ids[0])
+' "${reserved_lookup_raw}" "${reserved_args[0]}" \
+    || die "the two domains are not separated in the registry. Raw lookup: ${reserved_lookup_raw}"
+  ok "domain separation verified; raw response saved to ${reserved_lookup_raw}"
 }
 
 main() {
@@ -369,10 +412,17 @@ main() {
   log "  This will create or update 3 subscriber records and subscribe 4."
 
   registry_login
-  ensure_domain
+  ensure_domain "${ONDC_DOMAIN}" "ONDC unreserved transit ticketing, local test network"
   seed_subscriber bap   BAP "${RUNTIME_CONFIG_DIR}/bap-network.yml"
   seed_subscriber bmtc  BPP "${RUNTIME_CONFIG_DIR}/bmtc-bpp-network.yml"
   seed_subscriber bmrcl BPP "${RUNTIME_CONFIG_DIR}/bmrcl-bpp-network.yml"
+  if reserved_enabled; then
+    ensure_domain "${RESERVED_DOMAIN}" \
+      "Reserved intercity coach seats, local specimen domain. Not administered by any network."
+    seed_subscriber ksrtc BPP "${RUNTIME_CONFIG_DIR}/ksrtc-bpp-network.yml" "${RESERVED_DOMAIN}"
+  else
+    log "  (RESERVED_ENABLED is not true) skipping the reserved intercity domain and seller"
+  fi
   seed_gateway
 
   step "Verifying the registry the way the gateway reads it"

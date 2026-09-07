@@ -1,0 +1,111 @@
+{
+  "sourcing": {
+    "note": "Town names and their Kannada and Tamil forms are matters of public record. Hosapete and Hampi are listed separately because a rider may be sold to either and they are different dropping points with different times and different fares.",
+    "label": "V"
+  },
+  "towns": [
+    {
+      "code": "BLR",
+      "name": "Bengaluru",
+      "nameLocal": "ಬೆಂಗಳೂರು"
+    },
+    {
+      "code": "HPT",
+      "name": "Hosapete",
+      "nameLocal": "ಹೊಸಪೇಟೆ"
+    },
+    {
+      "code": "HMP",
+      "name": "Hampi",
+      "nameLocal": "ಹಂಪೆ"
+    },
+    {
+      "code": "MAA",
+      "name": "Chennai",
+      "nameLocal": "சென்னை"
+    },
+    {
+      "code": "MNG",
+      "name": "Mangaluru",
+      "nameLocal": "ಮಂಗಳೂರು"
+    },
+    {
+      "code": "CKM",
+      "name": "Chikkamagaluru",
+      "nameLocal": "ಚಿಕ್ಕಮಗಳೂರು"
+    },
+    {
+      "code": "MYS",
+      "name": "Mysuru",
+      "nameLocal": "ಮೈಸೂರು"
+    },
+    {
+      "code": "HSN",
+      "name": "Hassan"
+    },
+    {
+      "code": "KNG",
+      "name": "Kunigal"
+    },
+    {
+      "code": "CTD",
+      "name": "Chitradurga"
+    },
+    {
+      "code": "HVR",
+      "name": "Haveri"
+    },
+    {
+      "code": "HBL",
+      "name": "Hubballi"
+    },
+    {
+      "code": "MDK",
+      "name": "Madikeri"
+    },
+    {
+      "code": "MND",
+      "name": "Mandya"
+    },
+    {
+      "code": "ANK",
+      "name": "Ankola"
+    },
+    {
+      "code": "GKN",
+      "name": "Gokarna"
+    },
+    {
+      "code": "UDP",
+      "name": "Udupi"
+    },
+    {
+      "code": "BLL",
+      "name": "Ballari"
+    },
+    {
+      "code": "KRK",
+      "name": "Karkala"
+    },
+    {
+      "code": "SHV",
+      "name": "Shivamogga"
+    },
+    {
+      "code": "TMK",
+      "name": "Tumakuru"
+    },
+    {
+      "code": "BDM",
+      "name": "Badami"
+    },
+    {
+      "code": "BGK",
+      "name": "Bagalkot"
+    },
+    {
+      "code": "BJP",
+      "name": "Vijayapura"
+    }
+  ]
+}

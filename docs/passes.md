@@ -461,6 +461,18 @@ set — but a pass secret is longer-lived than a ticket token, so leaving it
 enabled on a shared host is worth deciding deliberately rather than by
 default.
 
+That note now covers a third thing, and the decision it asks for is
+correspondingly heavier. The reserved intercity category
+([`docs/reserved-intercity.md`](reserved-intercity.md)) stores a passenger
+manifest against every confirmed booking: a name per seat, and an age and a
+gender where the buyer app supplied them. The same endpoint returns those, so
+what is behind one bearer token is no longer only credentials this stack
+minted but names people gave it. Two things bound it rather than leaving it at
+a warning: nothing identifying beyond a name is ever accepted, stored or
+logged, and a manifest is swept once its journey is more than
+`RESERVED_MANIFEST_RETENTION_DAYS` old, from the stored order as well as from
+the row. Neither is a substitute for leaving the endpoint off.
+
 ## 7. Additions beyond the pinned wire contract
 
 The wire contract was pinned field-by-field in

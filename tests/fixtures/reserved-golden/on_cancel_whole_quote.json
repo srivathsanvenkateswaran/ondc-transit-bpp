@@ -1,0 +1,1906 @@
+{
+  "context": {
+    "domain": "TRANSIT.LOCALHOST:INTERCITY",
+    "location": {
+      "country": {
+        "code": "IND"
+      },
+      "city": {
+        "code": "std:080"
+      }
+    },
+    "action": "on_cancel",
+    "version": "0.1.0",
+    "bap_id": "bap.example.test",
+    "bap_uri": "https://bap.example.test",
+    "bpp_id": "ksrtc.provider.example.test",
+    "bpp_uri": "https://ksrtc-network.example.test",
+    "transaction_id": "0b0e1f6a-5c47-4d19-9a2f-3c8b1d6e7f01",
+    "message_id": "7d3f2c81-4a6b-4f0e-8c15-2b9d7e4a6c33",
+    "timestamp": "2026-09-20T10:00:00.000Z",
+    "ttl": "PT30S"
+  },
+  "message": {
+    "order": {
+      "id": "SPECIMEN-RSV-KSRTC-00000002",
+      "status": "ACTIVE",
+      "provider": {
+        "id": "P1",
+        "descriptor": {
+          "name": "Karnataka State Road Transport Corporation"
+        }
+      },
+      "items": [
+        {
+          "id": "RSV-2259BNGHMP-2026-09-30-PALLAKKI",
+          "category_ids": [
+            "C3"
+          ],
+          "descriptor": {
+            "name": "Pallakki non-AC sleeper",
+            "code": "RESERVED"
+          },
+          "price": {
+            "currency": "INR",
+            "value": "550"
+          },
+          "quantity": {
+            "available": {
+              "count": 8
+            },
+            "selected": {
+              "count": 2
+            },
+            "maximum": {
+              "count": 6
+            },
+            "minimum": {
+              "count": 1
+            }
+          },
+          "fulfillment_ids": [
+            "F-RSV-2259BNGHMP-2026-09-30-PALLAKKI"
+          ],
+          "time": {
+            "label": "Departure",
+            "timestamp": "2026-09-30T22:59:00.000+05:30"
+          },
+          "tags": [
+            {
+              "descriptor": {
+                "code": "SERVICE_INFO"
+              },
+              "display": true,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "SERVICE_ID"
+                  },
+                  "value": "2259BNGHMP"
+                },
+                {
+                  "descriptor": {
+                    "code": "SERVICE_NUMBER"
+                  },
+                  "value": "2259"
+                },
+                {
+                  "descriptor": {
+                    "code": "TRAVEL_DATE"
+                  },
+                  "value": "2026-09-30"
+                },
+                {
+                  "descriptor": {
+                    "code": "SERVICE_CLASS"
+                  },
+                  "value": "PALLAKKI"
+                },
+                {
+                  "descriptor": {
+                    "code": "RUNNING_MINUTES"
+                  },
+                  "value": "451"
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "PRICED_FOR"
+              },
+              "display": false,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "FROM_BOARDING_POINT_ID"
+                  },
+                  "value": "BP-BLR-MAJESTIC"
+                },
+                {
+                  "descriptor": {
+                    "code": "TO_BOARDING_POINT_ID"
+                  },
+                  "value": "BP-HMP-HAMPI"
+                },
+                {
+                  "descriptor": {
+                    "code": "FARE_SOURCING"
+                  },
+                  "value": "S"
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "OPERATOR_DISCLOSURE"
+              },
+              "display": true,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "BRAND"
+                  },
+                  "value": "KSRTC"
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "SERVICE_PROVENANCE"
+              },
+              "display": false,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "BASIS"
+                  },
+                  "value": "inferred"
+                },
+                {
+                  "descriptor": {
+                    "code": "SOURCE_COUNT"
+                  },
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "SIMULATED_INVENTORY"
+              },
+              "display": true,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "NOTICE"
+                  },
+                  "value": "Modelled inventory. The seats shown as sold are simulated by this specimen provider, not KSRTC's live availability."
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "SPECIMEN_INFO"
+              },
+              "display": true,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "NOTICE"
+                  },
+                  "value": "SPECIMEN - NOT VALID FOR TRAVEL"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "fulfillments": [
+        {
+          "id": "F-RSV-2259BNGHMP-2026-09-30-PALLAKKI",
+          "type": "RESERVATION",
+          "vehicle": {
+            "category": "COACH"
+          },
+          "stops": [
+            {
+              "id": "1",
+              "type": "START",
+              "location": {
+                "descriptor": {
+                  "name": "Majestic (Kempegowda Bus Station)",
+                  "code": "BP-BLR-MAJESTIC"
+                },
+                "gps": "12.9776, 77.5713"
+              },
+              "time": {
+                "timestamp": "2026-09-30T22:59:00.000+05:30"
+              },
+              "tags": [
+                {
+                  "descriptor": {
+                    "code": "STOP_ROLE"
+                  },
+                  "display": true,
+                  "list": [
+                    {
+                      "descriptor": {
+                        "code": "ROLE"
+                      },
+                      "value": "BOARDING"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "2",
+              "parent_stop_id": "1",
+              "type": "END",
+              "location": {
+                "descriptor": {
+                  "name": "Hampi",
+                  "code": "BP-HMP-HAMPI"
+                },
+                "gps": "15.335, 76.46"
+              },
+              "time": {
+                "timestamp": "2026-10-01T06:30:00.000+05:30"
+              },
+              "tags": [
+                {
+                  "descriptor": {
+                    "code": "STOP_ROLE"
+                  },
+                  "display": true,
+                  "list": [
+                    {
+                      "descriptor": {
+                        "code": "ROLE"
+                      },
+                      "value": "DROPPING"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "tags": [
+            {
+              "descriptor": {
+                "code": "SEAT_MAP_REF"
+              },
+              "display": false,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "SEAT_MAP_ID"
+                  },
+                  "value": "PALLAKKI-2P1-30"
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "BOOKING_REF"
+              },
+              "display": true,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "NUMBER"
+                  },
+                  "value": "SPECIMEN-KSRTC-00000002"
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "MANIFEST"
+              },
+              "display": false,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "SEAT_ID"
+                  },
+                  "value": "U3A"
+                },
+                {
+                  "descriptor": {
+                    "code": "NAME"
+                  },
+                  "value": "A Passenger"
+                },
+                {
+                  "descriptor": {
+                    "code": "AGE"
+                  },
+                  "value": "34"
+                },
+                {
+                  "descriptor": {
+                    "code": "GENDER"
+                  },
+                  "value": "female"
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "VEHICLE_LOOKUP"
+              },
+              "display": false,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "SERVICE_ID"
+                  },
+                  "value": "2259BNGHMP"
+                },
+                {
+                  "descriptor": {
+                    "code": "TRAVEL_DATE"
+                  },
+                  "value": "2026-09-30"
+                }
+              ]
+            },
+            {
+              "descriptor": {
+                "code": "SPECIMEN_INFO"
+              },
+              "display": true,
+              "list": [
+                {
+                  "descriptor": {
+                    "code": "NOTICE"
+                  },
+                  "value": "SPECIMEN - NOT VALID FOR TRAVEL - not issued by KSRTC, NWKRTC or KKRTC"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "quote": {
+        "price": {
+          "currency": "INR",
+          "value": "1180"
+        },
+        "breakup": [
+          {
+            "code": "BASE_FARE",
+            "title": "Base fare",
+            "price": {
+              "currency": "INR",
+              "value": "1100"
+            }
+          },
+          {
+            "code": "RESERVATION_FEE",
+            "title": "Reservation fee",
+            "price": {
+              "currency": "INR",
+              "value": "40"
+            }
+          },
+          {
+            "code": "TOLL",
+            "title": "Toll",
+            "price": {
+              "currency": "INR",
+              "value": "40"
+            }
+          }
+        ]
+      },
+      "billing": {
+        "name": "A Booker",
+        "phone": "+919999999999"
+      },
+      "payments": [
+        {
+          "collected_by": "BPP",
+          "status": "PAID",
+          "type": "PRE_ORDER",
+          "id": "PAY-KSRTC-1"
+        }
+      ],
+      "cancellation_terms": [
+        {
+          "external_ref": {
+            "mimetype": "text/html",
+            "url": "https://provider.example.test/terms"
+          }
+        }
+      ],
+      "created_at": "2026-09-20T15:30:00.000+05:30",
+      "updated_at": "2026-09-20T15:30:00.000+05:30",
+      "tags": [
+        {
+          "descriptor": {
+            "code": "SPECIMEN_INFO"
+          },
+          "display": true,
+          "list": [
+            {
+              "descriptor": {
+                "code": "NOTICE"
+              },
+              "value": "SPECIMEN - NOT VALID FOR TRAVEL"
+            }
+          ]
+        },
+        {
+          "descriptor": {
+            "code": "SEAT_MAP"
+          },
+          "display": false,
+          "list": [
+            {
+              "descriptor": {
+                "code": "SEAT_MAP_ID"
+              },
+              "value": "PALLAKKI-2P1-30"
+            },
+            {
+              "descriptor": {
+                "code": "L1A"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L1B"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L1C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L2A"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L2B"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L2C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L3A"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L3B"
+              },
+              "value": "FEMALE_ONLY"
+            },
+            {
+              "descriptor": {
+                "code": "L3C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L4A"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L4B"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L4C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L5A"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "L5B"
+              },
+              "value": "AVAILABLE"
+            },
+            {
+              "descriptor": {
+                "code": "L5C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "U1A"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "U1B"
+              },
+              "value": "FEMALE_ONLY"
+            },
+            {
+              "descriptor": {
+                "code": "U1C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "U2A"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "U2B"
+              },
+              "value": "FEMALE_ONLY"
+            },
+            {
+              "descriptor": {
+                "code": "U2C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "U3A"
+              },
+              "value": "HELD_BY_YOU"
+            },
+            {
+              "descriptor": {
+                "code": "U3B"
+              },
+              "value": "HELD_BY_YOU"
+            },
+            {
+              "descriptor": {
+                "code": "U3C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "U4A"
+              },
+              "value": "AVAILABLE"
+            },
+            {
+              "descriptor": {
+                "code": "U4B"
+              },
+              "value": "AVAILABLE"
+            },
+            {
+              "descriptor": {
+                "code": "U4C"
+              },
+              "value": "SOLD:simulated"
+            },
+            {
+              "descriptor": {
+                "code": "U5A"
+              },
+              "value": "AVAILABLE"
+            },
+            {
+              "descriptor": {
+                "code": "U5B"
+              },
+              "value": "AVAILABLE"
+            },
+            {
+              "descriptor": {
+                "code": "U5C"
+              },
+              "value": "SOLD:simulated"
+            }
+          ]
+        },
+        {
+          "descriptor": {
+            "code": "SEAT_MAP_LAYOUT"
+          },
+          "display": false,
+          "list": [
+            {
+              "descriptor": {
+                "code": "SEAT_MAP_ID"
+              },
+              "value": "PALLAKKI-2P1-30"
+            },
+            {
+              "descriptor": {
+                "code": "KIND"
+              },
+              "value": "SLEEPER"
+            },
+            {
+              "descriptor": {
+                "code": "DECKS"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "DOCUMENTED_CAPACITY"
+              },
+              "value": "30"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L1A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L1B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L1B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L1B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L1A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L1A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L1C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L2A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L2B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L2B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L2B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L2A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L2A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L2C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L3A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "3"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L3B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L3B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L3B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "3"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L3A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L3A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L3C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "3"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L4A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L4B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L4B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L4B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L4A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L4A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L4C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L5A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "5"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L5B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L5B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L5B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "5"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "L5A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "L5A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "L5C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "5"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U1A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U1B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U1B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U1B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U1A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U1A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U1C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U2A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U2B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U2B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U2B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U2A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U2A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U2C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U3A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "3"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U3B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U3B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U3B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "3"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U3A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U3A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U3C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "3"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U4A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U4B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U4B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U4B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U4A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U4A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U4C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U5A"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "5"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "1"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U5B"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U5B"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U5B"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "5"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "false"
+            },
+            {
+              "descriptor": {
+                "code": "PAIRED_SEAT_ID"
+              },
+              "value": "U5A"
+            },
+            {
+              "descriptor": {
+                "code": "ADJACENT_SEAT_IDS"
+              },
+              "value": "U5A"
+            },
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U5C"
+            },
+            {
+              "descriptor": {
+                "code": "DECK"
+              },
+              "value": "2"
+            },
+            {
+              "descriptor": {
+                "code": "ROW"
+              },
+              "value": "5"
+            },
+            {
+              "descriptor": {
+                "code": "COLUMN"
+              },
+              "value": "4"
+            },
+            {
+              "descriptor": {
+                "code": "WINDOW"
+              },
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "descriptor": {
+            "code": "SEATS"
+          },
+          "display": false,
+          "list": [
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U3A"
+            }
+          ]
+        },
+        {
+          "descriptor": {
+            "code": "CANCELLED_SEATS"
+          },
+          "display": true,
+          "list": [
+            {
+              "descriptor": {
+                "code": "SEAT_ID"
+              },
+              "value": "U3B"
+            }
+          ]
+        }
+      ]
+    },
+    "refund": {
+      "price": {
+        "currency": "INR",
+        "value": "515"
+      },
+      "breakup": [
+        {
+          "code": "BASE_FARE",
+          "title": "Base fare",
+          "price": {
+            "currency": "INR",
+            "value": "550"
+          }
+        },
+        {
+          "code": "SLAB_DEDUCTION",
+          "title": "Cancellation deduction",
+          "price": {
+            "currency": "INR",
+            "value": "-55"
+          }
+        },
+        {
+          "code": "RESERVATION_FEE",
+          "title": "Reservation fee",
+          "price": {
+            "currency": "INR",
+            "value": "0"
+          }
+        },
+        {
+          "code": "TOLL_REFUND",
+          "title": "Toll refund",
+          "price": {
+            "currency": "INR",
+            "value": "20"
+          }
+        }
+      ]
+    },
+    "tags": [
+      {
+        "descriptor": {
+          "code": "REFUND_SLAB"
+        },
+        "display": true,
+        "list": [
+          {
+            "descriptor": {
+              "code": "SLAB_CODE"
+            },
+            "value": "OVER_72H"
+          },
+          {
+            "descriptor": {
+              "code": "PERCENT"
+            },
+            "value": "10"
+          },
+          {
+            "descriptor": {
+              "code": "REFUND_QUOTE_ID"
+            },
+            "value": "RFQ-KSRTC-00000004"
+          },
+          {
+            "descriptor": {
+              "code": "QUOTE_EXPIRES_AT"
+            },
+            "value": "2026-09-20T15:32:00.000+05:30"
+          }
+        ]
+      }
+    ]
+  }
+}

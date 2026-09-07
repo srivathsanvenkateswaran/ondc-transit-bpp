@@ -1,0 +1,747 @@
+{
+  "sourcing": {
+    "note": "Tatak's src/intercity/classes.ts ASHWAMEDHA entry reads '3+2 seater, non-reclining' [V - Wikipedia, for the sibling Ashwamedha Classic Class product this project's own docblock treats as the layout match]. No source gives a seat count for this coach, so documentedCapacity is null rather than a number nobody published; the twelve-row, five-across layout below (sixty seats) is this fixture's own plausible realisation of a 3+2 non-reclining ordinary bus, not a transcription of an operator seating chart. Genuinely distinct from every 2+2 class this provider already sells: three seats on one side of the aisle, two on the other, and nobody reclines.",
+    "label": "I"
+  },
+  "seatMap": {
+    "seatMapId": "ASHWAMEDHA-3P2-60",
+    "serviceClass": "ASHWAMEDHA",
+    "kind": "SEATER",
+    "decks": 1,
+    "documentedCapacity": null,
+    "seats": [
+      {
+        "seatId": "1A",
+        "deck": 1,
+        "row": 1,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "1B"
+        ]
+      },
+      {
+        "seatId": "1B",
+        "deck": 1,
+        "row": 1,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "1A",
+          "1C"
+        ]
+      },
+      {
+        "seatId": "1C",
+        "deck": 1,
+        "row": 1,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "1B"
+        ]
+      },
+      {
+        "seatId": "1D",
+        "deck": 1,
+        "row": 1,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "1E"
+        ]
+      },
+      {
+        "seatId": "1E",
+        "deck": 1,
+        "row": 1,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "1D"
+        ]
+      },
+      {
+        "seatId": "2A",
+        "deck": 1,
+        "row": 2,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "2B"
+        ]
+      },
+      {
+        "seatId": "2B",
+        "deck": 1,
+        "row": 2,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "2A",
+          "2C"
+        ]
+      },
+      {
+        "seatId": "2C",
+        "deck": 1,
+        "row": 2,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "2B"
+        ]
+      },
+      {
+        "seatId": "2D",
+        "deck": 1,
+        "row": 2,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "2E"
+        ]
+      },
+      {
+        "seatId": "2E",
+        "deck": 1,
+        "row": 2,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "2D"
+        ]
+      },
+      {
+        "seatId": "3A",
+        "deck": 1,
+        "row": 3,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "3B"
+        ]
+      },
+      {
+        "seatId": "3B",
+        "deck": 1,
+        "row": 3,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "3A",
+          "3C"
+        ]
+      },
+      {
+        "seatId": "3C",
+        "deck": 1,
+        "row": 3,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "3B"
+        ]
+      },
+      {
+        "seatId": "3D",
+        "deck": 1,
+        "row": 3,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "3E"
+        ]
+      },
+      {
+        "seatId": "3E",
+        "deck": 1,
+        "row": 3,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "3D"
+        ]
+      },
+      {
+        "seatId": "4A",
+        "deck": 1,
+        "row": 4,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "4B"
+        ]
+      },
+      {
+        "seatId": "4B",
+        "deck": 1,
+        "row": 4,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "4A",
+          "4C"
+        ]
+      },
+      {
+        "seatId": "4C",
+        "deck": 1,
+        "row": 4,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "4B"
+        ]
+      },
+      {
+        "seatId": "4D",
+        "deck": 1,
+        "row": 4,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "4E"
+        ]
+      },
+      {
+        "seatId": "4E",
+        "deck": 1,
+        "row": 4,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "4D"
+        ]
+      },
+      {
+        "seatId": "5A",
+        "deck": 1,
+        "row": 5,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "5B"
+        ]
+      },
+      {
+        "seatId": "5B",
+        "deck": 1,
+        "row": 5,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "5A",
+          "5C"
+        ]
+      },
+      {
+        "seatId": "5C",
+        "deck": 1,
+        "row": 5,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "5B"
+        ]
+      },
+      {
+        "seatId": "5D",
+        "deck": 1,
+        "row": 5,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "5E"
+        ]
+      },
+      {
+        "seatId": "5E",
+        "deck": 1,
+        "row": 5,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "5D"
+        ]
+      },
+      {
+        "seatId": "6A",
+        "deck": 1,
+        "row": 6,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "6B"
+        ]
+      },
+      {
+        "seatId": "6B",
+        "deck": 1,
+        "row": 6,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "6A",
+          "6C"
+        ]
+      },
+      {
+        "seatId": "6C",
+        "deck": 1,
+        "row": 6,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "6B"
+        ]
+      },
+      {
+        "seatId": "6D",
+        "deck": 1,
+        "row": 6,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "6E"
+        ]
+      },
+      {
+        "seatId": "6E",
+        "deck": 1,
+        "row": 6,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "6D"
+        ]
+      },
+      {
+        "seatId": "7A",
+        "deck": 1,
+        "row": 7,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "7B"
+        ]
+      },
+      {
+        "seatId": "7B",
+        "deck": 1,
+        "row": 7,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "7A",
+          "7C"
+        ]
+      },
+      {
+        "seatId": "7C",
+        "deck": 1,
+        "row": 7,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "7B"
+        ]
+      },
+      {
+        "seatId": "7D",
+        "deck": 1,
+        "row": 7,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "7E"
+        ]
+      },
+      {
+        "seatId": "7E",
+        "deck": 1,
+        "row": 7,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "7D"
+        ]
+      },
+      {
+        "seatId": "8A",
+        "deck": 1,
+        "row": 8,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "8B"
+        ]
+      },
+      {
+        "seatId": "8B",
+        "deck": 1,
+        "row": 8,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "8A",
+          "8C"
+        ]
+      },
+      {
+        "seatId": "8C",
+        "deck": 1,
+        "row": 8,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "8B"
+        ]
+      },
+      {
+        "seatId": "8D",
+        "deck": 1,
+        "row": 8,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "8E"
+        ]
+      },
+      {
+        "seatId": "8E",
+        "deck": 1,
+        "row": 8,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "8D"
+        ]
+      },
+      {
+        "seatId": "9A",
+        "deck": 1,
+        "row": 9,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "9B"
+        ]
+      },
+      {
+        "seatId": "9B",
+        "deck": 1,
+        "row": 9,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "9A",
+          "9C"
+        ]
+      },
+      {
+        "seatId": "9C",
+        "deck": 1,
+        "row": 9,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "9B"
+        ]
+      },
+      {
+        "seatId": "9D",
+        "deck": 1,
+        "row": 9,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "9E"
+        ]
+      },
+      {
+        "seatId": "9E",
+        "deck": 1,
+        "row": 9,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "9D"
+        ]
+      },
+      {
+        "seatId": "10A",
+        "deck": 1,
+        "row": 10,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "10B"
+        ]
+      },
+      {
+        "seatId": "10B",
+        "deck": 1,
+        "row": 10,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "10A",
+          "10C"
+        ]
+      },
+      {
+        "seatId": "10C",
+        "deck": 1,
+        "row": 10,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "10B"
+        ]
+      },
+      {
+        "seatId": "10D",
+        "deck": 1,
+        "row": 10,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "10E"
+        ]
+      },
+      {
+        "seatId": "10E",
+        "deck": 1,
+        "row": 10,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "10D"
+        ]
+      },
+      {
+        "seatId": "11A",
+        "deck": 1,
+        "row": 11,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "11B"
+        ]
+      },
+      {
+        "seatId": "11B",
+        "deck": 1,
+        "row": 11,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "11A",
+          "11C"
+        ]
+      },
+      {
+        "seatId": "11C",
+        "deck": 1,
+        "row": 11,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "11B"
+        ]
+      },
+      {
+        "seatId": "11D",
+        "deck": 1,
+        "row": 11,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "11E"
+        ]
+      },
+      {
+        "seatId": "11E",
+        "deck": 1,
+        "row": 11,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "11D"
+        ]
+      },
+      {
+        "seatId": "12A",
+        "deck": 1,
+        "row": 12,
+        "column": 1,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "12B"
+        ]
+      },
+      {
+        "seatId": "12B",
+        "deck": 1,
+        "row": 12,
+        "column": 2,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "12A",
+          "12C"
+        ]
+      },
+      {
+        "seatId": "12C",
+        "deck": 1,
+        "row": 12,
+        "column": 3,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "12B"
+        ]
+      },
+      {
+        "seatId": "12D",
+        "deck": 1,
+        "row": 12,
+        "column": 5,
+        "kind": "SEAT",
+        "window": false,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "12E"
+        ]
+      },
+      {
+        "seatId": "12E",
+        "deck": 1,
+        "row": 12,
+        "column": 6,
+        "kind": "SEAT",
+        "window": true,
+        "pairedSeatId": null,
+        "adjacentSeatIds": [
+          "12D"
+        ]
+      }
+    ]
+  }
+}

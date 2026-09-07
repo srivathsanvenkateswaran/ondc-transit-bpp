@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/confirm.json",
+  "type": "object",
+  "required": [
+    "context",
+    "message"
+  ],
+  "properties": {
+    "context": {
+      "allOf": [
+        {
+          "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/context"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "const": "confirm"
+            }
+          }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "required": [
+        "order"
+      ],
+      "properties": {
+        "order": {
+          "allOf": [
+            {
+              "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/selectionOrder"
+            },
+            {
+              "type": "object",
+              "required": [
+                "billing",
+                "payments"
+              ],
+              "properties": {
+                "billing": {
+                  "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/billing"
+                },
+                "payments": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "https://transit.localhost/schemas/transit-local-intercity/0.1.0/common.json#/$defs/payment"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

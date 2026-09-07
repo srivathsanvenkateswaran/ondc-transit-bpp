@@ -31,8 +31,38 @@ GATEWAY_ADMIN_URL="${GATEWAY_ADMIN_URL:-http://127.0.0.1:4030}"
 REGISTRY_ADMIN_USER="${REGISTRY_ADMIN_USER:-root}"
 REGISTRY_ADMIN_PASSWORD="${REGISTRY_ADMIN_PASSWORD:-root}"
 
-# The domain every local subscriber is registered under.
+# The domain the unreserved transit sellers are registered under.
 ONDC_DOMAIN="${ONDC_DOMAIN:-ONDC:TRV11}"
+
+# The domain the reserved intercity seller is registered under. A local,
+# Beckn-shaped string under a reserved and unresolvable name; it claims
+# conformance to nothing and sits in no namespace anybody else administers.
+# See docs/reserved-intercity.md section 2.
+#
+# The gateway has no routing table of its own: it fans a search out to the
+# subscribers the registry returns for the search's own domain. So the
+# registry's network-domain row and the subscription under it are the routing
+# entry, and there is nothing else to configure.
+RESERVED_DOMAIN="${RESERVED_DOMAIN:-TRANSIT.LOCALHOST:INTERCITY}"
+
+# Whether the reserved intercity seller is part of this deployment. Off unless
+# asked for, so that a deployment that has not asked for a second domain gets
+# exactly the network it got before.
+#
+# Compose reads .env for its own ${...} interpolation and these scripts do not,
+# so the flag is read from the environment first and from .env second. Without
+# that, the provider could come up with the category enabled while the scripts
+# never started its protocol servers or registered it, which is the most
+# confusing possible way for this to be half on.
+reserved_enabled() {
+  if [[ -n "${RESERVED_ENABLED:-}" ]]; then
+    [[ "${RESERVED_ENABLED}" == "true" ]]
+    return
+  fi
+  local value
+  value="$(sed -n 's/^RESERVED_ENABLED=//p' "${REPO_ROOT}/.env" 2>/dev/null | head -n1 | tr -d '[:space:]')"
+  [[ "${value}" == "true" ]]
+}
 
 if [[ -t 1 ]]; then
   C_RED=$'\033[31m'; C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'
