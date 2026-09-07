@@ -11,6 +11,7 @@ import {
   ReconnectingDatabase,
   isDeadStreamError,
   openReservedDatabase,
+  isNothingToRollBack,
 } from "../../src/reserved/db.js";
 import { ReservedLifecycleError } from "../../src/reserved/errors.js";
 import { ReservedStore } from "../../src/reserved/store.js";
@@ -269,9 +270,18 @@ test("a dead-stream error mid-transaction is not retried, but heals the connecti
 
     // The caller's own catch block does exactly this next: issue a ROLLBACK
     // against what it still thinks is the same connection. There is no
-    // transaction open on the fresh one, which is a real SQLite error, not a
-    // dead stream, and it is not retried either.
-    assert.throws(() => database.exec("ROLLBACK"), /transaction/i);
+    // transaction open on the fresh one, and that is the point rather than a
+    // problem - the rollback wanted no transaction in flight and there is
+    // none, so it is a no-op rather than an error.
+    //
+    // This assertion used to expect a throw. Production on 2026-09-07 showed
+    // why that was wrong: a stream died mid-transaction, the wrapper
+    // reconnected and rethrew exactly as designed, and then this ROLLBACK
+    // raised "cannot rollback - no transaction is active", which propagated
+    // and turned a successful recovery into an INTERNAL-ERROR. The rider saw
+    // "the operator could not answer that request in a form Tatak can read"
+    // on a connection that was already healthy again.
+    assert.doesNotThrow(() => database.exec("ROLLBACK"));
     assert.equal(reconnects.length, 1);
 
     // The connection itself is healthy again: an unrelated statement outside
@@ -286,4 +296,30 @@ test("a dead-stream error mid-transaction is not retried, but heals the connecti
   } finally {
     cleanup();
   }
+});
+
+/**
+ * The follow-on failure a mid-transaction reconnect used to cause.
+ *
+ * Seen in production on 2026-09-07: a stream died between BEGIN and COMMIT,
+ * the wrapper reconnected and rethrew exactly as designed, and then the
+ * caller's own ROLLBACK hit the fresh connection, which had no transaction to
+ * undo. SQLite said "cannot rollback - no transaction is active", that
+ * propagated, and a recovered connection was reported to the rider as
+ * "the operator could not answer that request in a form Tatak can read".
+ */
+test("a rollback after a mid-transaction reconnect is not an error", () => {
+  assert.equal(
+    isNothingToRollBack(new Error('SQLite error: cannot rollback - no transaction is active')),
+    true,
+  );
+  assert.equal(
+    isNothingToRollBack(
+      new Error('Hrana(Api("SQLite error: cannot rollback - no transaction is active"))'),
+    ),
+    true,
+  );
+  // A rollback that failed for a real reason is still a failure.
+  assert.equal(isNothingToRollBack(new Error("SQLite error: database is locked")), false);
+  assert.equal(isNothingToRollBack(new Error("stream not found: abc")), false);
 });
