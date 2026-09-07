@@ -528,7 +528,8 @@ test("two confirms on one transaction produce one booking with one reference", a
   const third = await orders.confirm(request as never);
   assert.equal(orderOf(third).id, orderOf(first).id);
   assert.equal(
-    store.handle.prepare("SELECT COUNT(*) AS n FROM bookings").get()!.n,
+    (store.handle.prepare("SELECT COUNT(*) AS n FROM bookings").get() as { n: number })
+      .n,
     1,
   );
 });

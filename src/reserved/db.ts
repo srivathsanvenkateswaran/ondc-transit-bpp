@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+
+import Database from "libsql";
 
 /**
  * Where a held or booked seat actually lives.
@@ -16,15 +17,43 @@ import { DatabaseSync } from "node:sqlite";
  * uptime. For the window between held and confirmed-or-released, the row here
  * is the fact rather than a copy of one.
  *
- * ## Why the engine that ships with the runtime
+ * ## Why libSQL for both the file and the server
  *
  * `docs/reserved-intercity.md` section 15 names libSQL, one file, no extra
  * service, and every property it asks that engine for is a property of SQLite
- * rather than of that particular client: one file or one in-memory database,
- * a partial unique index, and a transaction with no scheduler and no worker
- * anywhere near it. The runtime this repository already pins ships SQLite in
- * the standard library, so it is used directly and nothing is installed. Two
- * consequences worth stating rather than discovering:
+ * rather than of any particular client: one file or one in-memory database, a
+ * partial unique index, and a transaction with no scheduler and no worker
+ * anywhere near it.
+ *
+ * This module used to open that file with `node:sqlite`, the runtime's own
+ * driver. That stopped being tenable once this process moved onto a
+ * filesystem that does not survive a restart (Heroku's Eco dyno, which
+ * recycles at least daily): `node:sqlite` only ever opens a local file, so
+ * the database had nowhere durable to be. The `libsql` package opens the
+ * same local file - it is a better-sqlite3-shaped, synchronous fork of
+ * SQLite - and it *also* opens a `libsql:` or `https:` URL against a
+ * hosted Turso database, with the same driver and the same call shape. Using
+ * it everywhere, rather than only for the remote case, means:
+ *
+ *   - Local and production run the identical engine. A bug that only
+ *     reproduces on one driver and not the other is a bug this deployment
+ *     will never get to find in CI and then hit for the first time in
+ *     production.
+ *   - There is exactly one code path here instead of a branch that picks a
+ *     driver by URL scheme, so `resolveDatabasePath` only has to decide what
+ *     string to hand the one constructor, not which constructor to call.
+ *
+ * The one incompatibility this swap actually surfaced: `node:sqlite` reports
+ * a constraint violation's extended SQLite code on `error.errcode`, and
+ * `libsql` reports the same number on `error.rawCode` instead. `ReservedStore`
+ * ("the live-lock index is the guarantee, not the availability check") reads
+ * that field to translate a unique-constraint failure into a seat-unavailable
+ * refusal, so it now reads `rawCode`. Nothing else in this module or in
+ * `store.ts` touched a driver-specific error shape, a raw row's key set, or a
+ * `better-sqlite3` method this fork does not also provide.
+ *
+ * Two consequences worth stating rather than discovering, both true before
+ * this change and still true after it:
  *
  *   - The API is synchronous, which is a strictly stronger guarantee than the
  *     one section 8.5 asks for. It says the acquire path must perform its
@@ -32,10 +61,12 @@ import { DatabaseSync } from "node:sqlite";
  *     them; here there is no `await` available to write, so no interleaving is
  *     expressible rather than merely avoided.
  *   - Running behind more than one replica needs a real server rather than a
- *     file, which is a swap of this module and nothing above it. Everything
- *     above talks to `ReservedStore`, and the unique index remains the
- *     guarantee either way.
+ *     file, which is a swap of this module's target and nothing above it.
+ *     Everything above talks to `ReservedStore`, and the unique index remains
+ *     the guarantee either way.
  */
+
+export type ReservedDatabase = Database.Database;
 
 export interface Migration {
   version: number;
@@ -83,12 +114,25 @@ export function migrationsUnder(root: string): Migration[] {
 }
 
 /**
- * `:memory:`, a bare path, or a `file:` URL. The default deployment is one
- * file beside the process and the tests are in memory, which is what keeps a
- * stranger's first clone running with nothing else up.
+ * A `libsql:` or `https:` URL names a hosted Turso database rather than a
+ * local file. Nothing else this module accepts does: `:memory:` and every
+ * plain path or `file:` URL stay local, which is what keeps every test and
+ * every local run pointed at a throwaway or beside-the-process file with
+ * nothing else up.
+ */
+export function isRemoteDatabaseUrl(url: string): boolean {
+  return url.startsWith("libsql:") || url.startsWith("https:");
+}
+
+/**
+ * `:memory:`, a bare path, a `file:` URL, or a remote `libsql:`/`https:` URL
+ * passed straight through. The default deployment is one file beside the
+ * process and the tests are in memory, which is what keeps a stranger's
+ * first clone running with nothing else up.
  */
 export function resolveDatabasePath(url: string): string {
   if (url === ":memory:") return ":memory:";
+  if (isRemoteDatabaseUrl(url)) return url;
   if (url.startsWith("file:")) return url.slice("file:".length);
   return url;
 }
@@ -97,12 +141,21 @@ export interface OpenOptions {
   url: string;
   migrationRoot: string;
   /**
+   * The Turso auth token, required when `url` is a `libsql:` or `https:`
+   * URL and ignored otherwise. `loadConfig` in `src/config.ts` already
+   * refuses to start a process configured with a remote URL and no token;
+   * this check exists so that a direct caller - a script, a test - fails at
+   * the same open call rather than at the first query a token would have
+   * been needed for.
+   */
+  authToken?: string;
+  /**
    * An already-open handle to migrate in place. Only a test needs this, and
    * only because an in-memory database cannot be reopened by name: without it
    * there is no way to point a second open at a database a first one already
    * wrote.
    */
-  handle?: DatabaseSync;
+  handle?: ReservedDatabase;
 }
 
 /**
@@ -112,9 +165,24 @@ export interface OpenOptions {
  * `schema_migrations` in the same transaction, so a failure half way through
  * one leaves neither the change nor the record of it.
  */
-export function openReservedDatabase(options: OpenOptions): DatabaseSync {
+export function openReservedDatabase(options: OpenOptions): ReservedDatabase {
+  if (options.handle === undefined && isRemoteDatabaseUrl(options.url) && !options.authToken) {
+    throw new Error(
+      `Reserved database URL ${options.url} is remote and needs an auth token, but none was given`,
+    );
+  }
+  // `libsql`'s shipped types are copied from better-sqlite3's and were never
+  // extended for `authToken`, even though the runtime reads it (README,
+  // "Connecting to a Remote libSQL server"; `index.js` does `opts?.authToken`).
+  // The cast through `unknown` is for that gap, not for anything this
+  // repository controls.
+  const remoteOptions = { authToken: options.authToken } as unknown as Database.Options;
   const database =
-    options.handle ?? new DatabaseSync(resolveDatabasePath(options.url));
+    options.handle ??
+    new Database(
+      resolveDatabasePath(options.url),
+      isRemoteDatabaseUrl(options.url) ? remoteOptions : undefined,
+    );
   database.exec("PRAGMA foreign_keys = ON");
   database.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (

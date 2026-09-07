@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import type { DatabaseSync } from "node:sqlite";
 
+import type { ReservedDatabase } from "./db.js";
 import { ReservedLifecycleError } from "./errors.js";
 import type { Corporation, ServiceProvenance } from "./types.js";
 
@@ -140,8 +140,14 @@ interface LockRow {
 const SQLITE_CONSTRAINT_UNIQUE = 2067;
 const SQLITE_CONSTRAINT_PRIMARYKEY = 1555;
 
+/**
+ * `libsql` reports this on `error.rawCode`, not `error.errcode`. That is the
+ * one behavioural difference `db.ts` found in swapping the driver that ships
+ * with the runtime for `libsql` everywhere: `node:sqlite` used `errcode` for
+ * the same number.
+ */
 function isUniqueViolation(error: unknown): boolean {
-  const code = (error as { errcode?: number } | null)?.errcode;
+  const code = (error as { rawCode?: number } | null)?.rawCode;
   return (
     code === SQLITE_CONSTRAINT_UNIQUE || code === SQLITE_CONSTRAINT_PRIMARYKEY
   );
@@ -151,7 +157,7 @@ export class ReservedStore {
   private readonly idFactory: () => string;
 
   constructor(
-    private readonly database: DatabaseSync,
+    private readonly database: ReservedDatabase,
     options: StoreOptions = {},
   ) {
     this.idFactory = options.idFactory ?? randomUUID;
@@ -162,7 +168,7 @@ export class ReservedStore {
   }
 
   /** Exposed for the boot-time schema check and for tests, nothing else. */
-  get handle(): DatabaseSync {
+  get handle(): ReservedDatabase {
     return this.database;
   }
 

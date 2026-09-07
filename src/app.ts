@@ -245,6 +245,7 @@ export async function createApp(
       openReservedDatabase({
         url: config.reservedDatabaseUrl,
         migrationRoot: config.reservedMigrationRoot,
+        authToken: config.reservedDatabaseAuthToken,
       }),
       reservedOverrides.idFactory
         ? { idFactory: reservedOverrides.idFactory }

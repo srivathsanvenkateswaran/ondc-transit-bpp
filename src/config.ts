@@ -1,5 +1,6 @@
 import { join } from "node:path";
 
+import { isRemoteDatabaseUrl } from "./reserved/db.js";
 import type { ReservedOperatorKey } from "./reserved/types.js";
 import type { OperatorKey } from "./sources/types.js";
 
@@ -88,8 +89,18 @@ export interface AppConfig {
    * Where held and booked seats live. One file beside the process by default,
    * and in memory under test. A held seat is a shared, finite resource rather
    * than a settled fact on somebody's phone, so it has to outlive a release.
+   *
+   * A `libsql:` or `https:` URL points at a hosted Turso database instead of
+   * a file, which is what survives a host whose filesystem does not - see
+   * `reservedDatabaseAuthToken` below.
    */
   reservedDatabaseUrl: string;
+  /**
+   * The Turso auth token for `reservedDatabaseUrl`. Required, and validated
+   * here at startup, whenever that URL is remote; meaningless and left unset
+   * for a local file or an in-memory database.
+   */
+  reservedDatabaseAuthToken?: string;
   reservedMigrationRoot: string;
   /**
    * Where the reserved catalogue comes from. The fixtures by default, so that
@@ -255,6 +266,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("Missing required environment variable RESERVED_SOURCE_URL");
   }
   if (reservedSourceUrl) parseHttpUrl(reservedSourceUrl, "RESERVED_SOURCE_URL");
+  const reservedDatabaseUrl =
+    env.RESERVED_DB_URL?.trim() || `file:${join(process.cwd(), "data", "reserved.db")}`;
+  const reservedDatabaseAuthToken = env.RESERVED_DB_AUTH_TOKEN?.trim();
+  if (isRemoteDatabaseUrl(reservedDatabaseUrl) && !reservedDatabaseAuthToken) {
+    // A remote database with no token opens successfully - libsql only fails
+    // it on the first query - which is exactly the failure mode this check
+    // exists to move earlier: a deployment that forgot the token should not
+    // pass health checks and then refuse the first booking somebody makes.
+    throw new Error(
+      "Missing required environment variable RESERVED_DB_AUTH_TOKEN for a remote RESERVED_DB_URL",
+    );
+  }
   // Unlike JOURNEY_SOURCE_URL and RESERVED_SOURCE_URL, there is no mode flag
   // that makes this one required: a manifest push is best-effort by nature
   // (see fleetManifest.ts), so its absence is never an error, only silence.
@@ -313,8 +336,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     reservedSchemaRoot:
       env.RESERVED_SCHEMA_ROOT ??
       join(process.cwd(), "schemas", "transit_local_intercity", "0.1.0"),
-    reservedDatabaseUrl:
-      env.RESERVED_DB_URL?.trim() || `file:${join(process.cwd(), "data", "reserved.db")}`,
+    reservedDatabaseUrl,
+    ...(reservedDatabaseAuthToken ? { reservedDatabaseAuthToken } : {}),
     reservedMigrationRoot:
       env.RESERVED_MIGRATION_ROOT ?? join(process.cwd(), "migrations", "reserved"),
     reservedSource,
