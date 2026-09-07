@@ -295,6 +295,7 @@ export async function createApp(
       callbackTimeoutMs: config.callbackTimeoutMs,
       logEvent: eventLogger,
       syncResponses: config.reservedSyncResponses ?? false,
+      syncTimeoutMs: config.reservedSyncTimeoutMs,
       ...(reservedOverrides.now ? { now: reservedOverrides.now } : {}),
     });
   }
