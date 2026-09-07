@@ -205,6 +205,37 @@ export class ReservedStore {
     return Number(result.changes);
   }
 
+  /**
+   * The same sweep as {@link sweepExpiredHolds}, for every service named in
+   * `serviceIds` at once, in one statement rather than one per service.
+   *
+   * A search over a corridor with dozens of running services used to call
+   * `sweepExpiredHolds` once per service before it could trust any of their
+   * claims; each of those was its own round trip to a remote database. This
+   * is the same `UPDATE`, widened with an `IN` list, so a search pays for one
+   * round trip regardless of how many services it is about to look at.
+   *
+   * `serviceIds` with duplicates is harmless (the `IN` list just repeats a
+   * value); an empty list is a no-op, since `service_id IN ()` is not valid
+   * SQL and there is nothing to sweep for zero services.
+   */
+  sweepExpiredHoldsForServices(
+    serviceIds: string[],
+    travelDate: string,
+    nowMs: number,
+  ): number {
+    if (serviceIds.length === 0) return 0;
+    const placeholders = serviceIds.map(() => "?").join(",");
+    const result = this.database
+      .prepare(
+        `UPDATE seat_locks SET state = 'EXPIRED'
+         WHERE state = 'HELD' AND service_id IN (${placeholders}) AND travel_date = ?
+           AND expires_at IS NOT NULL AND expires_at <= ?`,
+      )
+      .run(...serviceIds, travelDate, nowMs);
+    return Number(result.changes);
+  }
+
   /* ---------------------------------------------------------------- *
    * Holds
    * ---------------------------------------------------------------- */
@@ -245,6 +276,68 @@ export class ReservedStore {
       },
       gender: row.gender ?? null,
     }));
+  }
+
+  /**
+   * `liveClaims` for every service in `serviceIds`, in one query rather than
+   * one per service, keyed back out by `serviceId` so a caller can look each
+   * service's claims up the way it would have called `liveClaims` in a loop.
+   *
+   * Every id in `serviceIds` gets an entry in the returned map, `[]` if that
+   * service has no live claim, so a caller never has to distinguish "no
+   * claims" from "never asked".
+   */
+  liveClaimsForServices(
+    serviceIds: string[],
+    travelDate: string,
+  ): Map<string, LiveSeatClaim[]> {
+    const byService = new Map<string, LiveSeatClaim[]>(
+      serviceIds.map((serviceId) => [serviceId, []]),
+    );
+    if (serviceIds.length === 0) return byService;
+    const placeholders = serviceIds.map(() => "?").join(",");
+    const rows = this.database
+      .prepare(
+        `SELECT l.service_id, l.seat_id, l.state, l.hold_id, l.booking_id, l.bap_id,
+                l.bap_uri, l.transaction_id, s.gender AS gender
+         FROM seat_locks l
+         LEFT JOIN booking_seats s
+           ON s.booking_id = l.booking_id AND s.seat_id = l.seat_id
+         WHERE l.service_id IN (${placeholders}) AND l.travel_date = ?
+           AND l.state IN ('HELD','BOOKED')
+         ORDER BY l.service_id, l.seat_id`,
+      )
+      .all(...serviceIds, travelDate) as Array<
+      Pick<
+        LockRow,
+        | "service_id"
+        | "seat_id"
+        | "state"
+        | "hold_id"
+        | "booking_id"
+        | "bap_id"
+        | "bap_uri"
+        | "transaction_id"
+      > & { gender: ManifestGender | null }
+    >;
+    for (const row of rows) {
+      const claim: LiveSeatClaim = {
+        seatId: row.seat_id,
+        state: row.state as "HELD" | "BOOKED",
+        holdId: row.hold_id,
+        bookingId: row.booking_id,
+        identity: {
+          bapId: row.bap_id,
+          bapUri: row.bap_uri,
+          transactionId: row.transaction_id,
+        },
+        gender: row.gender ?? null,
+      };
+      // `byService` was seeded from the same `serviceIds` the `IN` list was
+      // built from, so every row's service id already has an entry.
+      byService.get(row.service_id)!.push(claim);
+    }
+    return byService;
   }
 
   findLatestHold(
