@@ -257,7 +257,10 @@ export class ReservedOrderService {
     // services is swept before any of their claims are read, so a hold that
     // just expired is never counted as live.
     const serviceIds = eligible.map((entry) => entry.service.serviceId);
-    this.store.sweepExpiredHoldsForServices(serviceIds, query.travelDate, nowMs);
+    // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
+    this.store.withTransaction(() =>
+      this.store.sweepExpiredHoldsForServices(serviceIds, query.travelDate, nowMs),
+    );
     const claimsByService = this.store.liveClaimsForServices(
       serviceIds,
       query.travelDate,
@@ -625,18 +628,21 @@ export class ReservedOrderService {
     }
     const nowMs = this.now().getTime();
     const refund = computeRefund(live, booking.departureAt, nowMs);
-    const quote = this.store.saveRefundQuote({
-      id: this.store.newRefundQuoteId(),
-      bookingId: booking.id,
-      seatIds: live.map((seat) => seat.seatId).sort(),
-      slabCode: refund.slab.code,
-      slabPercent: refund.slab.deductionPercent,
-      refundPaise: refund.refundPaise,
-      quotedAt: nowMs,
-      // Two minutes. Short enough that a slab crossing between the quote and
-      // the commitment is a rare path rather than a routine one.
-      expiresAt: nowMs + 2 * 60 * 1000,
-    });
+    // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
+    const quote = this.store.withTransaction(() =>
+      this.store.saveRefundQuote({
+        id: this.store.newRefundQuoteId(),
+        bookingId: booking.id,
+        seatIds: live.map((seat) => seat.seatId).sort(),
+        slabCode: refund.slab.code,
+        slabPercent: refund.slab.deductionPercent,
+        refundPaise: refund.refundPaise,
+        quotedAt: nowMs,
+        // Two minutes. Short enough that a slab crossing between the quote and
+        // the commitment is a rare path rather than a routine one.
+        expiresAt: nowMs + 2 * 60 * 1000,
+      }),
+    );
     return {
       // Nothing changes state. The booking is still live and still says so.
       order: booking.order,
@@ -692,16 +698,19 @@ export class ReservedOrderService {
       // support; honouring the new one silently would let a rider commit to
       // one number and receive another. So the commitment is refused and the
       // real figure goes back with it.
-      const replacement = this.store.saveRefundQuote({
-        id: this.store.newRefundQuoteId(),
-        bookingId: booking.id,
-        seatIds: wanted,
-        slabCode: refund.slab.code,
-        slabPercent: refund.slab.deductionPercent,
-        refundPaise: refund.refundPaise,
-        quotedAt: nowMs,
-        expiresAt: nowMs + 2 * 60 * 1000,
-      });
+      // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
+      const replacement = this.store.withTransaction(() =>
+        this.store.saveRefundQuote({
+          id: this.store.newRefundQuoteId(),
+          bookingId: booking.id,
+          seatIds: wanted,
+          slabCode: refund.slab.code,
+          slabPercent: refund.slab.deductionPercent,
+          refundPaise: refund.refundPaise,
+          quotedAt: nowMs,
+          expiresAt: nowMs + 2 * 60 * 1000,
+        }),
+      );
       throw new ReservedLifecycleError(
         "REFUND-SLAB-MOVED",
         `The refund slab moved from ${quote.slabCode} to ${refund.slab.code} between the quote and this request`,
@@ -727,7 +736,8 @@ export class ReservedOrderService {
       nowMs,
     });
     const rewritten = this.cancelledOrder(updated);
-    this.store.updateStoredOrder(updated.id, rewritten);
+    // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
+    this.store.withTransaction(() => this.store.updateStoredOrder(updated.id, rewritten));
     await this.publishManifestFor(booking.serviceId, booking.travelDate);
     return {
       order: rewritten,
@@ -1095,10 +1105,13 @@ export class ReservedOrderService {
     input: OrderInput,
   ): { hold: HoldRecord; records: ManifestRecord[] } {
     const nowMs = this.now().getTime();
-    this.store.sweepExpiredHolds(
-      resolved.service.serviceId,
-      resolved.travelDate,
-      nowMs,
+    // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
+    this.store.withTransaction(() =>
+      this.store.sweepExpiredHolds(
+        resolved.service.serviceId,
+        resolved.travelDate,
+        nowMs,
+      ),
     );
     const hold = this.store.findLatestHold(this.operatorKey, identity);
     if (!hold) {
@@ -1168,10 +1181,13 @@ export class ReservedOrderService {
     travelDate: string,
     viewer?: ReservedIdentity,
   ): Snapshot {
-    this.store.sweepExpiredHolds(
-      service.serviceId,
-      travelDate,
-      this.now().getTime(),
+    // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
+    this.store.withTransaction(() =>
+      this.store.sweepExpiredHolds(
+        service.serviceId,
+        travelDate,
+        this.now().getTime(),
+      ),
     );
     const claims = this.store.liveClaims(service.serviceId, travelDate);
     return this.snapshotFromClaims(service, seatMap, travelDate, claims, viewer);

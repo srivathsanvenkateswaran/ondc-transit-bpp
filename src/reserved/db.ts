@@ -230,6 +230,41 @@ export function isNothingToRollBack(error: unknown): boolean {
   return message !== undefined && /cannot rollback\s*-?\s*no transaction is active/i.test(message);
 }
 
+/**
+ * The server, not this client, ended the transaction.
+ *
+ * Turso enforces its own timeout on an "interactive transaction" - a BEGIN
+ * held open across more than one Hrana round trip - shorter than the idle
+ * window that kills the stream itself outright. Cross it and the *stream*
+ * survives; only the transaction is discarded server-side. Whichever
+ * statement asks next is told there is nothing there, in whichever of three
+ * wordings that particular statement happens to trigger: a bare `COMMIT` or
+ * `ROLLBACK` gets "cannot commit/rollback - no transaction is active", and a
+ * statement mid-batch gets "interactive transaction was rolled back because
+ * the stream was idle for too long; retry the transaction" (sometimes tagged
+ * `SQLITE_BUSY`, sometimes not - both were reproduced directly against the
+ * real Turso database on 2026-09-07 by holding a transaction open past
+ * roughly ten to twenty seconds and letting the next statement, or `COMMIT`
+ * itself, discover it).
+ *
+ * `isNothingToRollBack` already named the narrowest of these - a `ROLLBACK`
+ * that got exactly what it wanted - and stays the one place that turns a
+ * failure into success. This predicate is the general fact underneath all
+ * three wordings: `ReconnectingDatabase` uses it to stop believing a
+ * transaction is open once the server has already discarded it, on every
+ * kind of statement, not only `ROLLBACK`. It never authorises treating a
+ * `COMMIT` failure as anything but a failure - see `attempt` below.
+ */
+export function isTransactionAlreadyGone(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : undefined;
+  if (message === undefined) return false;
+  return (
+    isNothingToRollBack(error) ||
+    /cannot commit\s*-?\s*no transaction is active/i.test(message) ||
+    /interactive transaction was rolled back/i.test(message)
+  );
+}
+
 type OperationKind = "begin" | "commit" | "rollback" | "other";
 
 /**
@@ -335,6 +370,18 @@ export class ReconnectingDatabase implements ReservedDatabase {
         this.inTransaction = false;
         return undefined as T;
       }
+      if (wasInTransaction && isTransactionAlreadyGone(error)) {
+        // Turso discarded this transaction on its own - the stream is still
+        // fine, so there is nothing to reconnect, but this client's own
+        // `inTransaction` must not go on believing a transaction is open
+        // that the server has already thrown away, or the next `BEGIN`
+        // inherits a lie. A `COMMIT` that hits this path is still rethrown
+        // below exactly as any other real failure would be: the work it was
+        // meant to durably record was never inside a transaction at all by
+        // the time it ran, and that is not a success dressed up as one.
+        this.inTransaction = false;
+        throw error;
+      }
       if (!isDeadStreamError(error)) throw error;
       this.reconnect(error);
       if (wasInTransaction) {
@@ -383,6 +430,51 @@ export class ReconnectingDatabase implements ReservedDatabase {
 
   close(): unknown {
     return this.current.close();
+  }
+}
+
+/**
+ * Run `fn` inside one `BEGIN IMMEDIATE` / `COMMIT` transaction against
+ * `database`, `ROLLBACK` on any failure - `fn`'s own or `COMMIT`'s - and
+ * always re-throw whatever `fn` or `COMMIT` actually threw, never whatever
+ * the `ROLLBACK` attempt says.
+ *
+ * `store.ts` had this pattern by hand in four places (`acquireHold`,
+ * `confirmBooking`, `applyCancellation`, `sweepManifests`), each its own
+ * `BEGIN IMMEDIATE`, try block, `COMMIT`, and a catch that ran `ROLLBACK`
+ * before re-throwing. One copy here rather than four means the one subtlety
+ * that matters - a `ROLLBACK` that fails is never allowed to replace the
+ * error that caused it - is written once and cannot drift between sites. A
+ * `ROLLBACK` failing at all is already rare (`ReconnectingDatabase` turns the
+ * ordinary case, nothing left to roll back, into a no-op), but a second,
+ * unrelated failure right after the first is exactly the kind of situation
+ * where losing the original error is worst: the caller needs to hear why the
+ * transaction actually broke, not why the cleanup afterward also did.
+ *
+ * `libsql`'s own `Database.transaction()` was considered and set aside: it
+ * is implemented as this same `BEGIN`/`fn`/`COMMIT`/`ROLLBACK` shape over the
+ * same Hrana round trips, so adopting it would buy nothing here and cannot
+ * be handed a `ReconnectingDatabase` in the first place, since that wrapper
+ * deliberately only implements `prepare`, `exec` and `close` - see its class
+ * doc for why a single persistent connection is not an assumption this
+ * module can make.
+ */
+export function withTransaction<T>(database: ReservedDatabase, fn: () => T): T {
+  database.exec("BEGIN IMMEDIATE");
+  try {
+    const result = fn();
+    database.exec("COMMIT");
+    return result;
+  } catch (error) {
+    try {
+      database.exec("ROLLBACK");
+    } catch {
+      // Best-effort cleanup. The transaction is already gone - most often
+      // the ordinary case `ReconnectingDatabase` already turns into a no-op
+      // - and if the rollback itself fails for some other reason, the error
+      // that actually matters is the one caught above, not this one.
+    }
+    throw error;
   }
 }
 

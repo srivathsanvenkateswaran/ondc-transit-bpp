@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { ReservedDatabase } from "./db.js";
+import { withTransaction, type ReservedDatabase } from "./db.js";
 import { ReservedLifecycleError } from "./errors.js";
 import type { Corporation, ServiceProvenance } from "./types.js";
 
@@ -170,6 +170,34 @@ export class ReservedStore {
   /** Exposed for the boot-time schema check and for tests, nothing else. */
   get handle(): ReservedDatabase {
     return this.database;
+  }
+
+  /**
+   * Run `fn` inside its own transaction against this store's database.
+   *
+   * For a caller that needs to run a single write - `sweepExpiredHolds`,
+   * `sweepExpiredHoldsForServices`, `saveRefundQuote`, `updateStoredOrder` -
+   * on its own, outside any of this store's own transactional methods. Never
+   * skip this and call one of those directly: reproduced directly against
+   * the real Turso database on 2026-09-07, a write that runs outside any
+   * transaction on this connection - even a single, ordinary autocommit
+   * `UPDATE` - leaves the *next* `BEGIN IMMEDIATE` issued on the same
+   * connection unable to actually open a transaction server-side, even
+   * though it reports success. Every statement inside that "transaction"
+   * then runs and durably persists on its own, in autocommit, and the
+   * `COMMIT` at the end fails with "cannot commit - no transaction is
+   * active" - not because anything timed out, but because there was never a
+   * real transaction there to commit. This is `on_select`'s actual failure:
+   * `ReservedOrderService.snapshot()` swept expired holds as a bare write
+   * immediately before `acquireHold`'s own `BEGIN IMMEDIATE`, on the one
+   * connection this process holds for its whole life, so the very next
+   * select after any search or prior select corrupted itself this way. A
+   * committed transaction immediately followed by a fresh `BEGIN` on the
+   * same connection does not trigger this (also reproduced directly) - only
+   * a write with no transaction around it at all does.
+   */
+  withTransaction<T>(fn: () => T): T {
+    return withTransaction(this.database, fn);
   }
 
   private shortId(prefix: string): string {
@@ -422,93 +450,103 @@ export class ReservedStore {
     skipAvailabilityCheckForTest?: boolean;
   }): HoldRecord {
     const seatIds = [...new Set(params.seatIds)].sort();
-    this.database.exec("BEGIN IMMEDIATE");
     try {
-      this.sweepExpiredHolds(params.serviceId, params.travelDate, params.nowMs);
+      return withTransaction(this.database, (): HoldRecord => {
+        this.sweepExpiredHolds(params.serviceId, params.travelDate, params.nowMs);
 
-      const existing = this.findLatestHold(params.operator, params.identity);
-      if (
-        existing &&
-        this.holdStatus(existing, params.nowMs) === "LIVE" &&
-        existing.serviceId === params.serviceId &&
-        existing.travelDate === params.travelDate &&
-        existing.seatIds.length === seatIds.length &&
-        existing.seatIds.every((seatId, index) => seatId === seatIds[index])
-      ) {
-        // Idempotent, and deliberately not extended. A select naming exactly
-        // the seats already held returns the same hold and the same instant.
-        this.database.exec("COMMIT");
-        return existing;
-      }
-      if (existing && this.holdStatus(existing, params.nowMs) === "LIVE") {
-        this.database
-          .prepare(
-            "UPDATE seat_locks SET state = 'RELEASED' WHERE hold_id = ? AND state = 'HELD'",
-          )
-          .run(existing.holdId);
-      }
+        const existing = this.findLatestHold(params.operator, params.identity);
+        if (
+          existing &&
+          this.holdStatus(existing, params.nowMs) === "LIVE" &&
+          existing.serviceId === params.serviceId &&
+          existing.travelDate === params.travelDate &&
+          existing.seatIds.length === seatIds.length &&
+          existing.seatIds.every((seatId, index) => seatId === seatIds[index])
+        ) {
+          // Idempotent, and deliberately not extended. A select naming exactly
+          // the seats already held returns the same hold and the same instant.
+          return existing;
+        }
+        if (existing && this.holdStatus(existing, params.nowMs) === "LIVE") {
+          this.database
+            .prepare(
+              "UPDATE seat_locks SET state = 'RELEASED' WHERE hold_id = ? AND state = 'HELD'",
+            )
+            .run(existing.holdId);
+        }
 
-      if (!params.skipAvailabilityCheckForTest) {
-        const taken = this.liveClaims(params.serviceId, params.travelDate)
-          .filter((claim) => seatIds.includes(claim.seatId))
-          .map((claim) => claim.seatId);
-        if (taken.length > 0) {
-          throw new ReservedLifecycleError(
-            "SEAT-UNAVAILABLE",
-            `Seats ${taken.join(", ")} on ${params.serviceId} for ${
-              params.travelDate
-            } are already held or sold`,
-            { unavailableSeatIds: taken },
+        if (!params.skipAvailabilityCheckForTest) {
+          const taken = this.liveClaims(params.serviceId, params.travelDate)
+            .filter((claim) => seatIds.includes(claim.seatId))
+            .map((claim) => claim.seatId);
+          if (taken.length > 0) {
+            throw new ReservedLifecycleError(
+              "SEAT-UNAVAILABLE",
+              `Seats ${taken.join(", ")} on ${params.serviceId} for ${
+                params.travelDate
+              } are already held or sold`,
+              { unavailableSeatIds: taken },
+            );
+          }
+        }
+
+        const holdId = this.shortId("HLD-KSRTC");
+        if (this.findHoldById(holdId)) {
+          // A hold id that already exists is an id generator that repeated
+          // itself, not a contended seat. Saying so out loud matters: the insert
+          // below would collide on the primary key and the collision would be
+          // translated into a refusal that told a rider a free berth was taken.
+          throw new Error(
+            `Reserved id generator produced hold id ${holdId} twice`,
           );
         }
-      }
-
-      const holdId = this.shortId("HLD-KSRTC");
-      if (this.findHoldById(holdId)) {
-        // A hold id that already exists is an id generator that repeated
-        // itself, not a contended seat. Saying so out loud matters: the insert
-        // below would collide on the primary key and the collision would be
-        // translated into a refusal that told a rider a free berth was taken.
-        throw new Error(
-          `Reserved id generator produced hold id ${holdId} twice`,
+        const expiresAt = params.nowMs + params.ttlSeconds * 1000;
+        // One INSERT with a VALUES tuple per seat, not one round trip per
+        // seat. This transaction runs against a remote database, and Turso
+        // ends an "interactive transaction" that sits open too long even
+        // when the underlying stream is fine - reproduced directly against
+        // the real database on 2026-09-07 by holding one open past roughly
+        // ten to twenty seconds, which a per-seat round trip on a multi-seat
+        // hold reached routinely. Fewer round trips is the actual fix; the
+        // bookkeeping in `db.ts` only keeps the failure honest when the
+        // budget is blown anyway.
+        const tuples = seatIds
+          .map(() => "(?,?,?,?, 'HELD', ?, NULL, ?,?,?,?,?,?)")
+          .join(",");
+        const insert = this.database.prepare(
+          `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
+             hold_id, booking_id, operator, bap_id, bap_uri, transaction_id,
+             expires_at, created_at)
+           VALUES ${tuples}`,
         );
-      }
-      const expiresAt = params.nowMs + params.ttlSeconds * 1000;
-      const insert = this.database.prepare(
-        `INSERT INTO seat_locks (id, service_id, travel_date, seat_id, state,
-           hold_id, booking_id, operator, bap_id, bap_uri, transaction_id,
-           expires_at, created_at)
-         VALUES (?,?,?,?, 'HELD', ?, NULL, ?,?,?,?,?,?)`,
-      );
-      seatIds.forEach((seatId, index) => {
         insert.run(
-          `${holdId}-${index + 1}`,
-          params.serviceId,
-          params.travelDate,
-          seatId,
-          holdId,
-          params.operator,
-          params.identity.bapId,
-          params.identity.bapUri,
-          params.identity.transactionId,
-          expiresAt,
-          params.nowMs,
+          ...seatIds.flatMap((seatId, index) => [
+            `${holdId}-${index + 1}`,
+            params.serviceId,
+            params.travelDate,
+            seatId,
+            holdId,
+            params.operator,
+            params.identity.bapId,
+            params.identity.bapUri,
+            params.identity.transactionId,
+            expiresAt,
+            params.nowMs,
+          ]),
         );
+        return {
+          holdId,
+          operator: params.operator,
+          identity: params.identity,
+          serviceId: params.serviceId,
+          travelDate: params.travelDate,
+          seatIds,
+          state: "HELD",
+          expiresAt,
+          createdAt: params.nowMs,
+        };
       });
-      this.database.exec("COMMIT");
-      return {
-        holdId,
-        operator: params.operator,
-        identity: params.identity,
-        serviceId: params.serviceId,
-        travelDate: params.travelDate,
-        seatIds,
-        state: "HELD",
-        expiresAt,
-        createdAt: params.nowMs,
-      };
     } catch (error) {
-      this.database.exec("ROLLBACK");
       if (isUniqueViolation(error)) {
         // The losing racer. Translated rather than surfaced, because a client
         // reading "UNIQUE constraint failed" learns nothing it can act on.
@@ -682,75 +720,85 @@ export class ReservedStore {
     );
     const tollPaise = params.seats.reduce((sum, seat) => sum + seat.tollPaise, 0);
 
-    this.database.exec("BEGIN IMMEDIATE");
     try {
-      const moved = this.database
-        .prepare(
-          `UPDATE seat_locks
-           SET state = 'BOOKED', booking_id = ?, expires_at = NULL
-           WHERE hold_id = ? AND state = 'HELD'`,
-        )
-        .run(orderId, params.holdId);
-      if (Number(moved.changes) !== params.seats.length) {
-        // The hold lapsed or was replaced between the check and here. Refusing
-        // is the only safe answer: the seats may already belong to somebody
-        // else, and half a booking is not a booking.
-        throw new ReservedLifecycleError(
-          "HOLD-EXPIRED",
-          `Hold ${params.holdId} was no longer live at the moment of confirm`,
-        );
-      }
-      this.database
-        .prepare(
-          `INSERT INTO bookings (id, reference, operator, bap_id, bap_uri,
-             transaction_id, service_id, travel_date, service_class,
-             from_boarding_point_id, to_boarding_point_id, departure_at, status,
-             base_paise, reservation_fee_paise, toll_paise, created_at,
-             cancelled_at, refund_paise, slab_code, order_json,
-             settlement_corporation, settlement_basis)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?, 'CONFIRMED', ?,?,?,?, NULL, NULL, NULL, ?,?,?)`,
-        )
-        .run(
-          orderId,
-          reference,
-          params.operator,
-          params.identity.bapId,
-          params.identity.bapUri,
-          params.identity.transactionId,
-          params.serviceId,
-          params.travelDate,
-          params.serviceClass,
-          params.fromBoardingPointId,
-          params.toBoardingPointId,
-          params.departureAt,
-          basePaise,
-          feePaise,
-          tollPaise,
-          params.nowMs,
-          JSON.stringify(order),
-          params.settlementCorporation,
-          params.settlementBasis,
-        );
-      const insertSeat = this.database.prepare(
-        `INSERT INTO booking_seats (booking_id, seat_id, name, age, gender,
-           base_paise, reservation_fee_paise, toll_paise, status)
-         VALUES (?,?,?,?,?,?,?,?, 'CONFIRMED')`,
-      );
-      params.seats.forEach((seat) => {
-        insertSeat.run(
-          orderId,
-          seat.seatId,
-          seat.name,
-          seat.age,
-          seat.gender,
-          seat.basePaise,
-          seat.reservationFeePaise,
-          seat.tollPaise,
-        );
+      withTransaction(this.database, () => {
+        const moved = this.database
+          .prepare(
+            `UPDATE seat_locks
+             SET state = 'BOOKED', booking_id = ?, expires_at = NULL
+             WHERE hold_id = ? AND state = 'HELD'`,
+          )
+          .run(orderId, params.holdId);
+        if (Number(moved.changes) !== params.seats.length) {
+          // The hold lapsed or was replaced between the check and here. Refusing
+          // is the only safe answer: the seats may already belong to somebody
+          // else, and half a booking is not a booking.
+          throw new ReservedLifecycleError(
+            "HOLD-EXPIRED",
+            `Hold ${params.holdId} was no longer live at the moment of confirm`,
+          );
+        }
+        this.database
+          .prepare(
+            `INSERT INTO bookings (id, reference, operator, bap_id, bap_uri,
+               transaction_id, service_id, travel_date, service_class,
+               from_boarding_point_id, to_boarding_point_id, departure_at, status,
+               base_paise, reservation_fee_paise, toll_paise, created_at,
+               cancelled_at, refund_paise, slab_code, order_json,
+               settlement_corporation, settlement_basis)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?, 'CONFIRMED', ?,?,?,?, NULL, NULL, NULL, ?,?,?)`,
+          )
+          .run(
+            orderId,
+            reference,
+            params.operator,
+            params.identity.bapId,
+            params.identity.bapUri,
+            params.identity.transactionId,
+            params.serviceId,
+            params.travelDate,
+            params.serviceClass,
+            params.fromBoardingPointId,
+            params.toBoardingPointId,
+            params.departureAt,
+            basePaise,
+            feePaise,
+            tollPaise,
+            params.nowMs,
+            JSON.stringify(order),
+            params.settlementCorporation,
+            params.settlementBasis,
+          );
+        if (params.seats.length > 0) {
+          // One INSERT with a VALUES tuple per seat, not one round trip per
+          // seat - the same reasoning as `acquireHold`'s insert: this
+          // transaction runs against a remote database, and Turso ends an
+          // "interactive transaction" that sits open too long even when the
+          // stream itself is fine, well before the ~15 minute idle-stream
+          // eviction `ReconnectingDatabase` exists for.
+          const tuples = params.seats
+            .map(() => "(?,?,?,?,?,?,?,?, 'CONFIRMED')")
+            .join(",");
+          const insertSeats = this.database.prepare(
+            `INSERT INTO booking_seats (booking_id, seat_id, name, age, gender,
+               base_paise, reservation_fee_paise, toll_paise, status)
+             VALUES ${tuples}`,
+          );
+          insertSeats.run(
+            ...params.seats.flatMap((seat) => [
+              orderId,
+              seat.seatId,
+              seat.name,
+              seat.age,
+              seat.gender,
+              seat.basePaise,
+              seat.reservationFeePaise,
+              seat.tollPaise,
+            ]),
+          );
+        }
       });
-      this.database.exec("COMMIT");
     } catch (error) {
-      this.database.exec("ROLLBACK");
       if (isUniqueViolation(error)) {
         // Two confirms on one transaction, from two processes or from one that
         // bypassed the in-process check. The index caught it, and the honest
@@ -826,8 +874,7 @@ export class ReservedStore {
     refundBySeat: Map<string, number>;
     nowMs: number;
   }): BookingRecord {
-    this.database.exec("BEGIN IMMEDIATE");
-    try {
+    withTransaction(this.database, () => {
       const cancelSeat = this.database.prepare(
         `UPDATE booking_seats
          SET status = 'CANCELLED', cancelled_at = ?, refund_paise = ?, slab_code = ?
@@ -883,11 +930,7 @@ export class ReservedStore {
           params.slabCode,
           params.bookingId,
         );
-      this.database.exec("COMMIT");
-    } catch (error) {
-      this.database.exec("ROLLBACK");
-      throw error;
-    }
+    });
     const row = this.database
       .prepare("SELECT * FROM bookings WHERE id = ?")
       .get(params.bookingId) as Record<string, unknown>;
@@ -925,8 +968,7 @@ export class ReservedStore {
       )
       .all(cutoff) as Array<{ id: string; order_json: string }>;
     if (stale.length === 0) return 0;
-    this.database.exec("BEGIN IMMEDIATE");
-    try {
+    withTransaction(this.database, () => {
       const clearSeats = this.database.prepare(
         "UPDATE booking_seats SET name = NULL, age = NULL, gender = NULL WHERE booking_id = ?",
       );
@@ -942,11 +984,7 @@ export class ReservedStore {
           booking.id,
         );
       });
-      this.database.exec("COMMIT");
-    } catch (error) {
-      this.database.exec("ROLLBACK");
-      throw error;
-    }
+    });
     return stale.length;
   }
 
