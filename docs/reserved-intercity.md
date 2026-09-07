@@ -2634,7 +2634,15 @@ schema read by older code is how a hold quietly stops being honoured.
 (default `30`) drops manifest rows for bookings whose departure passed more than
 that long ago, on the same lazy sweep as expired holds. The booking row itself
 survives, because a rider needs to see that a journey happened; the names do not,
-because nothing needs them once the coach has gone. The `GET /orders/:orderId`
+because nothing needs them once the coach has gone.
+
+That sweep is throttled to run at most once a minute per process, so the window
+is "within the retention days, plus up to a minute". Unthrottled it ran on every
+search and every status check, which against a hosted database was a round trip
+on a rider's request to ask a question whose answer is nearly always "nothing is
+due yet" and cannot have changed since the last request a second ago. The lag it
+introduces is a minute against a window stated in days, and nothing observes
+retention that finely. The `GET /orders/:orderId`
 inspection endpoint, already bearer-gated and off unless
 `ORDER_INSPECTION_TOKEN` is set, now returns manifest names as well as tokens -
 which makes leaving it enabled on a shared host a more consequential decision

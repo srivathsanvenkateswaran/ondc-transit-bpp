@@ -722,7 +722,9 @@ public URLs, or ports.
 | `RESERVED_SOURCE_RESPONSE_SCHEMA` | `/app/schemas/reserved-source-response.json` | Reserved dataset response JSON Schema |
 | `RESERVED_DB_URL` | `file:/app/data/reserved.db` | Where held and booked seats live; `:memory:` runs without a file |
 | `RESERVED_MIGRATION_ROOT` | `/app/migrations/reserved` | Numbered, forward-only migrations applied at boot |
-| `RESERVED_MANIFEST_RETENTION_DAYS` | `30` | Days after departure that passenger names are kept |
+| `RESERVED_MANIFEST_RETENTION_DAYS` | `30` | Days after departure that passenger names are kept, give or take the sweep interval below |
+| `RESERVED_SYNC_RESPONSES` | `false` | Answer each reserved action on its own connection instead of acking and posting a callback |
+| `RESERVED_SYNC_TIMEOUT_MS` | `8000` | How long such an answer may take before this provider stops waiting and returns a domain error; `0` for no deadline |
 | `RESERVATION_CLOSE_MINUTES` | `45` | Reservations close this long before departure |
 | `RESERVATION_HORIZON_DAYS` | `30` | How far ahead a date can be booked |
 | `RESERVATION_HOLD_TTL_SECONDS` | `600` | How long a seat hold lasts, absolutely |
