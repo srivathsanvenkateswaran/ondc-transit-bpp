@@ -116,8 +116,33 @@ export interface RefundQuoteRecord {
   expiresAt: number;
 }
 
+/**
+ * How long a manifest retention sweep's result is treated as still good
+ * enough to skip the next one.
+ *
+ * The sweep is lazy by design - this process has no scheduler, so whoever
+ * next touches the provider pays for it - but "lazy" was implemented as "on
+ * literally every search and every status call", which against a remote
+ * database is an unconditional round trip taxed onto a rider's request to
+ * ask a question whose answer is nearly always "nothing is due yet".
+ *
+ * A minute is chosen because it is far below any window the retention
+ * guarantee is stated in (`MANIFEST_RETENTION_DAYS`, days) and far above the
+ * rate at which requests arrive, so it removes the round trip from almost
+ * every request while moving the guarantee by an amount nothing can observe.
+ * See `sweepManifests` for what that costs.
+ */
+export const MANIFEST_SWEEP_INTERVAL_MS = 60_000;
+
 interface StoreOptions {
   idFactory?: () => string;
+  /**
+   * Overrides {@link MANIFEST_SWEEP_INTERVAL_MS}. Only a test sets it; there
+   * is no configuration knob for this above, because the interval is not a
+   * deployment's decision - it is bounded on one side by the retention window
+   * and on the other by nothing at all.
+   */
+  manifestSweepIntervalMs?: number;
 }
 
 interface LockRow {
@@ -155,12 +180,25 @@ function isUniqueViolation(error: unknown): boolean {
 
 export class ReservedStore {
   private readonly idFactory: () => string;
+  private readonly manifestSweepIntervalMs: number;
+  /**
+   * When this process last actually ran the retention sweep, on the clock the
+   * caller passes in rather than on `Date.now()`, so a test's injected clock
+   * governs the throttle the same way it governs everything else here.
+   *
+   * In-process and deliberately not persisted: it is a note about what this
+   * process has already spent a round trip on, not a fact about the database.
+   * A restart, or a second dyno, simply sweeps once more than it had to.
+   */
+  private lastManifestSweepAt: number | undefined;
 
   constructor(
     private readonly database: ReservedDatabase,
     options: StoreOptions = {},
   ) {
     this.idFactory = options.idFactory ?? randomUUID;
+    this.manifestSweepIntervalMs =
+      options.manifestSweepIntervalMs ?? MANIFEST_SWEEP_INTERVAL_MS;
   }
 
   close(): void {
@@ -957,8 +995,43 @@ export class ReservedStore {
    * gone. The stored order carries the manifest too, so the sweep rewrites it
    * rather than only nulling the columns: leaving the names in one copy while
    * deleting them from the other would be a retention policy that retains.
+   *
+   * **Throttled, so the retention window may lag by up to
+   * {@link MANIFEST_SWEEP_INTERVAL_MS}.** Called on every search and every
+   * status check, this ran its scan unconditionally, so every one of those
+   * requests paid a remote round trip to be told nothing was due. At most one
+   * sweep per interval per process is the trade, and the guarantee it moves
+   * is "names are gone within `retentionDays`" to "within `retentionDays`
+   * plus a minute". Nothing measures retention that finely: the window is
+   * stated in days, the names being cleared a minute late is invisible from
+   * outside, and the alternative was a round trip on a rider's request to
+   * discover that the answer had not changed since the last one.
+   *
+   * A throttled call returns 0 - as does a call that swept and found nothing
+   * - because both are the same statement about the database: no manifest was
+   * cleared just now.
    */
   sweepManifests(nowMs: number, retentionDays: number): number {
+    const sinceLastSweep =
+      this.lastManifestSweepAt === undefined
+        ? undefined
+        : nowMs - this.lastManifestSweepAt;
+    // A clock that went backwards sweeps rather than skips. That is a test's
+    // injected clock rewinding, and refusing to sweep because "now" is before
+    // the last sweep would be the throttle deciding a question about time it
+    // has no standing to decide.
+    if (
+      sinceLastSweep !== undefined &&
+      sinceLastSweep >= 0 &&
+      sinceLastSweep < this.manifestSweepIntervalMs
+    ) {
+      return 0;
+    }
+    // Recorded before the statements run, not after: a sweep that throws is a
+    // database this process cannot reach, and the request that carried it has
+    // already failed for that reason. Retrying the same broken scan on every
+    // request behind it would only spend the outage louder.
+    this.lastManifestSweepAt = nowMs;
     const cutoff = nowMs - retentionDays * 24 * 60 * 60 * 1000;
     const stale = this.database
       .prepare(

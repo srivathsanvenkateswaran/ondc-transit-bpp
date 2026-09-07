@@ -199,7 +199,10 @@ export class ReservedOrderService {
     const nowMs = this.now().getTime();
     // The retention sweep rides the same lazy discipline as the hold sweep:
     // whoever next touches this provider pays for it, because a process with
-    // no scheduler has no other moment to do it in.
+    // no scheduler has no other moment to do it in. It is throttled inside
+    // the store, so most searches do not actually pay a round trip for it and
+    // the window it clears names within may lag by that interval - see
+    // `ReservedStore.sweepManifests`.
     this.store.sweepManifests(
       nowMs,
       this.options.reservation.manifestRetentionDays,
@@ -563,8 +566,9 @@ export class ReservedOrderService {
     }
     const booking = this.findBookingOrRefuse(request.context, reference);
     // The manifest sweep runs on whoever next reads, in the same lazy shape as
-    // the hold sweep. A booking whose coach went a month ago comes back
-    // without the names it carried.
+    // the hold sweep, and under the same throttle: a booking whose coach went
+    // a month ago comes back without the names it carried, give or take the
+    // sweep interval - see `ReservedStore.sweepManifests`.
     this.store.sweepManifests(
       this.now().getTime(),
       this.options.reservation.manifestRetentionDays,
