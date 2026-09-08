@@ -8,6 +8,7 @@ import { openReservedDatabase } from "../../src/reserved/db.js";
 import { reservedItemId } from "../../src/reserved/domain.js";
 import { ReservedLifecycleError } from "../../src/reserved/errors.js";
 import { FixtureReservedSource } from "../../src/reserved/fixture.js";
+import { manifestTag, parseManifest } from "../../src/reserved/manifest.js";
 import { seededOccupancy } from "../../src/reserved/occupancy.js";
 import { ReservedOrderService } from "../../src/reserved/order.js";
 import { availableSeatCount } from "../../src/reserved/seatstate.js";
@@ -834,6 +835,86 @@ test("confirm turns the hold into a booking with a reference of this provider's 
     claims.map((claim) => claim.state),
     ["BOOKED", "BOOKED"],
   );
+});
+
+/**
+ * `confirmBooking`'s own batched insert - one `VALUES` tuple per seat, the
+ * same shape `acquireHold`'s takes - is exactly what would misalign a
+ * passenger onto the wrong seat if a later edit changed how many columns one
+ * tuple carries without changing the other in step: two seats never caught
+ * that, because a two-tuple insert reads the same whether the tuples are
+ * matched to their seats or swapped with each other.
+ *
+ * The wire manifest is not a witness to this: `buildOrder` writes it straight
+ * from the request's own parsed records (`order.ts`, `manifestTagFrom`), so
+ * an insert that silently shuffled names in `booking_seats` would still echo
+ * the request back correctly and this test would pass for the wrong reason.
+ * Confirmed against `store.inspect`, which reads the row the batched insert
+ * actually wrote - proved by re-running this with `name` deliberately rotated
+ * one seat in the insert's own parameter list, which failed here and passed
+ * everywhere else in this file.
+ *
+ * Four seats, confirmed in an order that is not already sorted, with a
+ * fourth field (age) present on some passengers and omitted on others so a
+ * shifted column lands on a type it cannot hold rather than quietly reusing
+ * a neighbour's value.
+ */
+test("a four-seat confirm keeps every passenger on their own seat through the batched insert", async () => {
+  const seatIds = ["U4B", "U3A", "U4A", "U3B"];
+  const { orders, store } = await heldHarness(seatIds);
+  const manifest = [
+    { seatId: "U4B", name: "D Passenger", age: 22, gender: "female" },
+    { seatId: "U3A", name: "A Passenger", age: 34, gender: "female" },
+    { seatId: "U4A", name: "C Passenger", age: 40, gender: "male" },
+    { seatId: "U3B", name: "B Passenger", gender: "male" },
+  ];
+  const message = await orders.confirm(
+    reservedOrderRequest("confirm", {
+      itemId: ITEM,
+      seatIds,
+      manifest,
+    }) as never,
+  );
+  const order = orderOf(message);
+
+  // The row the batched insert actually wrote, read back independently of
+  // whatever `buildOrder` echoed onto the wire.
+  const booking = store.inspect(order.id as string);
+  assert.ok(booking, "confirmed booking not found in the store");
+  assert.deepEqual(
+    booking!.seats
+      .map((seat) => [seat.seatId, seat.name, seat.age, seat.gender])
+      .sort((left, right) => String(left[0]).localeCompare(String(right[0]))),
+    manifest
+      .map((passenger) => [
+        passenger.seatId,
+        passenger.name,
+        passenger.age ?? null,
+        passenger.gender,
+      ])
+      .sort((left, right) => String(left[0]).localeCompare(String(right[0]))),
+  );
+
+  // What the wire actually says matches the same records, seat for seat and
+  // in request order - the confirm path's own promise, checked the way a
+  // client reads it.
+  const fulfillment = (order.fulfillments as any)[0];
+  const parsed = parseManifest(manifestTag(fulfillment.tags as any) ?? []);
+  assert.deepEqual(
+    parsed.map((record) => [record.seatId, record.name, record.age, record.gender]),
+    manifest.map((passenger) => [
+      passenger.seatId,
+      passenger.name,
+      passenger.age ?? null,
+      passenger.gender,
+    ]),
+  );
+
+  // The store side of the same batched insert: one booked claim per seat,
+  // none dropped, none doubled, none carrying somebody else's identity.
+  const claims = store.liveClaims("2259BNGHMP", TRAVEL_DATE);
+  assert.deepEqual(claims.map((claim) => claim.seatId).sort(), [...seatIds].sort());
+  assert.ok(claims.every((claim) => claim.state === "BOOKED"));
 });
 
 test("two confirms on one transaction produce one booking with one reference", async () => {
