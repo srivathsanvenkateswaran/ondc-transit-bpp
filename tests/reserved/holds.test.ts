@@ -151,6 +151,37 @@ test("acquiring a hold costs the same handful of database round trips for one se
   );
 });
 
+/**
+ * The round-trip count above proves the insert became one statement; it says
+ * nothing about whether that one statement still writes the right row for
+ * the right seat. A single `VALUES` tuple per seat, built by flattening a
+ * `seatIds.map` into one parameter list, is exactly the shape a later edit
+ * could misalign - one seat's values sliding into another's row, a seat
+ * silently dropped because a placeholder count stopped matching a value
+ * count - and the six-seat hold above never checks the rows it produced, only
+ * how many round trips they cost. This does: five seats, in an order that
+ * does not already sort itself, each landing in its own row with its own
+ * identity rather than smeared across its neighbours'.
+ */
+test("a multi-seat hold's batched insert gives every seat its own row, not its neighbour's", async () => {
+  const store = await newStore();
+  const seatIds = ["U5B", "U3A", "U4A", "U3B", "U4B"];
+  const hold = await acquire(store, "tx1", seatIds, 1_000_000);
+  assert.deepEqual(hold.seatIds, [...seatIds].sort());
+
+  const claims = (await store.liveClaims(SERVICE, DATE)).map((claim) => ({ seatId: claim.seatId, holdId: claim.holdId, state: claim.state }));
+  assert.deepEqual(
+    claims.map((claim) => claim.seatId).sort(),
+    [...seatIds].sort(),
+  );
+  // Every row the batched insert produced belongs to the one hold it was
+  // for, and none of the five is a duplicate of another.
+  assert.ok(claims.every((claim) => claim.holdId === hold.holdId));
+  assert.ok(claims.every((claim) => claim.state === "HELD"));
+  assert.equal(new Set(claims.map((claim) => claim.seatId)).size, seatIds.length);
+  store.close();
+});
+
 test("a hold carries an absolute expiry this provider computed", async () => {
   const store = await newStore();
   const hold = await acquire(store, "tx1", ["U3A", "U3B"], 1_000_000);
