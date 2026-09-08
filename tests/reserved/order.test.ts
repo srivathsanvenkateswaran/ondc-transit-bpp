@@ -46,14 +46,14 @@ interface Harness {
   clock: { at: number };
 }
 
-function harness(): Harness {
+async function harness(): Promise<Harness> {
   const clock = { at: NOW };
   let counter = 0;
   // Distinct in its first eight characters, because that is the slice a
   // rider-facing reference is cut from.
   const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
   const store = new ReservedStore(
-    openReservedDatabase({ url: ":memory:", migrationRoot }),
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
     { idFactory },
   );
   const orders = new ReservedOrderService(
@@ -118,7 +118,7 @@ function twoPassengers() {
  * ------------------------------------------------------------------ */
 
 test("a search answers with dated items and a quiet seats-remaining count", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   const message = await orders.search(
     reservedSearchRequest({ travelDate: TRAVEL_DATE }) as never,
   );
@@ -142,7 +142,7 @@ test("the catalogue price names the pair it was computed for", async () => {
   // an ordinary consequence of the fare key, and a check that fired on every
   // rider boarding somewhere other than the terminus would train riders to
   // ignore a real alarm.
-  const { orders } = harness();
+  const { orders } = await harness();
   const message = await orders.search(
     reservedSearchRequest({ travelDate: TRAVEL_DATE }) as never,
   );
@@ -177,7 +177,7 @@ test("the catalogue price names the pair it was computed for", async () => {
 test("a rider asking about a date the coach does not run is told nothing runs", async () => {
   // No nearest-date fallback and no roll-forward: a rider asking about the
   // Saturday must not be sold the Sunday.
-  const { orders } = harness();
+  const { orders } = await harness();
   const message = await orders.search(
     reservedSearchRequest({
       fromTownCode: "BLR",
@@ -189,7 +189,7 @@ test("a rider asking about a date the coach does not run is told nothing runs", 
 });
 
 test("a search with no travel date is refused rather than answered for today", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   const request = reservedSearchRequest({ travelDate: TRAVEL_DATE }) as any;
   delete request.message.intent.fulfillment.travel_date;
   const refusal = await refusalFrom(() => orders.search(request));
@@ -197,7 +197,7 @@ test("a search with no travel date is refused rather than answered for today", a
 });
 
 test("a departure past its closing window is not published at all", async () => {
-  const { orders, clock } = harness();
+  const { orders, clock } = await harness();
   // Thirty minutes before a 22:59 departure, inside the 45-minute close.
   clock.at = Date.parse("2026-09-30T16:59:00.000Z");
   const message = await orders.search(
@@ -252,10 +252,10 @@ function countingDatabase(inner: import("../../src/reserved/db.js").ReservedData
   return { database, roundTrips: () => roundTrips };
 }
 
-function harnessWithCountingStore() {
+async function harnessWithCountingStore() {
   const clock = { at: NOW };
   const { database, roundTrips } = countingDatabase(
-    openReservedDatabase({ url: ":memory:", migrationRoot }),
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
   );
   const store = new ReservedStore(database);
   const orders = new ReservedOrderService(
@@ -282,7 +282,7 @@ function harnessWithCountingStore() {
 }
 
 test("a search costs the same handful of database round trips whether it answers one service or eighty-two", async () => {
-  const one = harnessWithCountingStore();
+  const one = await harnessWithCountingStore();
   const oneServiceMessage = await one.orders.search(
     // The default route (BLR to HMP, Hampi) runs exactly one service on this
     // date - see "a search answers with dated items and a quiet
@@ -295,7 +295,7 @@ test("a search costs the same handful of database round trips whether it answers
   );
   const oneServiceRoundTrips = one.roundTrips();
 
-  const many = harnessWithCountingStore();
+  const many = await harnessWithCountingStore();
   const manyServiceMessage = await many.orders.search(
     // Bengaluru to Mangaluru: 82 running services on this date, the corridor
     // named in the production measurement this fix responds to.
@@ -375,7 +375,7 @@ test("search publishes the same items and available counts a per-service read wo
 
   const clock = { at: NOW };
   const store = new ReservedStore(
-    openReservedDatabase({ url: ":memory:", migrationRoot }),
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
   );
   const orders = new ReservedOrderService(
     "ksrtc",
@@ -419,7 +419,7 @@ test("search publishes the same items and available counts a per-service read wo
     heldSeatC,
     "the test needs two distinct seat id strings to prove claims aren't mixed up by id alone",
   );
-  store.acquireHold({
+  await store.acquireHold({
     operator: "ksrtc",
     identity: {
       bapId: "bap.example.test",
@@ -432,7 +432,7 @@ test("search publishes the same items and available counts a per-service read wo
     nowMs: clock.at,
     ttlSeconds: HOLD_TTL_SECONDS,
   });
-  store.acquireHold({
+  await store.acquireHold({
     operator: "ksrtc",
     identity: {
       bapId: "bap.example.test",
@@ -494,7 +494,7 @@ test("search publishes the same items and available counts a per-service read wo
     // service's claims directly, the way the pre-batching code did it, and
     // recompute availability the same way `snapshot` does.
     const seatMap = await source.seatMap(service.seatMapId);
-    const claims = store.liveClaims(service.serviceId, TRAVEL_DATE);
+    const claims = await store.liveClaims(service.serviceId, TRAVEL_DATE);
     const seeded = seededOccupancy(service, seatMap!, TRAVEL_DATE, 20_260_905);
     const expectedAvailable = availableSeatCount({
       map: seatMap!,
@@ -508,19 +508,19 @@ test("search publishes the same items and available counts a per-service read wo
   // not on each other - the failure mode a service-id mixup in the batched
   // claims read would produce.
   assert.ok(
-    store
-      .liveClaims(realA.serviceId, TRAVEL_DATE)
-      .some((claim) => claim.seatId === heldSeatA),
+    (await store.liveClaims(realA.serviceId, TRAVEL_DATE)).some(
+      (claim) => claim.seatId === heldSeatA,
+    ),
   );
   assert.ok(
-    !store
-      .liveClaims(realC.serviceId, TRAVEL_DATE)
-      .some((claim) => claim.seatId === heldSeatA),
+    !(await store.liveClaims(realC.serviceId, TRAVEL_DATE)).some(
+      (claim) => claim.seatId === heldSeatA,
+    ),
   );
   assert.ok(
-    store
-      .liveClaims(realC.serviceId, TRAVEL_DATE)
-      .some((claim) => claim.seatId === heldSeatC),
+    (await store.liveClaims(realC.serviceId, TRAVEL_DATE)).some(
+      (claim) => claim.seatId === heldSeatC,
+    ),
   );
 });
 
@@ -531,7 +531,7 @@ test("search publishes the same items and available counts a per-service read wo
 test("browsing a seat map takes no hold", async () => {
   // Select is the one action a client may legitimately call repeatedly, and
   // browsing must not lock inventory.
-  const { orders, store } = harness();
+  const { orders, store } = await harness();
   const message = await orders.select(
     reservedOrderRequest("select", { itemId: ITEM }) as never,
   );
@@ -540,11 +540,11 @@ test("browsing a seat map takes no hold", async () => {
   const seatMap = tagOf(order.tags, "SEAT_MAP")!;
   assert.equal(seatMap.list[0].value, "PALLAKKI-2P1-30");
   assert.equal(seatMap.list.length, 31);
-  assert.deepEqual(store.liveClaims("2259BNGHMP", TRAVEL_DATE), []);
+  assert.deepEqual(await store.liveClaims("2259BNGHMP", TRAVEL_DATE), []);
 });
 
 test("naming seats takes a hold and publishes its absolute expiry", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   const message = await orders.select(
     reservedOrderRequest("select", {
       itemId: ITEM,
@@ -572,7 +572,7 @@ test("naming seats takes a hold and publishes its absolute expiry", async () => 
 });
 
 test("a seat count that disagrees with the seat list is refused, and neither wins", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   const refusal = await refusalFrom(() =>
     orders.select(
       reservedOrderRequest("select", {
@@ -586,18 +586,18 @@ test("a seat count that disagrees with the seat list is refused, and neither win
 });
 
 test("a seat this coach does not have is refused before anything is held", async () => {
-  const { orders, store } = harness();
+  const { orders, store } = await harness();
   const refusal = await refusalFrom(() =>
     orders.select(
       reservedOrderRequest("select", { itemId: ITEM, seatIds: ["Z9Z"] }) as never,
     ),
   );
   assert.equal(refusal.code, "SEAT-NOT-ON-MAP");
-  assert.deepEqual(store.liveClaims("2259BNGHMP", TRAVEL_DATE), []);
+  assert.deepEqual(await store.liveClaims("2259BNGHMP", TRAVEL_DATE), []);
 });
 
 test("a berth the simulation sold is refused with the map beside the refusal", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   const refusal = await refusalFrom(() =>
     orders.select(
       reservedOrderRequest("select", { itemId: ITEM, seatIds: ["L1A"] }) as never,
@@ -613,7 +613,7 @@ test("a berth the simulation sold is refused with the map beside the refusal", a
 });
 
 test("the loser of a race gets the map with the winner's hold already on it", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   await orders.select(
     reservedOrderRequest("select", {
       itemId: ITEM,
@@ -639,7 +639,7 @@ test("the loser of a race gets the map with the winner's hold already on it", as
 });
 
 test("a departure outside the booking window refuses the sale and names the edge", async () => {
-  const { orders, clock } = harness();
+  const { orders, clock } = await harness();
   clock.at = Date.parse("2026-09-30T16:59:00.000Z");
   const refusal = await refusalFrom(() =>
     orders.select(reservedOrderRequest("select", { itemId: ITEM }) as never),
@@ -652,7 +652,7 @@ test("a departure outside the booking window refuses the sale and names the edge
 });
 
 test("a boarding pair this provider does not price is refused, not interpolated", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   const refusal = await refusalFrom(() =>
     orders.select(
       reservedOrderRequest("select", {
@@ -670,7 +670,7 @@ test("a boarding pair this provider does not price is refused, not interpolated"
  * ------------------------------------------------------------------ */
 
 async function heldHarness(seatIds = ["U3A", "U3B"]): Promise<Harness> {
-  const context = harness();
+  const context = await harness();
   await context.orders.select(
     reservedOrderRequest("select", { itemId: ITEM, seatIds }) as never,
   );
@@ -694,7 +694,7 @@ test("init prices the held seats and echoes the manifest", async () => {
 });
 
 test("init without a hold says so rather than inventing one", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   const refusal = await refusalFrom(() =>
     orders.init(
       reservedOrderRequest("init", {
@@ -830,7 +830,7 @@ test("confirm turns the hold into a booking with a reference of this provider's 
     entryOf(fulfillment.tags, "VEHICLE_LOOKUP", "SERVICE_ID"),
     "2259BNGHMP",
   );
-  const claims = store.liveClaims("2259BNGHMP", TRAVEL_DATE);
+  const claims = await store.liveClaims("2259BNGHMP", TRAVEL_DATE);
   assert.deepEqual(
     claims.map((claim) => claim.state),
     ["BOOKED", "BOOKED"],
@@ -879,7 +879,7 @@ test("a four-seat confirm keeps every passenger on their own seat through the ba
 
   // The row the batched insert actually wrote, read back independently of
   // whatever `buildOrder` echoed onto the wire.
-  const booking = store.inspect(order.id as string);
+  const booking = await store.inspect(order.id as string);
   assert.ok(booking, "confirmed booking not found in the store");
   assert.deepEqual(
     booking!.seats
@@ -912,7 +912,7 @@ test("a four-seat confirm keeps every passenger on their own seat through the ba
 
   // The store side of the same batched insert: one booked claim per seat,
   // none dropped, none doubled, none carrying somebody else's identity.
-  const claims = store.liveClaims("2259BNGHMP", TRAVEL_DATE);
+  const claims = await store.liveClaims("2259BNGHMP", TRAVEL_DATE);
   assert.deepEqual(claims.map((claim) => claim.seatId).sort(), [...seatIds].sort());
   assert.ok(claims.every((claim) => claim.state === "BOOKED"));
 });
@@ -932,8 +932,11 @@ test("two confirms on one transaction produce one booking with one reference", a
   const third = await orders.confirm(request as never);
   assert.equal(orderOf(third).id, orderOf(first).id);
   assert.equal(
-    (store.handle.prepare("SELECT COUNT(*) AS n FROM bookings").get() as { n: number })
-      .n,
+    (
+      (await store.handle
+        .prepare("SELECT COUNT(*) AS n FROM bookings")
+        .get()) as { n: number }
+    ).n,
     1,
   );
 });
@@ -965,7 +968,7 @@ test("a confirm one second late is refused, even though the berth is still free"
     refusal.message,
     new RegExp(istIsoInstant(NOW + HOLD_TTL_SECONDS * 1000).replace(/\+/, "\\+")),
   );
-  assert.equal(store.liveClaims("2259BNGHMP", TRAVEL_DATE).length, 0);
+  assert.equal((await store.liveClaims("2259BNGHMP", TRAVEL_DATE)).length, 0);
 
   // And the rider re-selects the same berths, which usually succeeds at once.
   const again = await orders.select(
@@ -1011,10 +1014,10 @@ test("a booking reads back by order id and by the printed reference", async () =
     "BOOKING_REF",
     "NUMBER",
   )!;
-  const byId = orders.status(
+  const byId = await orders.status(
     reservedStatusRequest({ orderId: confirmed.id as string }) as never,
   );
-  const byReference = orders.status(
+  const byReference = await orders.status(
     reservedStatusRequest({ refId: reference }) as never,
   );
   assert.deepEqual(orderOf(byId), orderOf(byReference));
@@ -1058,7 +1061,7 @@ test("a manifest does not outlive its journey by more than the retention window"
 
   // Thirty-one days after the coach went.
   clock.at = Date.parse("2026-10-31T18:00:00.000Z");
-  const later = orders.status(
+  const later = await orders.status(
     reservedStatusRequest({ orderId: confirmed.id as string }) as never,
   );
   // The booking survives, because a rider needs to see that a journey
@@ -1073,7 +1076,7 @@ test("a manifest does not outlive its journey by more than the retention window"
  * ------------------------------------------------------------------ */
 
 test("a concession claim on a class with no published rate refuses the whole select", async () => {
-  const { orders } = harness();
+  const { orders } = await harness();
   const refusal = await refusalFrom(() =>
     orders.select(
       reservedOrderRequest("select", {

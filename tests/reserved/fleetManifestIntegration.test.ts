@@ -99,14 +99,14 @@ const PASSENGERS = [
  * behaviour on the simulator's side, and a real trap for a test that wants
  * to observe all three.
  */
-function harness(
+async function harness(
   clock: { at: number },
   fleetManifest?: InstanceType<typeof HttpFleetManifestPublisher> | InertFleetManifestPublisher,
   events: Record<string, unknown>[] = [],
 ) {
   let counter = 0;
   const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
-  const store = new ReservedStore(openReservedDatabase({ url: ":memory:", migrationRoot }), {
+  const store = new ReservedStore(await openReservedDatabase({ url: ":memory:", migrationRoot }), {
     idFactory,
   });
   const orders = new ReservedOrderService(
@@ -199,7 +199,7 @@ test(
         ttlSeconds: 3600,
       });
       const clock = { at: BPP_NOW };
-      const { orders, events } = harness(clock, publisher);
+      const { orders, events } = await harness(clock, publisher);
 
       /* 1. Confirm names both passengers and both seats. */
       await orders.select(
@@ -214,6 +214,12 @@ test(
       );
       const orderId = (confirmed.order as { id: string }).id;
 
+      // The confirm above did not wait for the push - see
+      // `ReservedOrderService.startManifestPush` - so a test that wants to
+      // read the manifest back has to wait for it explicitly. Reading without
+      // this would pass or fail on whether the loopback round trip happened
+      // to beat the assertion.
+      await orders.manifestPushesSettled();
       const afterConfirm = await readManifest(sim.url, SERVICE_ID, TRAVEL_DATE);
       assert.ok(afterConfirm, "expected a manifest after confirm");
       assert.equal(afterConfirm!.seatsBooked, 2);
@@ -245,6 +251,7 @@ test(
         }) as never,
       );
 
+      await orders.manifestPushesSettled();
       const afterPartialCancel = await readManifest(sim.url, SERVICE_ID, TRAVEL_DATE);
       assert.ok(afterPartialCancel, "a partial cancel must publish the remaining passenger, not clear the manifest");
       assert.equal(afterPartialCancel!.seatsBooked, 1);
@@ -268,6 +275,7 @@ test(
         }) as never,
       );
 
+      await orders.manifestPushesSettled();
       const afterWholeCancel = await readManifest(sim.url, SERVICE_ID, TRAVEL_DATE);
       assert.equal(
         afterWholeCancel,
@@ -344,7 +352,7 @@ test("this provider's own publisher is inert with no FLEET_MANIFEST_URL configur
     throw new Error("the inert publisher must never call fetch");
   }) as typeof fetch;
   try {
-    const { orders } = harness({ at: BPP_NOW }, new InertFleetManifestPublisher());
+    const { orders } = await harness({ at: BPP_NOW }, new InertFleetManifestPublisher());
     await orders.select(
       reservedOrderRequest("select", { itemId: ITEM, seatIds: ["L2B"] }) as never,
     );
@@ -393,7 +401,7 @@ test("a confirm still succeeds, and reports the failure, when the fleet simulato
     timeoutMs: 2_000,
     eventLogger: (fields) => events.push(fields),
   });
-  const { orders } = harness({ at: BPP_NOW }, publisher, events);
+  const { orders } = await harness({ at: BPP_NOW }, publisher, events);
   await orders.select(
     reservedOrderRequest("select", { itemId: ITEM, seatIds: ["L2B"] }) as never,
   );
@@ -406,9 +414,68 @@ test("a confirm still succeeds, and reports the failure, when the fleet simulato
   );
   // The sale went through regardless of the peer being unreachable.
   assert.equal((confirmed.order as { status: string }).status, "ACTIVE");
+  // And it went through before the push had even failed yet: the confirm does
+  // not wait for it, so the failure is only on the record once the push has
+  // been given the chance to settle.
+  assert.deepEqual(
+    events.filter((event) => event.action === "fleet_manifest_publish"),
+    [],
+  );
+  await orders.manifestPushesSettled();
   assert.equal(
     events.filter((event) => event.action === "fleet_manifest_publish" && event.outcome === "FAILED").length,
     1,
     "a publish failure must be reported, not silently dropped",
   );
+});
+
+test("a confirm answers without waiting for the fleet push, and the push still happens", async () => {
+  // The push used to be awaited inside confirm, with a five-second timeout
+  // and a fleet simulator that sleeps after half an hour on its Eco dyno: a
+  // rider's confirm inherited that dyno's cold start on top of the database
+  // round trips it had already paid for. Both halves are asserted here,
+  // because only asserting the first would let a change that never pushes at
+  // all pass.
+  let release: (() => void) | undefined;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let finished = 0;
+  const slowPublisher = {
+    async publish() {
+      await held;
+      finished += 1;
+    },
+    async clear() {
+      await held;
+      finished += 1;
+    },
+  };
+
+  const { orders } = await harness({ at: BPP_NOW }, slowPublisher as never);
+  await orders.select(
+    reservedOrderRequest("select", { itemId: ITEM, seatIds: ["L2B"] }) as never,
+  );
+  const started = Date.now();
+  const confirmed = await orders.confirm(
+    reservedOrderRequest("confirm", {
+      itemId: ITEM,
+      seatIds: ["L2B"],
+      manifest: [PASSENGERS[0]],
+    }) as never,
+  );
+  const elapsed = Date.now() - started;
+
+  // The booking is in the caller's hands while the push is still in flight:
+  // this publisher has not answered and will not until this test says so, and
+  // the confirm came back anyway rather than sitting on it.
+  assert.equal((confirmed.order as { status: string }).status, "ACTIVE");
+  assert.equal(finished, 0, "the push must still be outstanding");
+  assert.ok(elapsed < 1_000, `confirm answered in ${elapsed}ms`);
+
+  // And the push is real, not skipped: once the peer this test stands in for
+  // answers, it completes.
+  release!();
+  await orders.manifestPushesSettled();
+  assert.equal(finished, 1, "the push must still have happened");
 });

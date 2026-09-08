@@ -3,6 +3,8 @@ import type { Server } from "node:http";
 import { test } from "node:test";
 
 import { createApp } from "../../src/app.js";
+import { FixtureReservedSource } from "../../src/reserved/fixture.js";
+import type { ReservedServiceSource } from "../../src/reserved/types.js";
 import {
   reservedCancelRequest,
   reservedOrderRequest,
@@ -191,4 +193,86 @@ test("a sync refusal is answered inline too", async (t) => {
   const refusal = (await response.json()) as any;
   assert.equal(refusal.error.code, "SERVICE-NOT-FOUND");
   assert.equal(refusal.message.catalog, undefined);
+});
+
+/* ------------------------------------------------------------------ *
+ * The deadline
+ * ------------------------------------------------------------------ */
+
+/**
+ * The fixture source with one method that never answers.
+ *
+ * A stuck source stands in for the real stuck thing - a database on another
+ * continent behind a synchronous client - because what the deadline has to
+ * survive is the same either way: an awaited step of `resolveCallback` that
+ * does not come back.
+ */
+function neverAnsweringSource(inner: ReservedServiceSource): ReservedServiceSource {
+  return {
+    operator: inner.operator,
+    services: () => new Promise(() => undefined),
+    service: (serviceId) => inner.service(serviceId),
+    seatMap: (seatMapId) => inner.seatMap(seatMapId),
+    fareTable: (fareTableId) => inner.fareTable(fareTableId),
+  };
+}
+
+test("a sync action that overruns its deadline answers, rather than letting the router close the connection", async (t) => {
+  // Before this, the only bound on a sync answer was whatever router sat in
+  // front - on Heroku, 30 seconds ending in an H12 and a closed connection
+  // with no body at all. A client got nothing: no code, no sentence, no way
+  // to tell a slow provider from a dead one. The deadline is short here for
+  // the test's sake and 8 seconds in a real deployment; what is being
+  // asserted is that something comes back at all, and that it says which
+  // kind of failure it was.
+  const fixtures = await FixtureReservedSource.load(
+    new URL("../../fixtures", import.meta.url).pathname,
+    "ksrtc",
+  );
+  const app = await createApp(
+    { ...syncConfig(), reservedSyncTimeoutMs: 150 },
+    {},
+    () => undefined,
+    { source: neverAnsweringSource(fixtures) },
+  );
+  t.after(() => app.close());
+  const port = await listen(app);
+
+  const started = Date.now();
+  const response = await post(
+    port,
+    "/ksrtc/search",
+    reservedSearchRequest({ travelDate: TRAVEL_DATE }),
+  );
+  const elapsed = Date.now() - started;
+
+  assert.equal(response.status, 504);
+  const body = (await response.json()) as any;
+  assert.equal(body.context.action, "on_search");
+  assert.equal(body.context.bpp_id, "ksrtc.provider.example.test");
+  assert.equal(body.error.code, "INTERNAL-ERROR");
+  // The sentence names the deadline it actually applied, so an operator
+  // reading a log line knows which dial produced it.
+  assert.match(body.error.message, /150ms/);
+  // And no order is invented alongside it: the action produced none.
+  assert.deepEqual(body.message, {});
+  // Answered on its own clock rather than on the router's.
+  assert.ok(elapsed < 5_000, `answered in ${elapsed}ms`);
+});
+
+test("the deadline lets a healthy action through untouched", async (t) => {
+  // A bound that fired on ordinary traffic would be worse than no bound. The
+  // default is 8 seconds against a search that costs single-digit
+  // milliseconds here.
+  const app = await createApp(syncConfig());
+  t.after(() => app.close());
+  const port = await listen(app);
+
+  const response = await post(
+    port,
+    "/ksrtc/search",
+    reservedSearchRequest({ travelDate: TRAVEL_DATE }),
+  );
+  assert.equal(response.status, 200);
+  assert.equal(((await response.json()) as any).context.action, "on_search");
 });

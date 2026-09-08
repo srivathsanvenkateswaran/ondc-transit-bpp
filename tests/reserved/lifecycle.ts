@@ -88,7 +88,7 @@ export async function runGoldenLifecycle(): Promise<GoldenPayloads> {
   let counter = 0;
   const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
   const store = new ReservedStore(
-    openReservedDatabase({ url: ":memory:", migrationRoot }),
+    await openReservedDatabase({ url: ":memory:", migrationRoot }),
     { idFactory },
   );
   const orders = new ReservedOrderService(
@@ -173,7 +173,7 @@ export async function runGoldenLifecycle(): Promise<GoldenPayloads> {
   const orderId = (confirmed.order as { id: string }).id;
   payloads.on_status = envelope(
     "status",
-    orders.status(reservedStatusRequest({ orderId }) as never),
+    await orders.status(reservedStatusRequest({ orderId }) as never),
   );
   const quoted = await orders.cancel(
     reservedCancelRequest({
@@ -232,7 +232,7 @@ export async function runGoldenLifecycle(): Promise<GoldenPayloads> {
   // was answered in and `on_status` has to be able to publish it too.
   payloads.on_status_cancelled = envelope(
     "status",
-    orders.status(reservedStatusRequest({ orderId }) as never),
+    await orders.status(reservedStatusRequest({ orderId }) as never),
   );
 
   store.close();

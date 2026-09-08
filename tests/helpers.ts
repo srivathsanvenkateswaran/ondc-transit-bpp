@@ -34,6 +34,7 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
       manifestRetentionDays: 30,
     },
     callbackTimeoutMs: 1000,
+    reservedSyncTimeoutMs: 8000,
     contextTtl: "PT30S",
     orderInspectionToken: "test-inspection-token",
     operators: {

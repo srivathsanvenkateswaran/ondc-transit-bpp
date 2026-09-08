@@ -103,7 +103,7 @@ test(
 
       let counter = 0;
       const idFactory = () => `${String((counter += 1)).padStart(8, "0")}-fixed`;
-      const store = new ReservedStore(openReservedDatabase({ url: ":memory:", migrationRoot }), {
+      const store = new ReservedStore(await openReservedDatabase({ url: ":memory:", migrationRoot }), {
         idFactory,
       });
       const events: Record<string, unknown>[] = [];
@@ -150,6 +150,11 @@ test(
       );
       assert.ok((confirmed.order as { id: string }).id, "confirm did not return an order id");
 
+      // The confirm above did not wait for the push - see
+      // `ReservedOrderService.startManifestPush` - so reading the manifest
+      // back means waiting for it explicitly rather than on whether the
+      // loopback round trip happened to beat this assertion.
+      await orders.manifestPushesSettled();
       const manifest = await readManifest(sim.url, SERVICE_ID, TRAVEL_DATE);
       assert.ok(manifest, "expected a manifest after confirm");
       assert.equal(manifest!.seatsBooked, 2);

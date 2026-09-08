@@ -236,11 +236,21 @@ applied at boot inside a transaction, and the process refuses to start against
 a database written by a newer release. **Mount a volume at `/app/data` in any
 deployment that means it.**
 
-The design document names libSQL. What ships is the SQLite that comes with the
-runtime, which is the same engine reached without adding a dependency, and the
-swap is one module if a deployment ever needs a server rather than a file. It
-is also why the image is now Node 24: the runtime's own SQLite is available
-without a flag only from 23.4 onward.
+The design document names libSQL, and libSQL is what ships: the `libsql`
+package, which opens the same local file and also opens a hosted Turso
+database over `libsql:` or `https:` with the same driver and the same call
+shape. This paragraph used to say the runtime's own `node:sqlite` shipped
+instead; that stopped being true once this process moved onto a filesystem
+that does not survive a restart, because `node:sqlite` only ever opens a local
+file and the database had nowhere durable to be.
+
+Specifically `libsql/promise`, the asynchronous entry point, rather than the
+synchronous one. A synchronous native call cannot yield to Node's event loop
+for its whole duration, so against a database on another continent every
+statement froze the entire provider - BMTC and BMRCL searches included - for
+that round trip. What that removed is written up in the header of
+`src/reserved/db.ts`, along with what replaced it: one transaction at a time
+per connection, and the unique index that was always the real guarantee.
 
 ### The corporation nobody sees
 
@@ -712,7 +722,9 @@ public URLs, or ports.
 | `RESERVED_SOURCE_RESPONSE_SCHEMA` | `/app/schemas/reserved-source-response.json` | Reserved dataset response JSON Schema |
 | `RESERVED_DB_URL` | `file:/app/data/reserved.db` | Where held and booked seats live; `:memory:` runs without a file |
 | `RESERVED_MIGRATION_ROOT` | `/app/migrations/reserved` | Numbered, forward-only migrations applied at boot |
-| `RESERVED_MANIFEST_RETENTION_DAYS` | `30` | Days after departure that passenger names are kept |
+| `RESERVED_MANIFEST_RETENTION_DAYS` | `30` | Days after departure that passenger names are kept, give or take the sweep interval below |
+| `RESERVED_SYNC_RESPONSES` | `false` | Answer each reserved action on its own connection instead of acking and posting a callback |
+| `RESERVED_SYNC_TIMEOUT_MS` | `8000` | How long such an answer may take before this provider stops waiting and returns a domain error; `0` for no deadline |
 | `RESERVATION_CLOSE_MINUTES` | `45` | Reservations close this long before departure |
 | `RESERVATION_HORIZON_DAYS` | `30` | How far ahead a date can be booked |
 | `RESERVATION_HOLD_TTL_SECONDS` | `600` | How long a seat hold lasts, absolutely |

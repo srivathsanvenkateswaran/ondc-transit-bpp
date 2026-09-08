@@ -9,17 +9,22 @@ import type { Corporation, ServiceProvenance } from "./types.js";
  *
  * Two things about this module are load bearing rather than stylistic.
  *
- * **It is synchronous.** The acquire path performs its sweep, its availability
- * check and its insert inside one transaction with nothing awaited between
- * them, so no interleaving is possible within a process. That is not care
- * taken by the author: with a synchronous driver there is no `await` to write,
- * so the discipline cannot be broken by a later edit that adds one.
+ * **The acquire path cannot be interleaved with another write.** Its sweep,
+ * its availability check and its insert run inside one transaction, and
+ * `withTransaction` in `db.ts` lets only one transaction at a time run on a
+ * given database handle. This used to be free: the driver was synchronous, so
+ * there was no `await` to write and no interleaving was expressible. It is
+ * not free any more - a synchronous driver freezes the whole process for
+ * every round trip it makes, which is what a database on another continent
+ * turned into an outage - so the discipline is now explicit, in one place,
+ * with the reasoning written down beside it.
  *
  * **The unique index, not the check, is the guarantee.** Every availability
  * check here exists to produce an error message a client can act on. If a
  * check and the index ever disagree, the index is right, and the constraint
  * violation is translated into the same refusal the check would have produced
- * rather than surfaced as an internal error.
+ * rather than surfaced as an internal error. This is the half that holds
+ * across processes as well as within one, and it is unchanged.
  */
 
 export interface ReservedIdentity {
@@ -116,8 +121,33 @@ export interface RefundQuoteRecord {
   expiresAt: number;
 }
 
+/**
+ * How long a manifest retention sweep's result is treated as still good
+ * enough to skip the next one.
+ *
+ * The sweep is lazy by design - this process has no scheduler, so whoever
+ * next touches the provider pays for it - but "lazy" was implemented as "on
+ * literally every search and every status call", which against a remote
+ * database is an unconditional round trip taxed onto a rider's request to
+ * ask a question whose answer is nearly always "nothing is due yet".
+ *
+ * A minute is chosen because it is far below any window the retention
+ * guarantee is stated in (`MANIFEST_RETENTION_DAYS`, days) and far above the
+ * rate at which requests arrive, so it removes the round trip from almost
+ * every request while moving the guarantee by an amount nothing can observe.
+ * See `sweepManifests` for what that costs.
+ */
+export const MANIFEST_SWEEP_INTERVAL_MS = 60_000;
+
 interface StoreOptions {
   idFactory?: () => string;
+  /**
+   * Overrides {@link MANIFEST_SWEEP_INTERVAL_MS}. Only a test sets it; there
+   * is no configuration knob for this above, because the interval is not a
+   * deployment's decision - it is bounded on one side by the retention window
+   * and on the other by nothing at all.
+   */
+  manifestSweepIntervalMs?: number;
 }
 
 interface LockRow {
@@ -155,12 +185,25 @@ function isUniqueViolation(error: unknown): boolean {
 
 export class ReservedStore {
   private readonly idFactory: () => string;
+  private readonly manifestSweepIntervalMs: number;
+  /**
+   * When this process last actually ran the retention sweep, on the clock the
+   * caller passes in rather than on `Date.now()`, so a test's injected clock
+   * governs the throttle the same way it governs everything else here.
+   *
+   * In-process and deliberately not persisted: it is a note about what this
+   * process has already spent a round trip on, not a fact about the database.
+   * A restart, or a second dyno, simply sweeps once more than it had to.
+   */
+  private lastManifestSweepAt: number | undefined;
 
   constructor(
     private readonly database: ReservedDatabase,
     options: StoreOptions = {},
   ) {
     this.idFactory = options.idFactory ?? randomUUID;
+    this.manifestSweepIntervalMs =
+      options.manifestSweepIntervalMs ?? MANIFEST_SWEEP_INTERVAL_MS;
   }
 
   close(): void {
@@ -196,7 +239,7 @@ export class ReservedStore {
    * same connection does not trigger this (also reproduced directly) - only
    * a write with no transaction around it at all does.
    */
-  withTransaction<T>(fn: () => T): T {
+  withTransaction<T>(fn: () => T | Promise<T>): Promise<T> {
     return withTransaction(this.database, fn);
   }
 
@@ -222,8 +265,12 @@ export class ReservedStore {
    * hold past its expiry is functionally released the instant anybody asks,
    * and that is the only moment the answer matters.
    */
-  sweepExpiredHolds(serviceId: string, travelDate: string, nowMs: number): number {
-    const result = this.database
+  async sweepExpiredHolds(
+    serviceId: string,
+    travelDate: string,
+    nowMs: number,
+  ): Promise<number> {
+    const result = await this.database
       .prepare(
         `UPDATE seat_locks SET state = 'EXPIRED'
          WHERE state = 'HELD' AND service_id = ? AND travel_date = ?
@@ -247,14 +294,14 @@ export class ReservedStore {
    * value); an empty list is a no-op, since `service_id IN ()` is not valid
    * SQL and there is nothing to sweep for zero services.
    */
-  sweepExpiredHoldsForServices(
+  async sweepExpiredHoldsForServices(
     serviceIds: string[],
     travelDate: string,
     nowMs: number,
-  ): number {
+  ): Promise<number> {
     if (serviceIds.length === 0) return 0;
     const placeholders = serviceIds.map(() => "?").join(",");
-    const result = this.database
+    const result = await this.database
       .prepare(
         `UPDATE seat_locks SET state = 'EXPIRED'
          WHERE state = 'HELD' AND service_id IN (${placeholders}) AND travel_date = ?
@@ -268,8 +315,11 @@ export class ReservedStore {
    * Holds
    * ---------------------------------------------------------------- */
 
-  liveClaims(serviceId: string, travelDate: string): LiveSeatClaim[] {
-    const rows = this.database
+  async liveClaims(
+    serviceId: string,
+    travelDate: string,
+  ): Promise<LiveSeatClaim[]> {
+    const rows = (await this.database
       .prepare(
         `SELECT l.seat_id, l.state, l.hold_id, l.booking_id, l.bap_id, l.bap_uri,
                 l.transaction_id, s.gender AS gender
@@ -280,7 +330,7 @@ export class ReservedStore {
            AND l.state IN ('HELD','BOOKED')
          ORDER BY l.seat_id`,
       )
-      .all(serviceId, travelDate) as Array<
+      .all(serviceId, travelDate)) as Array<
       Pick<
         LockRow,
         | "seat_id"
@@ -315,16 +365,16 @@ export class ReservedStore {
    * service has no live claim, so a caller never has to distinguish "no
    * claims" from "never asked".
    */
-  liveClaimsForServices(
+  async liveClaimsForServices(
     serviceIds: string[],
     travelDate: string,
-  ): Map<string, LiveSeatClaim[]> {
+  ): Promise<Map<string, LiveSeatClaim[]>> {
     const byService = new Map<string, LiveSeatClaim[]>(
       serviceIds.map((serviceId) => [serviceId, []]),
     );
     if (serviceIds.length === 0) return byService;
     const placeholders = serviceIds.map(() => "?").join(",");
-    const rows = this.database
+    const rows = (await this.database
       .prepare(
         `SELECT l.service_id, l.seat_id, l.state, l.hold_id, l.booking_id, l.bap_id,
                 l.bap_uri, l.transaction_id, s.gender AS gender
@@ -335,7 +385,7 @@ export class ReservedStore {
            AND l.state IN ('HELD','BOOKED')
          ORDER BY l.service_id, l.seat_id`,
       )
-      .all(...serviceIds, travelDate) as Array<
+      .all(...serviceIds, travelDate)) as Array<
       Pick<
         LockRow,
         | "service_id"
@@ -368,15 +418,15 @@ export class ReservedStore {
     return byService;
   }
 
-  findLatestHold(
+  async findLatestHold(
     operator: string,
     identity: ReservedIdentity,
-  ): HoldRecord | undefined {
+  ): Promise<HoldRecord | undefined> {
     // Ordered by insertion rather than by id, because two selects from one
     // transaction inside the same millisecond would otherwise be separated by
     // whatever the id generator happened to produce, and the newest hold is
     // the one that counts.
-    const rows = this.database
+    const rows = (await this.database
       .prepare(
         `SELECT * FROM seat_locks
          WHERE operator = ? AND bap_id = ? AND bap_uri = ? AND transaction_id = ?
@@ -388,17 +438,17 @@ export class ReservedStore {
         identity.bapId,
         identity.bapUri,
         identity.transactionId,
-      ) as unknown as LockRow[];
+      )) as unknown as LockRow[];
     const newest = rows[0];
     if (!newest) return undefined;
     const holdRows = rows.filter((row) => row.hold_id === newest.hold_id);
     return this.holdFromRows(holdRows);
   }
 
-  findHoldById(holdId: string): HoldRecord | undefined {
-    const rows = this.database
+  async findHoldById(holdId: string): Promise<HoldRecord | undefined> {
+    const rows = (await this.database
       .prepare("SELECT * FROM seat_locks WHERE hold_id = ? ORDER BY seat_id")
-      .all(holdId) as unknown as LockRow[];
+      .all(holdId)) as unknown as LockRow[];
     return rows.length > 0 ? this.holdFromRows(rows) : undefined;
   }
 
@@ -434,7 +484,7 @@ export class ReservedStore {
     return hold.expiresAt <= nowMs ? "EXPIRED" : "LIVE";
   }
 
-  acquireHold(params: {
+  async acquireHold(params: {
     operator: string;
     identity: ReservedIdentity;
     serviceId: string;
@@ -448,13 +498,20 @@ export class ReservedStore {
      * the request path sets it.
      */
     skipAvailabilityCheckForTest?: boolean;
-  }): HoldRecord {
+  }): Promise<HoldRecord> {
     const seatIds = [...new Set(params.seatIds)].sort();
     try {
-      return withTransaction(this.database, (): HoldRecord => {
-        this.sweepExpiredHolds(params.serviceId, params.travelDate, params.nowMs);
+      return await withTransaction(this.database, async (): Promise<HoldRecord> => {
+        await this.sweepExpiredHolds(
+          params.serviceId,
+          params.travelDate,
+          params.nowMs,
+        );
 
-        const existing = this.findLatestHold(params.operator, params.identity);
+        const existing = await this.findLatestHold(
+          params.operator,
+          params.identity,
+        );
         if (
           existing &&
           this.holdStatus(existing, params.nowMs) === "LIVE" &&
@@ -468,7 +525,7 @@ export class ReservedStore {
           return existing;
         }
         if (existing && this.holdStatus(existing, params.nowMs) === "LIVE") {
-          this.database
+          await this.database
             .prepare(
               "UPDATE seat_locks SET state = 'RELEASED' WHERE hold_id = ? AND state = 'HELD'",
             )
@@ -476,7 +533,9 @@ export class ReservedStore {
         }
 
         if (!params.skipAvailabilityCheckForTest) {
-          const taken = this.liveClaims(params.serviceId, params.travelDate)
+          const taken = (
+            await this.liveClaims(params.serviceId, params.travelDate)
+          )
             .filter((claim) => seatIds.includes(claim.seatId))
             .map((claim) => claim.seatId);
           if (taken.length > 0) {
@@ -491,7 +550,7 @@ export class ReservedStore {
         }
 
         const holdId = this.shortId("HLD-KSRTC");
-        if (this.findHoldById(holdId)) {
+        if (await this.findHoldById(holdId)) {
           // A hold id that already exists is an id generator that repeated
           // itself, not a contended seat. Saying so out loud matters: the insert
           // below would collide on the primary key and the collision would be
@@ -519,7 +578,7 @@ export class ReservedStore {
              expires_at, created_at)
            VALUES ${tuples}`,
         );
-        insert.run(
+        await insert.run(
           ...seatIds.flatMap((seatId, index) => [
             `${holdId}-${index + 1}`,
             params.serviceId,
@@ -566,11 +625,11 @@ export class ReservedStore {
    * Bookings
    * ---------------------------------------------------------------- */
 
-  findBookingByTransaction(
+  async findBookingByTransaction(
     operator: string,
     identity: ReservedIdentity,
-  ): BookingRecord | undefined {
-    const row = this.database
+  ): Promise<BookingRecord | undefined> {
+    const row = (await this.database
       .prepare(
         `SELECT * FROM bookings
          WHERE operator = ? AND bap_id = ? AND bap_uri = ? AND transaction_id = ?`,
@@ -580,8 +639,8 @@ export class ReservedStore {
         identity.bapId,
         identity.bapUri,
         identity.transactionId,
-      ) as Record<string, unknown> | undefined;
-    return row ? this.bookingFromRow(row) : undefined;
+      )) as Record<string, unknown> | undefined;
+    return row ? await this.bookingFromRow(row) : undefined;
   }
 
   /**
@@ -589,12 +648,12 @@ export class ReservedStore {
    * bought it. A rider holding only a printed reference is the lookup path
    * `ref_id` exists for; one buyer app reading another's booking is not.
    */
-  findBooking(
+  async findBooking(
     operator: string,
     identity: Pick<ReservedIdentity, "bapId" | "bapUri">,
     idOrReference: string,
-  ): BookingRecord | undefined {
-    const row = this.database
+  ): Promise<BookingRecord | undefined> {
+    const row = (await this.database
       .prepare(
         `SELECT * FROM bookings
          WHERE operator = ? AND bap_id = ? AND bap_uri = ?
@@ -606,8 +665,8 @@ export class ReservedStore {
         identity.bapUri,
         idOrReference,
         idOrReference,
-      ) as Record<string, unknown> | undefined;
-    return row ? this.bookingFromRow(row) : undefined;
+      )) as Record<string, unknown> | undefined;
+    return row ? await this.bookingFromRow(row) : undefined;
   }
 
   /**
@@ -617,18 +676,20 @@ export class ReservedStore {
    * booking, and it exists for the bearer-gated operator inspection endpoint
    * rather than for any protocol action. Nothing on a request path may call it.
    */
-  inspect(idOrReference: string): BookingRecord | undefined {
-    const row = this.database
+  async inspect(idOrReference: string): Promise<BookingRecord | undefined> {
+    const row = (await this.database
       .prepare("SELECT * FROM bookings WHERE id = ? OR reference = ?")
-      .get(idOrReference, idOrReference) as Record<string, unknown> | undefined;
-    return row ? this.bookingFromRow(row) : undefined;
+      .get(idOrReference, idOrReference)) as Record<string, unknown> | undefined;
+    return row ? await this.bookingFromRow(row) : undefined;
   }
 
-  private bookingFromRow(row: Record<string, unknown>): BookingRecord {
+  private async bookingFromRow(
+    row: Record<string, unknown>,
+  ): Promise<BookingRecord> {
     const id = row.id as string;
-    const seats = this.database
+    const seats = (await this.database
       .prepare("SELECT * FROM booking_seats WHERE booking_id = ? ORDER BY seat_id")
-      .all(id) as Array<Record<string, unknown>>;
+      .all(id)) as Array<Record<string, unknown>>;
     return {
       id,
       reference: row.reference as string,
@@ -681,7 +742,7 @@ export class ReservedStore {
    * reinserted, because they are the same claim on the same resource at a
    * higher strength and the index that stops a double sale is the same index.
    */
-  confirmBooking(params: {
+  async confirmBooking(params: {
     holdId: string;
     operator: string;
     identity: ReservedIdentity;
@@ -703,8 +764,11 @@ export class ReservedStore {
     settlementCorporation: Corporation | null;
     settlementBasis: ServiceProvenance;
     nowMs: number;
-    order: (ids: { orderId: string; reference: string }) => Record<string, unknown>;
-  }): BookingRecord {
+    order: (ids: {
+      orderId: string;
+      reference: string;
+    }) => Record<string, unknown> | Promise<Record<string, unknown>>;
+  }): Promise<BookingRecord> {
     const suffix = this.idFactory()
       .replace(/[^A-Za-z0-9]/g, "")
       .toUpperCase()
@@ -712,7 +776,12 @@ export class ReservedStore {
     const operatorTag = params.operator.toUpperCase();
     const orderId = `SPECIMEN-RSV-${operatorTag}-${suffix}`;
     const reference = `SPECIMEN-${operatorTag}-${suffix}`;
-    const order = params.order({ orderId, reference });
+    // Built before the transaction opens, not inside it. It reads the seat
+    // map and this departure's live claims, and a transaction is the one
+    // place on this handle where nothing else's work can run - holding it
+    // open across a read that does not need to be in it would make every
+    // other request wait for this order's own rendering.
+    const order = await params.order({ orderId, reference });
     const basePaise = params.seats.reduce((sum, seat) => sum + seat.basePaise, 0);
     const feePaise = params.seats.reduce(
       (sum, seat) => sum + seat.reservationFeePaise,
@@ -721,8 +790,8 @@ export class ReservedStore {
     const tollPaise = params.seats.reduce((sum, seat) => sum + seat.tollPaise, 0);
 
     try {
-      withTransaction(this.database, () => {
-        const moved = this.database
+      await withTransaction(this.database, async () => {
+        const moved = await this.database
           .prepare(
             `UPDATE seat_locks
              SET state = 'BOOKED', booking_id = ?, expires_at = NULL
@@ -738,7 +807,7 @@ export class ReservedStore {
             `Hold ${params.holdId} was no longer live at the moment of confirm`,
           );
         }
-        this.database
+        await this.database
           .prepare(
             `INSERT INTO bookings (id, reference, operator, bap_id, bap_uri,
                transaction_id, service_id, travel_date, service_class,
@@ -784,7 +853,7 @@ export class ReservedStore {
                base_paise, reservation_fee_paise, toll_paise, status)
              VALUES ${tuples}`,
           );
-          insertSeats.run(
+          await insertSeats.run(
             ...params.seats.flatMap((seat) => [
               orderId,
               seat.seatId,
@@ -803,7 +872,7 @@ export class ReservedStore {
         // Two confirms on one transaction, from two processes or from one that
         // bypassed the in-process check. The index caught it, and the honest
         // answer is the booking that already exists rather than an error.
-        const existing = this.findBookingByTransaction(
+        const existing = await this.findBookingByTransaction(
           params.operator,
           params.identity,
         );
@@ -811,15 +880,15 @@ export class ReservedStore {
       }
       throw error;
     }
-    return this.findBooking(params.operator, params.identity, orderId)!;
+    return (await this.findBooking(params.operator, params.identity, orderId))!;
   }
 
   /* ---------------------------------------------------------------- *
    * Cancellation
    * ---------------------------------------------------------------- */
 
-  saveRefundQuote(quote: RefundQuoteRecord): RefundQuoteRecord {
-    this.database
+  async saveRefundQuote(quote: RefundQuoteRecord): Promise<RefundQuoteRecord> {
+    await this.database
       .prepare(
         `INSERT INTO refund_quotes (id, booking_id, seat_ids, slab_code,
            slab_percent, refund_paise, quoted_at, expires_at)
@@ -842,10 +911,10 @@ export class ReservedStore {
     return this.shortId("RFQ-KSRTC");
   }
 
-  findRefundQuote(id: string): RefundQuoteRecord | undefined {
-    const row = this.database
+  async findRefundQuote(id: string): Promise<RefundQuoteRecord | undefined> {
+    const row = (await this.database
       .prepare("SELECT * FROM refund_quotes WHERE id = ?")
-      .get(id) as Record<string, unknown> | undefined;
+      .get(id)) as Record<string, unknown> | undefined;
     if (!row) return undefined;
     return {
       id: row.id as string,
@@ -867,14 +936,14 @@ export class ReservedStore {
    * return a smaller refund as time passed, for a cancellation that already
    * completed, which makes a retry look like a penalty.
    */
-  applyCancellation(params: {
+  async applyCancellation(params: {
     bookingId: string;
     seatIds: string[];
     slabCode: string;
     refundBySeat: Map<string, number>;
     nowMs: number;
-  }): BookingRecord {
-    withTransaction(this.database, () => {
+  }): Promise<BookingRecord> {
+    await withTransaction(this.database, async () => {
       const cancelSeat = this.database.prepare(
         `UPDATE booking_seats
          SET status = 'CANCELLED', cancelled_at = ?, refund_paise = ?, slab_code = ?
@@ -884,8 +953,8 @@ export class ReservedStore {
         `UPDATE seat_locks SET state = 'RELEASED'
          WHERE booking_id = ? AND seat_id = ? AND state = 'BOOKED'`,
       );
-      params.seatIds.forEach((seatId) => {
-        cancelSeat.run(
+      for (const seatId of params.seatIds) {
+        await cancelSeat.run(
           params.nowMs,
           params.refundBySeat.get(seatId) ?? 0,
           params.slabCode,
@@ -894,28 +963,28 @@ export class ReservedStore {
         );
         // The seat goes back into inventory the moment it is cancelled, which
         // is what makes the adjacency rule re-evaluate for whoever remains.
-        releaseLock.run(params.bookingId, seatId);
-      });
+        await releaseLock.run(params.bookingId, seatId);
+      }
 
       const remaining = Number(
         (
-          this.database
+          (await this.database
             .prepare(
               "SELECT COUNT(*) AS remaining FROM booking_seats WHERE booking_id = ? AND status = 'CONFIRMED'",
             )
-            .get(params.bookingId) as { remaining: number }
+            .get(params.bookingId)) as { remaining: number }
         ).remaining,
       );
       const refundTotal = Number(
         (
-          this.database
+          (await this.database
             .prepare(
               "SELECT COALESCE(SUM(refund_paise), 0) AS total FROM booking_seats WHERE booking_id = ?",
             )
-            .get(params.bookingId) as { total: number }
+            .get(params.bookingId)) as { total: number }
         ).total,
       );
-      this.database
+      await this.database
         .prepare(
           `UPDATE bookings
            SET status = ?, cancelled_at = ?, refund_paise = ?, slab_code = ?
@@ -931,15 +1000,18 @@ export class ReservedStore {
           params.bookingId,
         );
     });
-    const row = this.database
+    const row = (await this.database
       .prepare("SELECT * FROM bookings WHERE id = ?")
-      .get(params.bookingId) as Record<string, unknown>;
+      .get(params.bookingId)) as Record<string, unknown>;
     return this.bookingFromRow(row);
   }
 
   /** Replaces the stored order, which a cancellation rewrites. */
-  updateStoredOrder(bookingId: string, order: Record<string, unknown>): void {
-    this.database
+  async updateStoredOrder(
+    bookingId: string,
+    order: Record<string, unknown>,
+  ): Promise<void> {
+    await this.database
       .prepare("UPDATE bookings SET order_json = ? WHERE id = ?")
       .run(JSON.stringify(order), bookingId);
   }
@@ -957,33 +1029,68 @@ export class ReservedStore {
    * gone. The stored order carries the manifest too, so the sweep rewrites it
    * rather than only nulling the columns: leaving the names in one copy while
    * deleting them from the other would be a retention policy that retains.
+   *
+   * **Throttled, so the retention window may lag by up to
+   * {@link MANIFEST_SWEEP_INTERVAL_MS}.** Called on every search and every
+   * status check, this ran its scan unconditionally, so every one of those
+   * requests paid a remote round trip to be told nothing was due. At most one
+   * sweep per interval per process is the trade, and the guarantee it moves
+   * is "names are gone within `retentionDays`" to "within `retentionDays`
+   * plus a minute". Nothing measures retention that finely: the window is
+   * stated in days, the names being cleared a minute late is invisible from
+   * outside, and the alternative was a round trip on a rider's request to
+   * discover that the answer had not changed since the last one.
+   *
+   * A throttled call returns 0 - as does a call that swept and found nothing
+   * - because both are the same statement about the database: no manifest was
+   * cleared just now.
    */
-  sweepManifests(nowMs: number, retentionDays: number): number {
+  async sweepManifests(nowMs: number, retentionDays: number): Promise<number> {
+    const sinceLastSweep =
+      this.lastManifestSweepAt === undefined
+        ? undefined
+        : nowMs - this.lastManifestSweepAt;
+    // A clock that went backwards sweeps rather than skips. That is a test's
+    // injected clock rewinding, and refusing to sweep because "now" is before
+    // the last sweep would be the throttle deciding a question about time it
+    // has no standing to decide.
+    if (
+      sinceLastSweep !== undefined &&
+      sinceLastSweep >= 0 &&
+      sinceLastSweep < this.manifestSweepIntervalMs
+    ) {
+      return 0;
+    }
+    // Recorded before the statements run, not after: a sweep that throws is a
+    // database this process cannot reach, and the request that carried it has
+    // already failed for that reason. Retrying the same broken scan on every
+    // request behind it would only spend the outage louder.
+    this.lastManifestSweepAt = nowMs;
     const cutoff = nowMs - retentionDays * 24 * 60 * 60 * 1000;
-    const stale = this.database
+    const stale = (await this.database
       .prepare(
         `SELECT DISTINCT b.id AS id, b.order_json AS order_json
          FROM bookings b JOIN booking_seats s ON s.booking_id = b.id
          WHERE b.departure_at < ? AND s.name IS NOT NULL`,
       )
-      .all(cutoff) as Array<{ id: string; order_json: string }>;
+      .all(cutoff)) as Array<{ id: string; order_json: string }>;
     if (stale.length === 0) return 0;
-    withTransaction(this.database, () => {
+    await withTransaction(this.database, async () => {
       const clearSeats = this.database.prepare(
         "UPDATE booking_seats SET name = NULL, age = NULL, gender = NULL WHERE booking_id = ?",
       );
       const rewrite = this.database.prepare(
         "UPDATE bookings SET order_json = ? WHERE id = ?",
       );
-      stale.forEach((booking) => {
-        clearSeats.run(booking.id);
-        rewrite.run(
+      for (const booking of stale) {
+        await clearSeats.run(booking.id);
+        await rewrite.run(
           JSON.stringify(
             withoutManifestNames(JSON.parse(booking.order_json) as unknown),
           ),
           booking.id,
         );
-      });
+      }
     });
     return stale.length;
   }
@@ -1015,14 +1122,16 @@ export class ReservedStore {
    * result is the complement of the refund, seat by seat, which is what the
    * same document says the retained amount is everywhere else.
    */
-  unattributedBookings(): Array<{
-    serviceId: string;
-    travelDate: string;
-    bookings: number;
-    owedPaise: number;
-  }> {
+  async unattributedBookings(): Promise<
+    Array<{
+      serviceId: string;
+      travelDate: string;
+      bookings: number;
+      owedPaise: number;
+    }>
+  > {
     return (
-      this.database
+      (await this.database
         .prepare(
           `SELECT b.service_id AS service_id, b.travel_date AS travel_date,
                   COUNT(*) AS bookings,
@@ -1037,7 +1146,7 @@ export class ReservedStore {
            GROUP BY b.service_id, b.travel_date
            ORDER BY b.service_id, b.travel_date`,
         )
-        .all() as Array<Record<string, unknown>>
+        .all()) as Array<Record<string, unknown>>
     ).map((row) => ({
       serviceId: row.service_id as string,
       travelDate: row.travel_date as string,

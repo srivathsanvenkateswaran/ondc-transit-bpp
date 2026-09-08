@@ -1,6 +1,7 @@
 import { join } from "node:path";
 
 import { isRemoteDatabaseUrl } from "./reserved/db.js";
+import { RESERVED_SYNC_TIMEOUT_MS } from "./reserved/handler.js";
 import type { ReservedOperatorKey } from "./reserved/types.js";
 import type { OperatorKey } from "./sources/types.js";
 
@@ -133,6 +134,21 @@ export interface AppConfig {
    * contract unchanged.
    */
   reservedSyncResponses?: boolean;
+  /**
+   * How long a synchronous answer may take before this provider stops waiting
+   * for its own database and returns a domain error instead. Milliseconds;
+   * `RESERVED_SYNC_TIMEOUT_MS`, defaulting to
+   * `RESERVED_SYNC_TIMEOUT_MS_DEFAULT`. Zero means no deadline, which is what
+   * this provider did before it had one and is never what a deployment behind
+   * a router with a timeout of its own wants.
+   *
+   * It exists because `reservedSyncResponses` puts the whole chain of
+   * database round trips on the open connection with nothing bounding it, so
+   * the only backstop was the router in front - which ends the connection
+   * with no body at all, leaving a client nothing to read and nothing to
+   * retry against.
+   */
+  reservedSyncTimeoutMs: number;
   reservation: ReservationConfig;
   /**
    * Where a confirm or a cancellation pushes the seat count that changed -
@@ -257,6 +273,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const reservedEnabled = (env.RESERVED_ENABLED?.trim() || "false") === "true";
   const reservedSyncResponses =
     (env.RESERVED_SYNC_RESPONSES?.trim() || "false") === "true";
+  const reservedSyncTimeoutMs = optionalIntegerInRange(
+    env,
+    "RESERVED_SYNC_TIMEOUT_MS",
+    // Zero is the documented way to ask for no deadline at all.
+    0,
+    2_147_483_647,
+    RESERVED_SYNC_TIMEOUT_MS,
+  );
   const reservedSource = env.RESERVED_SOURCE?.trim() || "fixture";
   if (reservedSource !== "fixture" && reservedSource !== "http") {
     throw new Error(`Unsupported RESERVED_SOURCE ${reservedSource}`);
@@ -333,6 +357,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     },
     reservedEnabled,
     reservedSyncResponses,
+    reservedSyncTimeoutMs,
     reservedSchemaRoot:
       env.RESERVED_SCHEMA_ROOT ??
       join(process.cwd(), "schemas", "transit_local_intercity", "0.1.0"),

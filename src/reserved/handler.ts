@@ -58,6 +58,65 @@ export interface ReservedRuntimeConfig {
   callbackDelayMs: number;
 }
 
+/**
+ * How long a synchronous answer is allowed to take before this provider stops
+ * waiting for its own database and says so.
+ *
+ * With `syncResponses` on, the whole chain of database round trips for an
+ * action sits directly on the open connection, and nothing in this process
+ * bounded it. The only backstop was whatever router or proxy is in front -
+ * on the deployment this ships to, Heroku's, that is a hard 30 seconds ending
+ * in an H12 and a closed connection with no body at all. That is the worst
+ * answer available: the client learns nothing, cannot tell a slow provider
+ * from a dead one, and has no code to branch on.
+ *
+ * Eight seconds is chosen to sit well inside any such router clock while
+ * staying far above what a healthy request costs (single-digit milliseconds
+ * locally, low seconds even with a database on another continent), so it
+ * fires on a provider that is genuinely stuck rather than on one that is
+ * merely far away.
+ */
+export const RESERVED_SYNC_TIMEOUT_MS = 8_000;
+
+/** Thrown by {@link withDeadline}, and nothing else throws it. */
+class ReservedDeadlineExceeded extends Error {
+  constructor(readonly milliseconds: number) {
+    super(`Provider did not finish within ${milliseconds}ms`);
+    this.name = "ReservedDeadlineExceeded";
+  }
+}
+
+/**
+ * `work`, or a `ReservedDeadlineExceeded` once `milliseconds` have passed.
+ *
+ * The abandoned work is not cancelled - there is nothing in a libSQL
+ * statement to cancel - it is only stopped being waited on. Its eventual
+ * settlement, success or failure, is already handled here, so a rejection
+ * that arrives after the deadline is absorbed rather than surfacing as an
+ * unhandled rejection that would take the process down.
+ */
+function withDeadline<T>(work: Promise<T>, milliseconds: number): Promise<T> {
+  if (!Number.isFinite(milliseconds) || milliseconds <= 0) return work;
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new ReservedDeadlineExceeded(milliseconds)),
+      milliseconds,
+    );
+    // The deadline must never be the reason a process stays alive.
+    timer.unref?.();
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
 export interface ReservedHandlerDependencies {
   orders: ReservedOrderService;
   validator: ReservedValidator;
@@ -73,6 +132,14 @@ export interface ReservedHandlerDependencies {
    * for why this exists and when it is safe to turn on.
    */
   syncResponses?: boolean;
+  /**
+   * The deadline `answerActionSync` answers by, in milliseconds. Defaults to
+   * {@link RESERVED_SYNC_TIMEOUT_MS}; zero or a negative number means no
+   * deadline at all, which is what this handler did before it had one.
+   * Ignored entirely when `syncResponses` is off, because the ack has already
+   * gone out on that path and there is no connection left to answer late on.
+   */
+  syncTimeoutMs?: number;
 }
 
 interface RequestContext {
@@ -402,26 +469,42 @@ export function createReservedHandler(dependencies: ReservedHandlerDependencies)
     respond: (status: number, payload: unknown) => void,
   ): Promise<void> {
     const onAction = `on_${action}` as ReservedCallbackAction;
+    const deadlineMs = dependencies.syncTimeoutMs ?? RESERVED_SYNC_TIMEOUT_MS;
     try {
-      const resolved = await resolveCallback(action, request);
+      const resolved = await withDeadline(
+        resolveCallback(action, request),
+        deadlineMs,
+      );
       logResolution(request, resolved.onAction, resolved.callback);
       respond(200, resolved.callback);
     } catch (error) {
+      const timedOut = error instanceof ReservedDeadlineExceeded;
       dependencies.logEvent({
         transaction_id: request.context.transaction_id,
         message_id: request.context.message_id,
         action: onAction,
         subscriber_id: dependencies.runtime.subscriberId,
         operator: "ksrtc",
-        outcome: "ERROR",
+        outcome: timedOut ? "TIMEOUT" : "ERROR",
+        ...(timedOut ? { timeout_ms: deadlineMs } : {}),
         error: error instanceof Error ? error.message : String(error),
       });
-      respond(500, {
+      // A timeout answers 504 rather than 500 and says which it was, because
+      // the two are different things for whoever is holding the connection:
+      // a 500 is this provider having decided something, and a 504 is it
+      // having run out of the time it gave itself. Both carry the same
+      // domain error object, so a client that only reads the envelope is
+      // unaffected, and both are an answer - which is the point. Left
+      // unbounded, this path returned nothing at all and the router closed
+      // the connection at 30 seconds with no body for a client to branch on.
+      respond(timedOut ? 504 : 500, {
         context: callbackContext(request, onAction),
         message: {},
         error: {
           code: RESERVED_INTERNAL_ERROR,
-          message: "Provider could not process the request",
+          message: timedOut
+            ? `Provider did not finish this request within ${deadlineMs}ms and stopped waiting; the request may be retried`
+            : "Provider could not process the request",
         },
       });
     }

@@ -31,7 +31,7 @@ const ITEM = `RSV-${SERVICE_ID}-${TRAVEL_DATE}-AIRAVAT_CLUB_CLASS`;
 
 async function makeOrders() {
   const source = await FixtureReservedSource.load(fixtureRoot, "ksrtc");
-  const store = new ReservedStore(openReservedDatabase({ url: ":memory:", migrationRoot }));
+  const store = new ReservedStore(await openReservedDatabase({ url: ":memory:", migrationRoot }));
   const orders = new ReservedOrderService(
     "ksrtc",
     source,
@@ -115,7 +115,9 @@ test("Bengaluru-Mangaluru: select, init, confirm, status and cancel all succeed"
     const orderId = (confirmed.order as { id: string }).id;
     assert.ok(orderId, "confirm did not return an order id");
 
-    const status = orders.status(reservedStatusRequest({ orderId }) as never);
+    const status = await orders.status(
+      reservedStatusRequest({ orderId }) as never,
+    );
     assert.equal((status.order as { id: string }).id, orderId);
 
     const quoted = await orders.cancel(

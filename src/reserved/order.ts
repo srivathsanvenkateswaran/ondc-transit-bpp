@@ -172,6 +172,14 @@ export class ReservedOrderService {
   private readonly idFactory: () => string;
   private readonly fleetManifest: FleetManifestPublisher;
   private readonly eventLogger: FleetManifestEventLogger;
+  /**
+   * The manifest pushes this service has started and not yet seen settle.
+   *
+   * Held only so `manifestPushesSettled` has something to wait on. Nothing
+   * about a booking depends on this set being empty, and a process that exits
+   * with entries still in it has lost nothing a rider can see.
+   */
+  private readonly inFlightManifestPushes = new Set<Promise<void>>();
   private readonly confirmations = new Map<string, Promise<BookingRecord>>();
 
   constructor(
@@ -199,8 +207,11 @@ export class ReservedOrderService {
     const nowMs = this.now().getTime();
     // The retention sweep rides the same lazy discipline as the hold sweep:
     // whoever next touches this provider pays for it, because a process with
-    // no scheduler has no other moment to do it in.
-    this.store.sweepManifests(
+    // no scheduler has no other moment to do it in. It is throttled inside
+    // the store, so most searches do not actually pay a round trip for it and
+    // the window it clears names within may lag by that interval - see
+    // `ReservedStore.sweepManifests`.
+    await this.store.sweepManifests(
       nowMs,
       this.options.reservation.manifestRetentionDays,
     );
@@ -258,10 +269,10 @@ export class ReservedOrderService {
     // just expired is never counted as live.
     const serviceIds = eligible.map((entry) => entry.service.serviceId);
     // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
-    this.store.withTransaction(() =>
+    await this.store.withTransaction(() =>
       this.store.sweepExpiredHoldsForServices(serviceIds, query.travelDate, nowMs),
     );
-    const claimsByService = this.store.liveClaimsForServices(
+    const claimsByService = await this.store.liveClaimsForServices(
       serviceIds,
       query.travelDate,
     );
@@ -336,7 +347,7 @@ export class ReservedOrderService {
     if (seatIds.length > 0) {
       this.assertSeatsOnMap(resolved.seatMap, seatIds);
       const nowMs = this.now().getTime();
-      const snapshot = this.snapshot(
+      const snapshot = await this.snapshot(
         resolved.service,
         resolved.seatMap,
         resolved.travelDate,
@@ -360,7 +371,7 @@ export class ReservedOrderService {
         );
       }
       try {
-        hold = this.store.acquireHold({
+        hold = await this.store.acquireHold({
           operator: this.operatorKey,
           identity,
           serviceId: resolved.service.serviceId,
@@ -374,7 +385,7 @@ export class ReservedOrderService {
           // The seat map goes back with the refusal, already reflecting the
           // winner's hold, so the loser can re-render without a second round
           // trip.
-          const after = this.snapshot(
+          const after = await this.snapshot(
             resolved.service,
             resolved.seatMap,
             resolved.travelDate,
@@ -390,7 +401,7 @@ export class ReservedOrderService {
       }
     }
 
-    const order = this.buildOrder({
+    const order = await this.buildOrder({
       resolved,
       pair,
       farePaise: cell.farePaise,
@@ -415,14 +426,18 @@ export class ReservedOrderService {
     this.assertPaymentStatus(input.payments, "NOT_PAID");
     const identity = this.identity(request.context);
     const resolved = await this.resolveSelection(request.context, input);
-    const { hold, records } = this.liveHoldAndManifest(resolved, identity, input);
+    const { hold, records } = await this.liveHoldAndManifest(
+      resolved,
+      identity,
+      input,
+    );
     const pair = boardingPairFromStops(
       resolved.service,
       input.fulfillments?.[0]?.stops ?? [],
     );
     const cell = fareCell(resolved.fareTable, pair, resolved.service.serviceClass);
 
-    const order = this.buildOrder({
+    const order = await this.buildOrder({
       resolved,
       pair,
       farePaise: cell.farePaise,
@@ -454,7 +469,7 @@ export class ReservedOrderService {
 
     // Idempotent on the transaction, which a Beckn transaction id is already
     // defined to be constant for across the whole life of one order.
-    const existing = this.store.findBookingByTransaction(
+    const existing = await this.store.findBookingByTransaction(
       this.operatorKey,
       identity,
     );
@@ -480,7 +495,11 @@ export class ReservedOrderService {
     identity: ReservedIdentity,
   ): Promise<BookingRecord> {
     const resolved = await this.resolveSelection(context, input);
-    const { hold, records } = this.liveHoldAndManifest(resolved, identity, input);
+    const { hold, records } = await this.liveHoldAndManifest(
+      resolved,
+      identity,
+      input,
+    );
     const pair = boardingPairFromStops(
       resolved.service,
       input.fulfillments?.[0]?.stops ?? [],
@@ -495,7 +514,7 @@ export class ReservedOrderService {
     // reach back into a transaction that already closed.
     const attributed = resolved.service.operatingCorporationBasis === "confirmed";
 
-    const booking = this.store.confirmBooking({
+    const booking = await this.store.confirmBooking({
       holdId: hold.holdId,
       operator: this.operatorKey,
       identity,
@@ -543,7 +562,14 @@ export class ReservedOrderService {
           createdAt: nowMs,
         }),
     });
-    await this.publishManifestFor(resolved.service.serviceId, resolved.travelDate);
+    // Started, not awaited. The sale is already committed in this provider's
+    // own store by the line above; whether a fleet simulator on another dyno
+    // hears about it is not a condition of it, which the publisher has always
+    // agreed with - it resolves rather than rejects on every transport
+    // failure it can have. What awaiting it did buy was the rider's confirm
+    // waiting on that dyno's cold start, up to FLEET_MANIFEST_TIMEOUT_MS of
+    // it, chained onto database round trips they were already waiting on.
+    this.startManifestPush(resolved.service.serviceId, resolved.travelDate);
     return booking;
   }
 
@@ -551,7 +577,7 @@ export class ReservedOrderService {
    * status
    * ---------------------------------------------------------------- */
 
-  status(request: ReservedRequest): Record<string, unknown> {
+  async status(request: ReservedRequest): Promise<Record<string, unknown>> {
     this.assertBppAddress(request.context);
     const message = request.message as { order_id?: string; ref_id?: string };
     const reference = message.order_id ?? message.ref_id;
@@ -561,15 +587,16 @@ export class ReservedOrderService {
         "A status request names an order id or a booking reference",
       );
     }
-    const booking = this.findBookingOrRefuse(request.context, reference);
+    const booking = await this.findBookingOrRefuse(request.context, reference);
     // The manifest sweep runs on whoever next reads, in the same lazy shape as
-    // the hold sweep. A booking whose coach went a month ago comes back
-    // without the names it carried.
-    this.store.sweepManifests(
+    // the hold sweep, and under the same throttle: a booking whose coach went
+    // a month ago comes back without the names it carried, give or take the
+    // sweep interval - see `ReservedStore.sweepManifests`.
+    await this.store.sweepManifests(
       this.now().getTime(),
       this.options.reservation.manifestRetentionDays,
     );
-    const fresh = this.findBookingOrRefuse(request.context, reference);
+    const fresh = await this.findBookingOrRefuse(request.context, reference);
     return {
       order: fresh.order,
       ...(fresh.refundPaise === null
@@ -589,7 +616,10 @@ export class ReservedOrderService {
       descriptor: { code: string };
       tags?: Array<Record<string, unknown>>;
     };
-    const booking = this.findBookingOrRefuse(request.context, message.order_id);
+    const booking = await this.findBookingOrRefuse(
+      request.context,
+      message.order_id,
+    );
     const named = this.seatIdsFrom(message.tags);
     const confirmedSeats = booking.seats.filter(
       (seat) => seat.status === "CONFIRMED",
@@ -615,10 +645,10 @@ export class ReservedOrderService {
     return this.confirmCancel(booking, targetSeats, message.tags);
   }
 
-  private softCancel(
+  private async softCancel(
     booking: BookingRecord,
     seats: BookingRecord["seats"],
-  ): Record<string, unknown> {
+  ): Promise<Record<string, unknown>> {
     const live = seats.filter((seat) => seat.status === "CONFIRMED");
     if (live.length === 0) {
       // Nothing left to quote. The stored figure is the honest answer, and
@@ -629,7 +659,7 @@ export class ReservedOrderService {
     const nowMs = this.now().getTime();
     const refund = computeRefund(live, booking.departureAt, nowMs);
     // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
-    const quote = this.store.withTransaction(() =>
+    const quote = await this.store.withTransaction(() =>
       this.store.saveRefundQuote({
         id: this.store.newRefundQuoteId(),
         bookingId: booking.id,
@@ -672,7 +702,7 @@ export class ReservedOrderService {
     }
     const nowMs = this.now().getTime();
     const quoteId = this.tagValue(tags, "REFUND_SLAB", "REFUND_QUOTE_ID");
-    const quote = quoteId ? this.store.findRefundQuote(quoteId) : undefined;
+    const quote = quoteId ? await this.store.findRefundQuote(quoteId) : undefined;
     const wanted = live.map((seat) => seat.seatId).sort();
     if (
       !quote ||
@@ -699,7 +729,7 @@ export class ReservedOrderService {
       // one number and receive another. So the commitment is refused and the
       // real figure goes back with it.
       // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
-      const replacement = this.store.withTransaction(() =>
+      const replacement = await this.store.withTransaction(() =>
         this.store.saveRefundQuote({
           id: this.store.newRefundQuoteId(),
           bookingId: booking.id,
@@ -728,7 +758,7 @@ export class ReservedOrderService {
       );
     }
 
-    const updated = this.store.applyCancellation({
+    const updated = await this.store.applyCancellation({
       bookingId: booking.id,
       seatIds: wanted,
       slabCode: refund.slab.code,
@@ -737,8 +767,13 @@ export class ReservedOrderService {
     });
     const rewritten = this.cancelledOrder(updated);
     // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
-    this.store.withTransaction(() => this.store.updateStoredOrder(updated.id, rewritten));
-    await this.publishManifestFor(booking.serviceId, booking.travelDate);
+    await this.store.withTransaction(() =>
+      this.store.updateStoredOrder(updated.id, rewritten),
+    );
+    // Started, not awaited - the same reasoning as confirm's, and the same
+    // guarantee: the cancellation is committed above, and the push is a
+    // courtesy to a peer rather than part of it.
+    this.startManifestPush(booking.serviceId, booking.travelDate);
     return {
       order: rewritten,
       refund: this.refundPayload(refund),
@@ -921,7 +956,7 @@ export class ReservedOrderService {
    * Shared work
    * ---------------------------------------------------------------- */
 
-  private buildOrder(input: {
+  private async buildOrder(input: {
     resolved: Resolved;
     pair: BoardingPair;
     farePaise: number;
@@ -937,9 +972,9 @@ export class ReservedOrderService {
     id?: string;
     status?: string;
     createdAt?: number;
-  }): Record<string, unknown> {
+  }): Promise<Record<string, unknown>> {
     const { resolved } = input;
-    const snapshot = this.snapshot(
+    const snapshot = await this.snapshot(
       resolved.service,
       resolved.seatMap,
       resolved.travelDate,
@@ -1099,21 +1134,27 @@ export class ReservedOrderService {
    * hold, this rule would need a compensating answer and would not be this
    * rule.
    */
-  private liveHoldAndManifest(
+  private async liveHoldAndManifest(
     resolved: Resolved,
     identity: ReservedIdentity,
     input: OrderInput,
-  ): { hold: HoldRecord; records: ManifestRecord[] } {
+  ): Promise<{ hold: HoldRecord; records: ManifestRecord[] }> {
     const nowMs = this.now().getTime();
+    // The one sweep of this (service, date) that init and confirm pay for.
+    // It has to happen here rather than further down, because the refusal
+    // path returns before anything below runs and a lapsed hold has to be
+    // off the coach by then: a confirm refused with HOLD-EXPIRED releases
+    // the berths it was holding, and whoever asks next must see them free.
+    //
     // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
-    this.store.withTransaction(() =>
+    await this.store.withTransaction(() =>
       this.store.sweepExpiredHolds(
         resolved.service.serviceId,
         resolved.travelDate,
         nowMs,
       ),
     );
-    const hold = this.store.findLatestHold(this.operatorKey, identity);
+    const hold = await this.store.findLatestHold(this.operatorKey, identity);
     if (!hold) {
       throw new ReservedLifecycleError(
         "HOLD-REQUIRED",
@@ -1154,10 +1195,23 @@ export class ReservedOrderService {
     // Re-checked here rather than at select, because the hold taken at select
     // named seats only and the manifest is the first point at which this
     // provider learns which gender is going in which seat.
-    const snapshot = this.snapshot(
+    //
+    // Read through `snapshotFromClaims` rather than `snapshot`, because
+    // `snapshot` opens a transaction and sweeps this same (service, date)
+    // before it reads, and the sweep above already did exactly that,
+    // microseconds earlier. The second sweep could never find a hold the
+    // first one left behind, so it was three round trips - BEGIN, UPDATE,
+    // COMMIT - for no effect on every init and every confirm. What is left
+    // is the read the gender check actually needs, against a table this
+    // function has already swept.
+    const snapshot = this.snapshotFromClaims(
       resolved.service,
       resolved.seatMap,
       resolved.travelDate,
+      await this.store.liveClaims(
+        resolved.service.serviceId,
+        resolved.travelDate,
+      ),
       identity,
     );
     assertGenderLocks(
@@ -1175,21 +1229,21 @@ export class ReservedOrderService {
     return { hold, records };
   }
 
-  private snapshot(
+  private async snapshot(
     service: ReservedService,
     seatMap: SeatMap,
     travelDate: string,
     viewer?: ReservedIdentity,
-  ): Snapshot {
+  ): Promise<Snapshot> {
     // In its own transaction, not a bare write - see `ReservedStore.withTransaction`.
-    this.store.withTransaction(() =>
+    await this.store.withTransaction(() =>
       this.store.sweepExpiredHolds(
         service.serviceId,
         travelDate,
         this.now().getTime(),
       ),
     );
-    const claims = this.store.liveClaims(service.serviceId, travelDate);
+    const claims = await this.store.liveClaims(service.serviceId, travelDate);
     return this.snapshotFromClaims(service, seatMap, travelDate, claims, viewer);
   }
 
@@ -1201,7 +1255,9 @@ export class ReservedOrderService {
    * holds and reading live claims for every service in the search in one
    * round trip each - the sweep and the read are the two database calls
    * `snapshot` makes per service, and neither belongs inside a loop that
-   * would otherwise pay for them once per service.
+   * would otherwise pay for them once per service. `liveHoldAndManifest`
+   * calls it for the other reason a caller might: it has already swept this
+   * (service, date) itself, and only the read is left to do.
    */
   private snapshotFromClaims(
     service: ReservedService,
@@ -1329,6 +1385,62 @@ export class ReservedOrderService {
    * map, for the same reason - a sale that already committed in this
    * provider's own store must not be undone by a peer that will not answer.
    */
+  /**
+   * Start a manifest push and stop caring when it finishes.
+   *
+   * The push runs after its transaction has committed, and its failure has
+   * never been fatal - `publishManifestFor` catches everything and
+   * `HttpFleetManifestPublisher` catches its own transport failures before
+   * that. So the only thing awaiting it ever bought a rider was the wait
+   * itself: `FLEET_MANIFEST_TIMEOUT_MS` is five seconds, the fleet simulator
+   * is an Eco dyno that sleeps after half an hour, and a confirm was
+   * inheriting that dyno's cold start on top of the database round trips it
+   * had already paid for.
+   *
+   * Two pushes for the same departure in quick succession can now arrive out
+   * of the order they were started in. That is already the case the receiving
+   * end is built for: a manifest carries an `asOf`, taken at the moment each
+   * push starts and therefore still in the order the events happened, and
+   * `docs/intercity-coaches.md` §7.4 has the simulator discard a push whose
+   * `asOf` is not strictly newer than the one it holds.
+   */
+  private startManifestPush(serviceId: string, travelDate: string): void {
+    const push = this.publishManifestFor(serviceId, travelDate).catch(
+      (error: unknown) => {
+        // `publishManifestFor` catches its own failures, so reaching here
+        // means something threw on the way out of the catch itself. It is
+        // still logged rather than left to become an unhandled rejection
+        // that would take the process down over a courtesy call.
+        this.eventLogger({
+          action: "fleet_manifest_publish",
+          outcome: "FAILED",
+          serviceId,
+          travelDate,
+          reason: error instanceof Error ? error.message : String(error),
+        });
+      },
+    );
+    this.inFlightManifestPushes.add(push);
+    void push.then(() => {
+      this.inFlightManifestPushes.delete(push);
+    });
+  }
+
+  /**
+   * Resolves once every manifest push started so far has settled.
+   *
+   * Nothing on a request path calls this, and nothing on a request path
+   * should: the whole point of the change above is that a booking does not
+   * wait for a peer. It exists so a test can assert that the push happened
+   * without asserting that the response waited for it, which are two
+   * different claims and only one of them is true.
+   */
+  async manifestPushesSettled(): Promise<void> {
+    while (this.inFlightManifestPushes.size > 0) {
+      await Promise.all([...this.inFlightManifestPushes]);
+    }
+  }
+
   private async publishManifestFor(
     serviceId: string,
     travelDate: string,
@@ -1338,7 +1450,7 @@ export class ReservedOrderService {
       const service = await this.source.service(serviceId);
       if (!service) return;
       const seatMap = await this.seatMapFor(service);
-      const claims = this.store.liveClaims(serviceId, travelDate);
+      const claims = await this.store.liveClaims(serviceId, travelDate);
       if (claims.length === 0) {
         await this.fleetManifest.clear({ serviceId, travelDate });
         return;
@@ -1421,11 +1533,11 @@ export class ReservedOrderService {
     return entry?.value as string | undefined;
   }
 
-  private findBookingOrRefuse(
+  private async findBookingOrRefuse(
     context: ReservedContext,
     reference: string,
-  ): BookingRecord {
-    const booking = this.store.findBooking(
+  ): Promise<BookingRecord> {
+    const booking = await this.store.findBooking(
       this.operatorKey,
       { bapId: context.bap_id, bapUri: context.bap_uri },
       reference,
