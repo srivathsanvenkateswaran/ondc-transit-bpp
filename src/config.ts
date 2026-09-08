@@ -164,6 +164,33 @@ export interface AppConfig {
   fleetManifestToken?: string;
   /** The `ttlSeconds` sent on every push. See `FLEET_MANIFEST_TTL_SECONDS`. */
   fleetManifestTtlSeconds: number;
+  /**
+   * The Karnataka Sarige pass path: off by default, the same discipline
+   * `reservedEnabled` above holds. A buyer app that dials this provider for
+   * a pass over ONDC's TRV11 network reaches only `bmtc` and `bmrcl` - this
+   * network's own gateway is not registry-configured for a third BPP, and
+   * making it so is out of scope here (see `src/trv11/passHandler.ts`'s own
+   * docblock). So `ksrtc` sells the two Karnataka Sarige pass items
+   * (`src/trv11/pass.ts`'s `PASS_CATALOGUE`) on its own route,
+   * `/ksrtc/pass/*`, answered synchronously on the same connection rather
+   * than over the network - a buyer app dials this provider directly for it,
+   * the same shape `reservedSyncResponses` already uses and for the same
+   * reason. Nothing here is constructed while the flag is false: no
+   * `ksrtcPassOperator` is read, and a deployment that has not set one boots
+   * exactly as it did before this feature existed.
+   */
+  ksrtcPassEnabled: boolean;
+  /**
+   * `ksrtc`'s own subscriber identity for the pass path above. Deliberately
+   * the same environment variable prefix (`KSRTC_*`) `reservedOperators.ksrtc`
+   * already reads when `RESERVED_ENABLED` is on - one physical operator,
+   * Karnataka State Road Transport Corporation, selling two different
+   * products (a reserved coach seat, a Sarige pass) over two different
+   * routes in this same process. A deployment that already has
+   * `RESERVED_ENABLED=true` and the `KSRTC_*` variables set needs no new
+   * configuration to also turn `KSRTC_PASS_ENABLED` on.
+   */
+  ksrtcPassOperator?: OperatorRuntimeConfig;
 }
 
 function required(env: NodeJS.ProcessEnv, name: string): string {
@@ -270,6 +297,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   if (journeySourceUrl) {
     parseHttpUrl(journeySourceUrl, "JOURNEY_SOURCE_URL");
   }
+  const ksrtcPassEnabled =
+    (env.KSRTC_PASS_ENABLED?.trim() || "false") === "true";
   const reservedEnabled = (env.RESERVED_ENABLED?.trim() || "false") === "true";
   const reservedSyncResponses =
     (env.RESERVED_SYNC_RESPONSES?.trim() || "false") === "true";
@@ -376,6 +405,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
             ksrtc: operatorRuntimeConfig(env, "ksrtc", "KSRTC"),
           },
         }
+      : {}),
+    ksrtcPassEnabled,
+    ...(ksrtcPassEnabled
+      ? { ksrtcPassOperator: operatorRuntimeConfig(env, "ksrtc", "KSRTC") }
       : {}),
     reservation: {
       closeMinutes: optionalIntegerInRange(

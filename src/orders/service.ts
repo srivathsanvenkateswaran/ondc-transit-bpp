@@ -12,7 +12,7 @@ import type {
   Trv11Context,
 } from "../protocol/types.js";
 import type {
-  OperatorKey,
+  PassOperatorKey,
   OperatorProfile,
   TransitOffer,
 } from "../sources/types.js";
@@ -142,7 +142,7 @@ function specimenOrderTags() {
 
 function paymentWithId(
   payment: Payment,
-  operator: OperatorKey,
+  operator: PassOperatorKey,
   transactionId: string,
   index: number,
 ): Record<string, unknown> {
@@ -162,7 +162,7 @@ export class TransitOrderService {
   private readonly confirmations = new Map<string, Promise<ProtocolOrder>>();
 
   constructor(
-    private readonly operatorKey: OperatorKey,
+    private readonly operatorKey: PassOperatorKey,
     private readonly profile: OperatorProfile,
     private readonly runtime: OperatorRuntimeConfig,
     private readonly store: InMemoryOrderStore,

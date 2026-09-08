@@ -10,6 +10,23 @@ export interface JourneySource {
 export type OperatorKey = "bmtc" | "bmrcl";
 
 /**
+ * `OperatorKey`, plus `ksrtc` - Karnataka Sarige's own identity, kept apart
+ * from `OperatorKey` deliberately. `ksrtc` sells no journey offers over this
+ * domain (no `JourneySource`, no `/ksrtc/search|select|.../` route wired into
+ * the `Record<OperatorKey, ...>` tables `app.ts` builds for bmtc and bmrcl):
+ * `src/trv11/passHandler.ts` sells it passes only, over its own route, direct
+ * from Tatak rather than through the ONDC network - see that file's own
+ * docblock for why. Everywhere that threads an operator identity through
+ * pass selling and order settlement (`src/trv11/pass.ts`,
+ * `src/orders/service.ts`, `src/orders/store.ts`) takes this wider type
+ * instead of `OperatorKey`, so ksrtc can mint and settle a pass without
+ * `AppConfig.operators`, `sources` or the bmtc/bmrcl route table growing a
+ * third, unconditional member that would break a deployment which has not
+ * configured one.
+ */
+export type PassOperatorKey = OperatorKey | "ksrtc";
+
+/**
  * The class of service a ride is on, and the axis a pass scopes to. A pass
  * covers a tier by the class-based rule in `src/trv11/pass.ts`: a higher
  * class is honoured on a lower service, never the reverse.

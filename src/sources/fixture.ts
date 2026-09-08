@@ -4,7 +4,7 @@ import { join } from "node:path";
 import type {
   FixtureFile,
   JourneySource,
-  OperatorKey,
+  PassOperatorKey,
   RouteStop,
   SearchQuery,
   TransitOffer,
@@ -79,7 +79,7 @@ export class FixtureJourneySource implements JourneySource {
 
   static async load(
     fixtureRoot: string,
-    operator: OperatorKey,
+    operator: PassOperatorKey,
     nearestStopRadiusKm = 3,
   ): Promise<FixtureJourneySource> {
     const path = join(fixtureRoot, operator, "offers.json");

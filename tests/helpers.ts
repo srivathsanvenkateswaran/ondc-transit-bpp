@@ -53,9 +53,28 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
         callbackDelayMs: 0,
       },
     },
+    ksrtcPassEnabled: false,
     ...overrides,
   };
 }
+
+/**
+ * The identity a test turns `ksrtcPassEnabled` on with - `testConfig({
+ * ksrtcPassEnabled: true, ksrtcPassOperator: KSRTC_PASS_TEST_OPERATOR })`.
+ *
+ * Cast the same way `operatorRuntimeConfig` in `src/config.ts` casts its own
+ * `ksrtc` build: `OperatorRuntimeConfig.key` is typed `OperatorKey`
+ * (`"bmtc" | "bmrcl"`) because that is what every *other* reader of the
+ * field is, and `ksrtc` is neither - the field itself is not read anywhere
+ * in this repository, only carried.
+ */
+export const KSRTC_PASS_TEST_OPERATOR = {
+  key: "ksrtc",
+  subscriberId: "ksrtc.provider.example.test",
+  subscriberUri: "https://ksrtc-network.example.test",
+  callbackUrl: "https://ksrtc-client.example.test/on_search",
+  callbackDelayMs: 0,
+} as unknown as import("../src/config.js").OperatorRuntimeConfig;
 
 export function searchRequest(category: "BUS" | "METRO") {
   return {

@@ -1,0 +1,13 @@
+{
+  "sourcing": {
+    "note": "This provider sells no Karnataka Sarige journey offers over the TRV11 domain - only the two pass items in src/trv11/pass.ts's PASS_CATALOGUE. The empty offers array is not a placeholder for a dataset that has not arrived; it is the honest shape of a source with nothing to sell but a pass. The operator profile's name matches fixtures/ksrtc/operator.json, the reserved intercity domain's own citation for the same real corporation. The service window is reused from BMTC's own (05:00-23:00) rather than sourced for Sarige specifically - it feeds only the cosmetic time.range on a pass search response, never a ride offer.",
+    "label": "S"
+  },
+  "operator": {
+    "id": "P1",
+    "name": "Karnataka State Road Transport Corporation",
+    "vehicleCategory": "BUS",
+    "serviceWindow": { "startHHMM": "05:00", "endHHMM": "23:00" }
+  },
+  "offers": []
+}

@@ -509,7 +509,97 @@ inventing a field name for "this provider checked and it passed" would be
 exactly the unilateral naming the contract warns against. If a client wants an
 explicit receipt, the field name needs agreeing on both sides first.
 
-## 8. Open questions for the owner
+## 8. Karnataka Sarige: a tenth and eleventh item, sold off the network
+
+Tatak's own `KSRTC_SARIGE_PRODUCTS` in its `src/city/bengaluru.ts` modelled a
+Karnataka Sarige day and monthly pass before any BPP sold one — see that
+constant's own comment for why. This provider is that seller.
+
+**The scope, and why it is not a `ServiceTier`.** `sources/types.ts`'s
+`ServiceTier` — `ORDINARY_BUS | AC_BUS | METRO` — is the axis a *ride* is
+sold on, and this provider offers no Karnataka Sarige ride to sell one on:
+`OperatorKey` stays `bmtc | bmrcl`, exactly as before. `trv11/pass.ts`'s
+`PassScope` — the axis a *pass* is sold on — is `ServiceTier` plus
+`KSRTC_SARIGE`, and a wider `PassOperatorKey` (`OperatorKey | "ksrtc"`)
+threads the third identity through the pass catalogue, the order service and
+the credential store without touching a single `Record<OperatorKey, …>` table
+built for bmtc and bmrcl. `passCovers("KSRTC_SARIGE", …)` returns `false`
+unconditionally, for the honest reason this provider settles no Sarige ride
+against any pass, ever — not the operator-scoping rule Tatak's own
+`busOperators` field applies (this provider's `ServiceTier` carries no
+operator axis to hang that rule on), but the correct answer given what this
+provider actually offers.
+
+**The price: two catalogue items, day and monthly, no weekly.**
+
+| id | operator | window | scope | duration | price |
+|---|---|---|---|---|---|
+| `PASS-DAY-KSRTC_SARIGE` | KSRTC | day | Karnataka Sarige only | `P1D` | ₹237.50 |
+| `PASS-MONTHLY-KSRTC_SARIGE` | KSRTC | monthly | Karnataka Sarige only | `P1M` | ₹4275.00 |
+
+Priced off `CEILING_SINGLE_FARE_PAISE.KSRTC_SARIGE = 9,500` paise — not a
+synthetic ceiling like the other three. It is Rs.95, Udupi to Mangaluru,
+61.2 road km, the fare Tatak's own `coastal-spine.ts` cites as one it
+actually paid (sourcing label `P`), on the same class this pass covers.
+Tatak's own comment on `SARIGE_CEILING_SINGLE_FARE_PAISE` explains the choice
+of anchor at length: a commuter-scale fare, not a trunk-route one, because a
+monthly pass priced off a 350km Bengaluru–Mangaluru fare would be a pass for
+a rider this product does not plausibly serve. `PASS_CEILING_MULTIPLE` (2.5×)
+and `MONTHLY_DAY_MULTIPLE` (18×) apply unchanged — the same derivation the
+other three scopes use, extended rather than replaced. No weekly product
+exists because the owner asked for day and monthly only.
+
+**This price is not a second number invented for the same product.** It is
+mechanically equal, to the paisa, to Tatak's own `SARIGE_CEILING_SINGLE_FARE_PAISE`-derived
+figure in `src/city/bengaluru.ts`, because both sides apply the identical
+multiple to the identical sourced anchor. Tatak's own `reconcilePassFare`
+checks this agreement on every sale rather than assuming it holds.
+
+**Concessions: applied unchanged, the same 25%/10% senior and 33% student
+rates every other scope carries.** There is no Sarige-specific concession
+source to invent a second, differently-uncertain rate from, and Tatak's own
+`concessionPercentFor` in `bengaluru.ts` already made the identical call for
+the identical reason — see that function's comment. `SENIOR_DISCOUNT_PERCENT`
+and `STUDENT_DISCOUNT_PERCENT` are keyed by window, not by scope, so
+Karnataka Sarige inherits them by construction rather than by a special case.
+
+**One real correction fell out of adding this scope.** `9,500 × 2.5 = 23,750`
+paise is not a multiple of 100, so `PASS-DAY-KSRTC_SARIGE` is the first
+catalogue item where a published concession rate does not divide the price
+evenly — 25% of Rs.237.50 is Rs.59.375, an actual half-paisa. The original
+`concessionDiscountPaise` rounded the *discount* and subtracted it, which
+happened to agree with rounding the *final price* directly for all nine
+original items (every one of them divides evenly, so `Math.round` was never
+actually exercised) but disagrees with it, by exactly one paisa, once a real
+half-paisa exists. Tatak's own `expectedFinalPaise` in
+`src/ondc/passPurchase.ts` rounds the final price directly
+(`Math.round(pricePaise * (100 - percent) / 100)`), so `concessionDiscountPaise`
+now derives the discount from that same final figure rather than the other way
+around — see its own docblock. Every one of the original nine items is
+unaffected (the two formulas coincide exactly whenever the division is
+already exact); `PASS-DAY-KSRTC_SARIGE` at a verified senior or student rate
+now agrees with Tatak's own figure by construction rather than by luck.
+
+**Sold off the ONDC network, not over it — say so plainly.** The other nine
+items travel the network: a `search` fans out through the deployed onix
+gateway to whichever BPPs its registry names, and `select`/`init`/`confirm`
+are addressed through the same deployed network once a BPP answers. That
+registry names two BPPs, `bmtc` and `bmrcl`, as six environment keys on the
+deployed network. Adding a third leg there is a change to the vendored onix
+network Tatak deploys, not a configuration change, and it is out of scope for
+this feature. So Karnataka Sarige's two items are not reachable through
+`/bmtc|bmrcl/` or through the network at all: they are sold on this
+provider's own `/ksrtc/pass/*` route, dialled directly by a buyer app the
+same way `src/reserved/handler.ts`'s `answerActionSync` already established
+for reserved intercity booking, and for the identical reason stated there —
+no gateway sits in front of it, so nothing an ack-then-callback shape buys
+here, and a direct-dialling caller with no public webhook of its own could
+not consume one anyway. This is a real sale, reconciled and
+TOTP-credentialed exactly like the other nine — it has just not travelled the
+network's gateway and registry the way they have. See
+`src/trv11/passHandler.ts`'s own docblock.
+
+## 9. Open questions for the owner
 
 1. **`MONTHLY_DAY_MULTIPLE` (18×)** — proposed, not derived from anything BMTC
    has stated.
@@ -526,3 +616,6 @@ explicit receipt, the field name needs agreeing on both sides first.
 6. **Whether the fixtures should distinguish AC from Ordinary bus offers**, so
    the settlement scope check is exercised against a tier the source actually
    states rather than a fallback.
+7. **Whether Karnataka Sarige should ever get a real ONDC network leg**, or
+   stay a direct-dial sale permanently. The direct path was chosen for time,
+   not because it is the intended end state — see section 8.

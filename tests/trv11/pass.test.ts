@@ -33,10 +33,15 @@ const EXPECTED = [
   ["PASS-DAY-METRO", "bmrcl", "DAY", "METRO", "P1D", 22_500, 25],
   ["PASS-WEEKLY-METRO", "bmrcl", "WEEKLY", "METRO", "P7D", 112_500, 25],
   ["PASS-MONTHLY-METRO", "bmrcl", "MONTHLY", "METRO", "P1M", 405_000, 10],
+  // Karnataka Sarige: day and monthly only, no weekly product, priced off
+  // Tatak's own Rs.95 Udupi-Mangaluru fare (`CEILING_SINGLE_FARE_PAISE`'s
+  // own note) rather than a bus or metro ceiling fare - see that constant.
+  ["PASS-DAY-KSRTC_SARIGE", "ksrtc", "DAY", "KSRTC_SARIGE", "P1D", 23_750, 25],
+  ["PASS-MONTHLY-KSRTC_SARIGE", "ksrtc", "MONTHLY", "KSRTC_SARIGE", "P1M", 427_500, 10],
 ] as const;
 
-test("nine items, spelled and priced exactly as the contract states", () => {
-  assert.equal(PASS_CATALOGUE.length, 9);
+test("eleven items, spelled and priced exactly as the contract states", () => {
+  assert.equal(PASS_CATALOGUE.length, 11);
   PASS_CATALOGUE.forEach((item, index) => {
     const [id, operator, window, scope, duration, pricePaise, senior] =
       EXPECTED[index];
@@ -129,14 +134,58 @@ test("a higher class is honoured on a lower service, never the reverse", () => {
   assert.equal(passCovers("ORDINARY_BUS", "METRO"), false);
 });
 
-test("every published rate divides exactly, so both sides agree without rounding", () => {
+test("a Karnataka Sarige pass covers no ride this provider itself offers", () => {
+  // This provider sells no Karnataka Sarige ride, so a Sarige pass settles
+  // nothing here - not even the ordinary-bus tier a Sarige coach's own
+  // fixture `serviceTier` would carry, which is exactly the BMTC-ordinary
+  // confusion Tatak's own operator-scoping exists to prevent.
+  assert.equal(passCovers("KSRTC_SARIGE", "ORDINARY_BUS"), false);
+  assert.equal(passCovers("KSRTC_SARIGE", "AC_BUS"), false);
+  assert.equal(passCovers("KSRTC_SARIGE", "METRO"), false);
+});
+
+test("every published rate divides exactly, except Karnataka Sarige's day pass", () => {
+  // The eight original items - BMTC's six and BMRCL's three still carry no
+  // fractional paisa at any published rate, exactly as before: neither price
+  // nor formula changed for them.
   for (const item of PASS_CATALOGUE) {
+    if (item.scope === "KSRTC_SARIGE") continue;
     for (const concession of ["SENIOR", "STUDENT"] as const) {
       const percent = concessionRatePercent(item, concession);
       const exact = (item.pricePaise * percent) / 100;
       assert.equal(Number.isInteger(exact), true, `${item.id}/${concession}`);
       assert.equal(concessionDiscountPaise(item.pricePaise, percent), exact);
     }
+  }
+  // Karnataka Sarige's day price (23,750 paise, the real Udupi-Mangaluru
+  // fare's own multiple) is the one price in this catalogue where a
+  // published rate does not divide it evenly - `PASS-DAY-KSRTC_SARIGE` at
+  // 25% senior is Rs.59.375 of discount, an actual half-paisa. There is
+  // still exactly one number a rider is charged, though: not because the
+  // division came out clean, but because `concessionDiscountPaise` is
+  // derived from the final price, and Tatak's own `expectedFinalPaise` in
+  // `src/ondc/passPurchase.ts` derives the same final price from the same
+  // `Math.round((pricePaise * (100 - percent)) / 100)`. Karnataka Sarige's
+  // monthly price (427,500 paise, 18x the day price) divides every published
+  // rate exactly, same as the original eight.
+  const day = passItemById("ksrtc", "PASS-DAY-KSRTC_SARIGE")!;
+  assert.equal(day.pricePaise, 23_750);
+  assert.equal(
+    Number.isInteger((day.pricePaise * concessionRatePercent(day, "SENIOR")) / 100),
+    false,
+  );
+  for (const concession of ["SENIOR", "STUDENT"] as const) {
+    const percent = concessionRatePercent(day, concession);
+    const discount = concessionDiscountPaise(day.pricePaise, percent);
+    const tatakFinal = Math.round((day.pricePaise * (100 - percent)) / 100);
+    assert.equal(day.pricePaise - discount, tatakFinal);
+  }
+  const monthly = passItemById("ksrtc", "PASS-MONTHLY-KSRTC_SARIGE")!;
+  for (const concession of ["SENIOR", "STUDENT"] as const) {
+    const percent = concessionRatePercent(monthly, concession);
+    const exact = (monthly.pricePaise * percent) / 100;
+    assert.equal(Number.isInteger(exact), true, `${monthly.id}/${concession}`);
+    assert.equal(concessionDiscountPaise(monthly.pricePaise, percent), exact);
   }
 });
 

@@ -44,6 +44,11 @@ import { HttpJourneySource } from "./sources/http.js";
 import type { JourneySource, OperatorKey } from "./sources/types.js";
 import { buildOnSearch, searchQueryFromRequest } from "./trv11/catalog.js";
 import { buildPassOnSearch, isPassSearch } from "./trv11/pass.js";
+import {
+  KSRTC_PASS_ROUTE,
+  createKsrtcPassHandler,
+  type KsrtcPassHandlerDependencies,
+} from "./trv11/passHandler.js";
 
 const MAX_BODY_BYTES = 1_048_576;
 const requestActions = ["search", "select", "init", "confirm", "status"] as const;
@@ -300,6 +305,47 @@ export async function createApp(
     });
   }
 
+  /**
+   * Karnataka Sarige's own pass path - off unless a deployment asked for it,
+   * the same discipline `reserved` above holds. See
+   * `src/trv11/passHandler.ts`'s own docblock for why this sells over its
+   * own direct route rather than through the `/bmtc|bmrcl/` route table and
+   * the ONDC network in front of it.
+   */
+  let ksrtcPass: ReturnType<typeof createKsrtcPassHandler> | undefined;
+  if (config.ksrtcPassEnabled) {
+    const ksrtcOperator = config.ksrtcPassOperator;
+    if (!ksrtcOperator) {
+      throw new Error(
+        "KSRTC_PASS_ENABLED is on and no KSRTC operator identity is configured",
+      );
+    }
+    // Static facts about the operator, read the same way bmtc's and bmrcl's
+    // own profiles are - off the fixture's `operator` block - even though
+    // this provider sells no Karnataka Sarige ride offers over TRV11: the
+    // fixture's `offers` array is empty by design, see its own sourcing note.
+    const ksrtcProfile = (
+      await FixtureJourneySource.load(config.fixtureRoot, "ksrtc")
+    ).operator;
+    const ksrtcOrders = new TransitOrderService(
+      "ksrtc",
+      ksrtcProfile,
+      ksrtcOperator,
+      store,
+      { publicBaseUrl: config.publicBaseUrl },
+    );
+    const dependencies: KsrtcPassHandlerDependencies = {
+      profile: ksrtcProfile,
+      orders: ksrtcOrders,
+      validator,
+      runtime: ksrtcOperator,
+      publicBaseUrl: config.publicBaseUrl,
+      contextTtl: config.contextTtl,
+      logEvent: eventLogger,
+    };
+    ksrtcPass = createKsrtcPassHandler(dependencies);
+  }
+
   async function buildCallback(
     operatorKey: OperatorKey,
     action: RequestAction,
@@ -442,6 +488,7 @@ export async function createApp(
           bmtc: ["POST /bmtc/search", "POST /bmtc/select", "POST /bmtc/init", "POST /bmtc/confirm", "POST /bmtc/status", "POST /bmtc/inbound"],
           bmrcl: ["POST /bmrcl/search", "POST /bmrcl/select", "POST /bmrcl/init", "POST /bmrcl/confirm", "POST /bmrcl/status", "POST /bmrcl/inbound"],
           ...(reserved ? { ksrtc: reserved.endpoints } : {}),
+          ...(ksrtcPass ? { ksrtcPass: ksrtcPass.endpoints } : {}),
         },
       });
       return;
@@ -537,6 +584,29 @@ export async function createApp(
         reservedBody,
         request,
         (status, payload) => json(response, status, payload),
+      );
+      return;
+    }
+
+    const ksrtcPassMatch = url.pathname.match(KSRTC_PASS_ROUTE);
+    if (request.method === "POST" && ksrtcPassMatch) {
+      if (!ksrtcPass) {
+        json(response, 404, { error: "Not found" });
+        return;
+      }
+      let ksrtcPassBody: unknown;
+      try {
+        ksrtcPassBody = await readJson(request);
+      } catch (error) {
+        json(
+          response,
+          400,
+          nack(error instanceof Error ? error.message : "Invalid JSON"),
+        );
+        return;
+      }
+      await ksrtcPass.handle(ksrtcPassMatch[1], ksrtcPassBody, (status, payload) =>
+        json(response, status, payload),
       );
       return;
     }

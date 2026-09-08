@@ -1,9 +1,9 @@
 import type { ProtocolOrder } from "../protocol/types.js";
 import type {
-  OperatorKey,
-  ServiceTier,
+  PassOperatorKey,
   TransitOffer,
 } from "../sources/types.js";
+import type { PassScope } from "../trv11/pass.js";
 
 export interface TransactionIdentity {
   transactionId: string;
@@ -19,7 +19,7 @@ export interface TransactionIdentity {
 export interface PassCredentialRecord {
   fulfillmentId: string;
   itemId: string;
-  scope: ServiceTier;
+  scope: PassScope;
   /** The pass's own window, in epoch milliseconds. `validToMs` is exclusive. */
   validFromMs: number;
   validToMs: number;
@@ -30,7 +30,7 @@ export interface PassCredentialRecord {
 }
 
 function transactionKey(
-  operator: OperatorKey,
+  operator: PassOperatorKey,
   identity: TransactionIdentity,
 ): string {
   return JSON.stringify([
@@ -50,7 +50,7 @@ function transactionKey(
  * as it sells no BMRCL ticket.
  */
 function passKey(
-  operator: OperatorKey,
+  operator: PassOperatorKey,
   identity: TransactionIdentity,
   orderId: string,
 ): string {
@@ -62,7 +62,7 @@ export class InMemoryOrderStore {
   private readonly orders = new Map<
     string,
     {
-      operator: OperatorKey;
+      operator: PassOperatorKey;
       identity: TransactionIdentity;
       order: ProtocolOrder;
     }
@@ -71,7 +71,7 @@ export class InMemoryOrderStore {
   private readonly passCredentials = new Map<string, PassCredentialRecord[]>();
 
   cacheCatalogue(
-    operator: OperatorKey,
+    operator: PassOperatorKey,
     identity: TransactionIdentity,
     offers: TransitOffer[],
   ): void {
@@ -82,7 +82,7 @@ export class InMemoryOrderStore {
   }
 
   selectedOffers(
-    operator: OperatorKey,
+    operator: PassOperatorKey,
     identity: TransactionIdentity,
     itemIds: string[],
   ): TransitOffer[] {
@@ -106,7 +106,7 @@ export class InMemoryOrderStore {
   }
 
   save(
-    operator: OperatorKey,
+    operator: PassOperatorKey,
     identity: TransactionIdentity,
     order: ProtocolOrder & { id: string },
   ): void {
@@ -133,7 +133,7 @@ export class InMemoryOrderStore {
   }
 
   savePassCredentials(
-    operator: OperatorKey,
+    operator: PassOperatorKey,
     identity: TransactionIdentity,
     orderId: string,
     credentials: PassCredentialRecord[],
@@ -147,7 +147,7 @@ export class InMemoryOrderStore {
 
   /** Empty when this operator holds no pass under that order id for this BAP. */
   findPassCredentials(
-    operator: OperatorKey,
+    operator: PassOperatorKey,
     identity: TransactionIdentity,
     orderId: string,
   ): PassCredentialRecord[] {
@@ -158,7 +158,7 @@ export class InMemoryOrderStore {
   }
 
   findByTransaction(
-    operator: OperatorKey,
+    operator: PassOperatorKey,
     identity: TransactionIdentity,
   ): ProtocolOrder | undefined {
     const orderId = this.ordersByTransaction.get(
@@ -169,7 +169,7 @@ export class InMemoryOrderStore {
   }
 
   get(
-    operator: OperatorKey,
+    operator: PassOperatorKey,
     identity: TransactionIdentity,
     orderId: string,
   ): ProtocolOrder {

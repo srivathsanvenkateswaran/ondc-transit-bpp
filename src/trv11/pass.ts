@@ -1,8 +1,8 @@
 import type { OperatorRuntimeConfig } from "../config.js";
 import type { OnSearchResponse, SearchRequest } from "../protocol/types.js";
 import type {
-  OperatorKey,
   OperatorProfile,
+  PassOperatorKey,
   ServiceTier,
 } from "../sources/types.js";
 import { fulfillmentIdForOffer, paiseToRupees, providerPayments } from "./catalog.js";
@@ -25,12 +25,20 @@ export type PassDuration = "P1D" | "P7D" | "P1M";
 export type ConcessionClass = "SENIOR" | "STUDENT";
 
 /**
- * A pass's scope is a class of service, and the nine published items scope to
- * exactly one each. "Bus and Metro" is deliberately not here: neither
- * operator sells the other's network, so a buyer app composes that from two
- * orders under one checkout id of its own.
+ * A pass's scope is a class of service, and eleven published items scope to
+ * exactly one each - `ServiceTier`'s own three classes, plus `KSRTC_SARIGE`.
+ * "Bus and Metro" is deliberately not here: neither operator sells the
+ * other's network, so a buyer app composes that from two orders under one
+ * checkout id of its own.
+ *
+ * **`KSRTC_SARIGE` is not a `ServiceTier`.** A `ServiceTier` is the class a
+ * *ride* is on - the axis `passCovers` checks a settlement claim against -
+ * and this provider sells no Karnataka Sarige ride offers to settle against:
+ * `sources/types.ts`'s `OperatorKey` stays `bmtc | bmrcl`, unchanged, and
+ * `PassOperatorKey` is the wider identity this pass scope needs instead. See
+ * that type's own docblock for why the two are kept apart.
  */
-export type PassScope = ServiceTier;
+export type PassScope = ServiceTier | "KSRTC_SARIGE";
 
 export const CONCESSION_CLASSES: readonly ConcessionClass[] = ["SENIOR", "STUDENT"];
 
@@ -77,11 +85,25 @@ export const MONTHLY_DAY_MULTIPLE = 18;
  * Ceiling single fares the day price derives from, in paise. Bus figures are
  * Tatak's existing `BUS_FARES.ordinary.maxPaise` / `.ac.maxPaise`; the metro
  * figure is its metro fare ceiling. Synthetic like everything else here.
+ *
+ * `KSRTC_SARIGE`'s own figure is not synthetic the way the other three are.
+ * Rs.95 (9,500 paise) is a real, paid Karnataka Sarige fare - Udupi to
+ * Mangaluru, 61.2 road km, the anchor Tatak's own `coastal-spine.ts` cites
+ * with sourcing label `P` - chosen because it sits at commuter scale rather
+ * than at the trunk-route scale a corridor like Bengaluru-Mangaluru would
+ * price a monthly pass for nobody. This is Tatak's own basis, reused rather
+ * than a second figure invented for the same product: `dayPricePaise` below
+ * applies the same `PASS_CEILING_MULTIPLE` to it that the other three
+ * scopes get, which is what keeps this provider's published price equal, to
+ * the paisa, to `SARIGE_CEILING_SINGLE_FARE_PAISE` in Tatak's
+ * `src/city/bengaluru.ts` - the figure Tatak's own reconciliation checks
+ * this one against before a sale can go through.
  */
 export const CEILING_SINGLE_FARE_PAISE: Record<PassScope, number> = {
   ORDINARY_BUS: 3000,
   AC_BUS: 6000,
   METRO: 9000,
+  KSRTC_SARIGE: 9_500,
 };
 
 const WINDOW_MULTIPLE: Record<PassWindow, number> = {
@@ -106,12 +128,14 @@ const SCOPE_LABEL: Record<PassScope, string> = {
   ORDINARY_BUS: "Ordinary bus",
   AC_BUS: "AC bus",
   METRO: "Metro",
+  KSRTC_SARIGE: "Karnataka Sarige",
 };
 
-const SCOPE_OPERATOR: Record<PassScope, OperatorKey> = {
+const SCOPE_OPERATOR: Record<PassScope, PassOperatorKey> = {
   ORDINARY_BUS: "bmtc",
   AC_BUS: "bmtc",
   METRO: "bmrcl",
+  KSRTC_SARIGE: "ksrtc",
 };
 
 /**
@@ -120,6 +144,14 @@ const SCOPE_OPERATOR: Record<PassScope, OperatorKey> = {
  * old, predates a roughly 15% BMTC fare rise in January 2025, and conflicts
  * with itself on whether the qualifying age is 60 or 65. Applying it to a
  * BMRCL metro item is an extrapolation with no metro-specific source at all.
+ *
+ * **Keyed by window, not by scope, so `KSRTC_SARIGE` inherits it unchanged.**
+ * That is a deliberate choice, not an oversight this table happens to make:
+ * there is no Karnataka Sarige-specific senior or student rate to extrapolate
+ * from either, and inventing a second, differently-wrong rate table for a
+ * figure this uncertain already would not make it more honest, only harder
+ * to audit. Tatak's own `concessionPercentFor` in `src/city/bengaluru.ts`
+ * makes the same call for the same reason - see that function's own comment.
  */
 const SENIOR_DISCOUNT_PERCENT: Record<PassWindow, number> = {
   DAY: 25,
@@ -131,14 +163,15 @@ const SENIOR_DISCOUNT_PERCENT: Record<PassWindow, number> = {
  * A round number invented so the product exists. No source of any kind, weak
  * or otherwise - no current BMTC student pass price could be found from any
  * primary source. This needs the owner's sign-off more than any other
- * constant in this feature.
+ * constant in this feature. Applied to `KSRTC_SARIGE` unchanged, for the same
+ * reason `SENIOR_DISCOUNT_PERCENT` above is.
  */
 const STUDENT_DISCOUNT_PERCENT = 33;
 
 export interface PassCatalogueItem {
   /** The contract. A buyer app selects by this exact string. */
   id: string;
-  operator: OperatorKey;
+  operator: PassOperatorKey;
   window: PassWindow;
   scope: PassScope;
   duration: PassDuration;
@@ -178,8 +211,13 @@ function passItem(window: PassWindow, scope: PassScope): PassCatalogueItem {
 }
 
 /**
- * The nine catalogue items, in the order the brief tabulates them: BMTC's six
- * (Ordinary and AC bus across three windows), then BMRCL's three (Metro).
+ * Eleven catalogue items: BMTC's six (Ordinary and AC bus across three
+ * windows), BMRCL's three (Metro), then Karnataka Sarige's own two - day and
+ * monthly only, no weekly product, the same two windows Tatak's own
+ * `KSRTC_SARIGE_PRODUCTS` in `src/city/bengaluru.ts` carries and for the same
+ * reason: Karnataka Sarige sells no weekly pass for this provider to publish
+ * one for, and adding a window nobody asked for is not this provider's call
+ * to make either.
  */
 export const PASS_CATALOGUE: readonly PassCatalogueItem[] = [
   ...(["DAY", "WEEKLY", "MONTHLY"] as const).flatMap((window) =>
@@ -188,11 +226,12 @@ export const PASS_CATALOGUE: readonly PassCatalogueItem[] = [
   ...(["DAY", "WEEKLY", "MONTHLY"] as const).map((window) =>
     passItem(window, "METRO"),
   ),
+  ...(["DAY", "MONTHLY"] as const).map((window) => passItem(window, "KSRTC_SARIGE")),
 ];
 
 const PASS_BY_ID = new Map(PASS_CATALOGUE.map((item) => [item.id, item]));
 
-export function passCatalogueFor(operator: OperatorKey): PassCatalogueItem[] {
+export function passCatalogueFor(operator: PassOperatorKey): PassCatalogueItem[] {
   return PASS_CATALOGUE.filter((item) => item.operator === operator);
 }
 
@@ -208,7 +247,7 @@ export function isPassItemId(itemId: string): boolean {
  * does not.
  */
 export function passItemById(
-  operator: OperatorKey,
+  operator: PassOperatorKey,
   itemId: string,
 ): PassCatalogueItem | undefined {
   const item = PASS_BY_ID.get(itemId);
@@ -220,8 +259,21 @@ export function passItemById(
  * class-based coverage rule Tatak's own fare model already applies. Metro
  * covers metro only; neither bus scope reaches it and it reaches neither of
  * them.
+ *
+ * `KSRTC_SARIGE` covers nothing here, ever - not the operator-scoping rule
+ * Tatak's own `busOperators` applies (this provider's `ServiceTier` has no
+ * operator axis to carry that rule on), but the honest answer for what this
+ * *provider* can settle: `tier` only ever names a ride this provider itself
+ * offered, and this provider offers no Karnataka Sarige ride to settle a
+ * Sarige pass against. Falling through to the ordinary-bus branch below
+ * would make a Sarige pass silently cover a BMTC ordinary ride within this
+ * provider's own settlement check - exactly the confusion Tatak's own
+ * `busOperators` field exists to close, reintroduced by omission. Returning
+ * `false` unconditionally is what keeps this provider from being the one
+ * place that confusion sneaks back in.
  */
 export function passCovers(scope: PassScope, tier: ServiceTier): boolean {
+  if (scope === "KSRTC_SARIGE") return false;
   if (scope === "METRO" || tier === "METRO") return scope === tier;
   if (scope === "AC_BUS") return tier === "AC_BUS" || tier === "ORDINARY_BUS";
   return tier === "ORDINARY_BUS";
@@ -243,16 +295,30 @@ export function concessionRateCode(concession: string): string {
 
 /**
  * Discount for one unit, in paise. Both sides compute this from the rate
- * published on the item, so neither hard-codes a percentage. Every shipped
- * price is a whole number of rupees and every rate is a whole percent, so the
- * division is exact and no rounding convention is ever exercised - which is
- * what lets the two sides agree without having agreed on one.
+ * published on the item, so neither hard-codes a percentage.
+ *
+ * **Derived from the final price, not from the discount itself.** For the
+ * original nine items, `pricePaise * percent` is always a whole number of
+ * paise divided by 100, so no rounding was ever actually exercised and it did
+ * not matter which side of the subtraction it happened on. `KSRTC_SARIGE`'s
+ * day price (23,750 paise, `CEILING_SINGLE_FARE_PAISE`'s own real-fare
+ * anchor) breaks that: `23750 * 25 / 100` is 5,937.5, an actual half-paisa
+ * that has to land somewhere. Rounding the *discount* and subtracting it
+ * disagrees, by exactly one paisa, with rounding the *final price* directly -
+ * and Tatak's own `expectedFinalPaise` in `src/ondc/passPurchase.ts` does the
+ * latter: `Math.round((pricePaise * (100 - percent)) / 100)`. This function
+ * computes that same final figure first and returns what is left over as the
+ * discount, so `pricePaise - concessionDiscountPaise(pricePaise, percent)`
+ * equals Tatak's own figure exactly, for every item, whether or not the
+ * division happens to be clean - not by having agreed on a rounding
+ * convention by accident, as the nine original items did, but by using the
+ * one convention this repository's own reconciliation partner already uses.
  */
 export function concessionDiscountPaise(
   pricePaise: number,
   percent: number,
 ): number {
-  return Math.round((pricePaise * percent) / 100);
+  return pricePaise - Math.round((pricePaise * (100 - percent)) / 100);
 }
 
 export function signedPaiseToRupees(paise: number): string {
@@ -437,7 +503,7 @@ export function isPassSearch(request: SearchRequest): boolean {
 export function buildPassOnSearch(
   request: SearchRequest,
   profile: OperatorProfile,
-  operatorKey: OperatorKey,
+  operatorKey: PassOperatorKey,
   operator: OperatorRuntimeConfig,
   options: { publicBaseUrl: string; contextTtl: string; now?: () => Date },
 ): OnSearchResponse {
